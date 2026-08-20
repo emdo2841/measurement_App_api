@@ -1,0 +1,100 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: "967980"
+    ports:
+      - "5432:5432"
+    volumes:
+      - measurement-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Dedicated Migration Runner
+  migration:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    command: npx prisma db push
+    environment:
+      - DATABASE_URL=postgresql://postgres:967980@db:5432/postgres?schema=public
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # Nginx Load Balancer
+  nginx:
+    image: nginx:alpine
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - app1
+      - app2
+      - app3
+
+  app1:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      - APP_NAME=App1
+      - DATABASE_URL=postgresql://postgres:967980@db:5432/postgres?schema=public
+    depends_on:
+      migration:
+        condition: service_completed_successfully
+    ports:
+      - "8001:8000"
+
+  app2:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      - APP_NAME=App2
+      - DATABASE_URL=postgresql://postgres:967980@db:5432/postgres?schema=public
+    depends_on:
+      migration:
+        condition: service_completed_successfully
+    ports:
+      - "8002:8000"
+
+  app3:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      - APP_NAME=App3
+      - DATABASE_URL=postgresql://postgres:967980@db:5432/postgres?schema=public
+    depends_on:
+      migration:
+        condition: service_completed_successfully
+    ports:
+      - "8003:8000"
+
+volumes:
+  measurement-data:

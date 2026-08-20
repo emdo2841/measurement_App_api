@@ -1,0 +1,112 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String        @id @default(uuid())
+  name         String
+  email        String        @unique
+  password     String
+  phone        String?
+  image        String?
+  imagePublicId String? 
+  resetTokens   String?
+  resetTokenExpiry DateTime?
+  refreshToken RefreshToken[]
+  createdAt    DateTime      @default(now())
+  clients      Client[]
+  updatedAt    DateTime      @updatedAt
+  @@map("users")
+}
+
+model RefreshToken {
+  id          String   @id @default(uuid())
+  hashedToken String   @unique
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  revoked     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime
+  @@map("refreshTokens")
+}
+
+model Client{
+  id           String           @id @default(uuid())
+  name         String
+  phone        String
+  address      String?
+  email        String?
+  gender       Gender
+  tailor       User    @relation(fields: [tailorId], references: [id], onDelete: Cascade)
+  tailorId     String
+  measurements Measurement[]
+  image        String?
+  imagePublicId String? 
+  orders       Order[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([tailorId])
+  @@index([phone])
+  @@map("clients")
+  
+}
+enum Gender {
+  MALE
+  FEMALE
+}
+
+model Measurement {
+  id           String           @id @default(uuid())
+  title        String
+  unit         Unit     @default(INCHES)
+  data         Json
+  client       Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId     String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("measurements")
+}
+enum Unit {
+  CM
+  INCHES
+}
+
+model Order {
+  id          String      @id @default(uuid())
+  clientId    String
+  image       String?
+  imagePublicId String? 
+  client      Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  status      OrderStatus @default(PENDING)
+  dueDate     DateTime?
+  totalAmount Float?
+  notes       String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([clientId])
+  @@index([status])
+  @@index([clientId, status])
+  @@map("orders")
+}
+
+enum OrderStatus {
+  PENDING
+  CUTTING
+  SEWING
+  FITTING
+  COMPLETED
+  DELIVERED
+}

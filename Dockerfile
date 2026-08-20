@@ -1,14 +1,28 @@
-FROM node:14
+FROM node:20 AS build
 
 WORKDIR /app
 
-COPY server.js .
-COPY index.html .
-COPY images ./images
-COPY package.json .
+COPY package*.json tsconfig.json ./
+COPY prisma ./prisma
+RUN npm ci
 
-RUN npm install
+COPY . .
 
-EXPOSE 3000
+RUN npx prisma generate
+RUN npm run build
 
-CMD ["node", "server.js"]
+
+FROM node:20
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci --only=production
+
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=build /app/node_modules/@prisma/client ./node_modules/@prisma/client
+
+EXPOSE 8000
+
+CMD ["node", "dist/server.js"]
