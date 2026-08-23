@@ -6,6 +6,10 @@ import 'dotenv/config';
 import { uploadImageBuffer, deleteImage } from "../Utils/cloudinary";
 import { sendEmail } from "../services/email";
 import { signupTemplate } from "../template/emailTemplate";
+import { getCache, setCache, delCache } from '../middleWare/cache';
+
+const userCacheKey = (id: string) => `user:${id}`;
+const profileCacheKey = (id: string) => `user:profile:${id}`;
 
 export const createUser = async (req: Request, res: Response) => {
     try {
@@ -56,23 +60,37 @@ export const createUser = async (req: Request, res: Response) => {
         return res.status(500).json({ error: "Internal server error" });
     }
 };
+
+
 export const getUser = async (req: Request, res: Response) => {
     try {
         const userId = req.params.id;
+        const cacheKey = userCacheKey(userId);
+ 
+        // 1. Try cache first
+        const cached = await getCache(cacheKey);
+        if (cached) {
+            return res.status(200).json(cached);
+        }
+ 
+        // 2. Cache miss -> query DB
         const user = await prisma.user.findUnique({
             where: { id: userId }
         });
         if (!user) {
             return res.status(404).json({ error: "User not found" });
         }
+ 
+        // 3. Populate cache (fire-and-forget, non-blocking on errors)
+        await setCache(cacheKey, user);
+ 
         return res.status(200).json(user);
     } catch (error) {
         console.log(error);
         return res.status(500).json({ error: "Internal server error" });
-
     }
 }
-
+ 
 export const updateUser = async (req: Request, res: Response) => {
     try {
         const id = req.params.id;
@@ -84,19 +102,21 @@ export const updateUser = async (req: Request, res: Response) => {
             where: { id },
             data: validatData.data
         })
+ 
+        // Invalidate stale cache entries for this user
+        await delCache(userCacheKey(id), profileCacheKey(id));
+ 
         return res.status(200).json(user);
     } catch (error) {
         console.log(error);
         return res.status(500).json({ error: "Internal server error" });
     }
 }
-
-
-
+ 
 export const deleteUser = async (req: Request, res: Response) => {
     try {
         const id = req.params.id;
-
+ 
         // 1. Query the user along with nested client and order imagePublicIds
         const user = await prisma.user.findUnique({
             where: { id },
@@ -114,56 +134,68 @@ export const deleteUser = async (req: Request, res: Response) => {
                 },
             },
         });
-
+ 
         if (!user) {
             return res.status(404).json({ error: "User not found" });
         }
-
+ 
         // 2. Collect all non-null publicIds into a single array
         const publicIds: string[] = [];
-
+ 
         if (user.imagePublicId) publicIds.push(user.imagePublicId);
-
+ 
         for (const client of user.clients) {
             if (client.imagePublicId) publicIds.push(client.imagePublicId);
             for (const order of client.orders) {
                 if (order.imagePublicId) publicIds.push(order.imagePublicId);
             }
         }
-
+ 
         // 3. Delete all collected images in parallel
         if (publicIds.length > 0) {
             await Promise.allSettled(
                 publicIds.map((publicId) => deleteImage(publicId))
             );
         }
-
+ 
         // 4. Delete user from database
         await prisma.user.delete({
             where: { id },
         });
-
+ 
+        // 5. Invalidate cache entries for this user
+        await delCache(userCacheKey(id), profileCacheKey(id));
+ 
         return res.status(200).json({ message: "User and associated images deleted successfully" });
     } catch (error: any) {
         if (error?.code === 'P2025') {
             return res.status(404).json({ error: "User not found" });
         }
-
+ 
         console.error(error);
         return res.status(500).json({ error: "Internal server error" });
     }
 };
-
-
+ 
+ 
 export const profile = async (req: Request, res: Response) => {
     try {
         const userId = req.user?.userId;
-
+ 
         if (!userId) {
             return res.status(401).json({ message: "unathorized access" })
         }
-
-        const user = await prisma.user.findUnique({
+ 
+        const cacheKey = profileCacheKey(userId);
+ 
+        // 1. Try cache first
+        const cached = await getCache(cacheKey);
+        if (cached) {
+            return res.status(200).json(cached);
+        }
+ 
+        // 2. Cache miss -> query DB
+        const user = await prisma.$primary().user.findUnique({
             where: { id: userId },
             select: {
                 id: true,
@@ -177,6 +209,10 @@ export const profile = async (req: Request, res: Response) => {
         if (!user) {
             return res.status(404).json({ error: "user not found" })
         }
+ 
+        // 3. Populate cache
+        await setCache(cacheKey, user);
+ 
         return res.status(200).json(user)
     } catch (error) {
         console.log(error);

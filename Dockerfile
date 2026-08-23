@@ -1,10 +1,13 @@
 FROM node:20 AS build
 
+RUN apt-get update -y && apt-get install -y openssl
 WORKDIR /app
 
 COPY package*.json tsconfig.json ./
 COPY prisma ./prisma
 RUN npm ci
+
+
 
 COPY . .
 
@@ -13,6 +16,8 @@ RUN npm run build
 
 
 FROM node:20
+
+RUN apt-get update -y && apt-get install -y openssl
 
 WORKDIR /app
 

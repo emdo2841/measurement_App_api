@@ -1,6 +1,10 @@
 import { Request, Response } from "express";
 import {prisma} from "../db";
 import { createOrderSchema, updateOrderSchema } from "../schemas/OrderSchema";
+import { getCache, setCache, delCache } from '../middleWare/cache';
+
+const orderCacheKey = (id: string) => `order:${id}`;
+const ORDERS_LIST_CACHE_KEY = 'orders:all';
 
 
 export const createOrder = async (req: Request, res:Response) => {
@@ -36,6 +40,12 @@ export const createOrder = async (req: Request, res:Response) => {
 
 export const getOrders = async (req: Request, res: Response) =>{
     try{
+
+        // 1. Try cache f
+        const cached = await getCache(ORDERS_LIST_CACHE_KEY);
+        if (cached) {
+            return res.status(200).json(cached);
+        }
         const order = await prisma.order.findMany({
             include: {
                 client: {
@@ -57,6 +67,14 @@ export const getOrders = async (req: Request, res: Response) =>{
 export const getOrder = async (req: Request, res: Response) => {
     try{
         const id = req.params.id;
+        const cachedKey = orderCacheKey(id)
+
+         // 1. Try cache first
+        const cached = await getCache(cachedKey);
+        if (cached) {
+            return res.status(200).json(cached);
+        }
+
         const order = await prisma.order.findUnique({
             where: {id},
             include: {
@@ -92,6 +110,9 @@ export const updateOrder = async (req: Request, res: Response) => {
             },
         
         })
+        // Invalidate stale cache entries for this user
+        await delCache('orders:all');
+
         return res.status(200).json(order)
     }catch (error){
         console.log(error)
@@ -105,6 +126,10 @@ export const deleteOrder = async (req: Request, res: Response) =>{
         const order = await prisma.order.delete({
             where: {id}
     })
+
+    // Invalidate stale cache entries for this user
+    await delCache('orders:all');
+
     return res.status(200).json({message : "order deleted successfully"})
     }catch(error) {
         console.log(error)

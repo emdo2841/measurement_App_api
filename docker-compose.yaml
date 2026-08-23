@@ -3,13 +3,41 @@ services:
     image: postgres:16-alpine
     restart: always
     environment:
-      POSTGRES_PASSWORD: "967980"
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
       - measurement-data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  replica-db:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5434:5432" # <-- External port 5433 maps to container port 5432
+    volumes:
+      - replica-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:8.8.2-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -21,7 +49,7 @@ services:
       dockerfile: Dockerfile
     command: npx prisma migrate deploy
     environment:
-      - DATABASE_URL=postgresql://postgres:967980@db:5432/postgres?schema=public
+      - DATABASE_URL=${DATABASE_URL}
     depends_on:
       db:
         condition: service_healthy
@@ -51,10 +79,14 @@ services:
       - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
       - APP_NAME=App1
-      - DATABASE_URL=postgresql://postgres:967980@db:5432/postgres?schema=public
+      - DATABASE_URL=${DATABASE_URL}
+      - REPLICA_URL=${REPLICA_URL}
+      - REDIS_URL=redis://redis:6379
     depends_on:
       migration:
         condition: service_completed_successfully
+      redis:
+        condition: service_healthy
     ports:
       - "8001:8000"
 
@@ -70,10 +102,14 @@ services:
       - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
       - APP_NAME=App2
-      - DATABASE_URL=postgresql://postgres:967980@db:5432/postgres?schema=public
+      - DATABASE_URL=${DATABASE_URL}
+      - REPLICA_URL=${REPLICA_URL}
+      - REDIS_URL=redis://redis:6379
     depends_on:
       migration:
         condition: service_completed_successfully
+      redis:
+        condition: service_healthy
     ports:
       - "8002:8000"
 
@@ -89,12 +125,19 @@ services:
       - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
       - APP_NAME=App3
-      - DATABASE_URL=postgresql://postgres:967980@db:5432/postgres?schema=public
+      - DATABASE_URL=${DATABASE_URL}
+      - REPLICA_URL=${REPLICA_URL}
+      - REDIS_URL=redis://redis:6379
     depends_on:
       migration:
         condition: service_completed_successfully
+      redis:
+        condition: service_healthy
     ports:
       - "8003:8000"
 
 volumes:
   measurement-data:
+  repliica-date:
+  redis-data:
+  

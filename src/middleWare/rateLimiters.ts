@@ -1,32 +1,43 @@
-import rateLimit from 'express-rate-limit';
-import type { Request } from 'express';
+import { rateLimit } from 'express-rate-limit';
+import { RedisStore } from 'rate-limit-redis';
+import { redisClient } from './redisClient';
 
-// Helper to strip port numbers from IP if Nginx or proxies append them
-const customKeyGenerator = (req: Request): string => {
-  const clientIp = req.ip || req.socket.remoteAddress || '127.0.0.1';
-  return clientIp.replace(/:\d+[^:]*$/, '');
-};
+// Helper function to send commands safely
+const sendCommand = (...args: string[]): Promise<any> =>
+  redisClient.sendCommand(args);
 
-// 1. Strict Limiter for sensitive endpoints (Login, Register, Forgot Password, Reset Password)
-export const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15-minute window
-  limit: 5, // Limit each IP to 5 requests per window
-  standardHeaders: 'draft-7',
+// Public Limiter
+export const publicLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 100,
+  standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: customKeyGenerator,
+  statusCode: 429,
   message: {
-    error: 'Too many attempt attempts from this IP, please try again after 15 minutes.',
+    status: 429,
+    error: 'Too Many Requests',
+    message: 'You have exceeded the request limit. Please try again later.',
   },
+  store: new RedisStore({
+    sendCommand,
+    prefix: 'rl:public:',
+  }),
 });
 
-// 2. General Limiter for standard API routes (Products, Orders, Profile, etc.)
-export const generalApiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15-minute window
-  limit: 100, // Limit each IP to 100 requests per window
-  standardHeaders: 'draft-7',
+// Auth Limiter
+export const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 5,
+  standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: customKeyGenerator,
+  statusCode: 429,
   message: {
-    error: 'Too many requests. Please slow down.',
+    status: 429,
+    error: 'Too Many Requests',
+    message: 'Too many authentication attempts. Account locked for 15 minutes.',
   },
+  store: new RedisStore({
+    sendCommand,
+    prefix: 'rl:auth:',
+  }),
 });

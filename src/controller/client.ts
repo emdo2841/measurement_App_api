@@ -3,6 +3,10 @@ import { Request, Response } from "express";
 import { createClientSchema, UpdateClientSchema } from "../schemas/client.schema";
 import { uploadImageBuffer, deleteImage } from "../Utils/cloudinary";
 import multer from "multer";
+import { getCache, setCache, delCache } from '../middleWare/cache';
+
+const CLIENT_LIST_CACHE_KEY = 'clients:all';
+const clientCatchedKey = (id: string) => `client:${id}`;
 
 export const createClient = async (req: Request, res: Response) => {
     try {
@@ -58,6 +62,14 @@ export const createClient = async (req: Request, res: Response) => {
 export const getClient = async (req: Request, res: Response) => {
     try {
         const clientId = req.params.id;
+        const cachedKey = clientCatchedKey(clientId)
+
+        // 1. Try cache first
+        const cached = await getCache(cachedKey);
+        if (cached) {
+            return res.status(200).json(cached);
+        }
+
         const client = await prisma.client.findUnique({
             where: { id: clientId },
             include: {
@@ -89,6 +101,12 @@ export const getClient = async (req: Request, res: Response) => {
 }
 export const getClients = async (req: Request, res: Response) => {
     try {
+
+        // 1. Try cache first
+        const cached = await getCache(CLIENT_LIST_CACHE_KEY);
+        if (cached) {
+            return res.status(200).json(cached);
+        }
         const clients = await prisma.client.findMany({
             include: {
                 measurements: true,
@@ -154,7 +172,7 @@ export const updateClient = async (req: Request, res: Response) => {
                     : {}),
             },
         });
-
+        await delCache('clients:all')
         return res.status(200).json(client);
     } catch (error) {
         console.log(error);
@@ -168,6 +186,7 @@ export const deleteClient = async (req: Request, res: Response) => {
         const client = await prisma.client.delete({
             where: { id }
         })
+        await delCache('clients:all')
         return res.status(200).json({ message: "Client deleted successfully" });
     } catch (error) {
         console.log(error);
