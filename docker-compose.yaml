@@ -1,3 +1,166 @@
+# services:
+#   db:
+#     image: postgres:16-alpine
+#     restart: always
+#     environment:
+#       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+#     ports:
+#       - "5432:5432"
+#     volumes:
+#       - measurement-data:/var/lib/postgresql/data
+#     healthcheck:
+#       test: ["CMD-SHELL", "pg_isready -U postgres"]
+#       interval: 5s
+#       timeout: 5s
+#       retries: 5
+
+#   replica-db1:
+#     image: postgres:16-alpine
+#     restart: always
+#     environment:
+#       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+#     ports:
+#       - "5434:5432" # <-- External port 5433 maps to container port 5432
+#     volumes:
+#       - replica1-data:/var/lib/postgresql/data
+#     healthcheck:
+#       test: ["CMD-SHELL", "pg_isready -U postgres"]
+#       interval: 5s
+#       timeout: 5s
+#       retries: 5
+
+#   replica-db2:
+#     image: postgres:16-alpine
+#     restart: always
+#     environment:
+#       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+#     ports:
+#       - "5435:5432" # <-- External port 5433 maps to container port 5432
+#     volumes:
+#       - replica2-data:/var/lib/postgresql/data
+#     healthcheck:
+#       test: ["CMD-SHELL", "pg_isready -U postgres"]
+#       interval: 5s
+#       timeout: 5s
+#       retries: 5
+
+#   redis:
+#     image: redis:8.8.2-alpine
+#     restart: always
+#     ports:
+#       - "6379:6379"
+#     volumes:
+#       - redis-data:/data
+#     healthcheck:
+#       test: ["CMD", "redis-cli", "ping"]
+#       interval: 5s
+#       timeout: 5s
+#       retries: 5
+
+#   # Dedicated Migration Runner
+#   migration:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile
+#     command: npx prisma migrate deploy
+#     environment:
+#       - DATABASE_URL=${DATABASE_URL}
+#     depends_on:
+#       db:
+#         condition: service_healthy
+
+#   # Nginx Load Balancer
+#   nginx:
+#     image: nginx:alpine
+#     restart: always
+#     ports:
+#       - "80:80"
+#     volumes:
+#       - ./nginx.conf:/etc/nginx/nginx.conf:ro
+#     depends_on:
+#       - redis
+#       - app1
+#       - app2
+#       - app3
+
+#   app1:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile
+#     volumes:
+#       - .:/app
+#       - /app/node_modules
+#     environment:
+#       - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+#       - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+#       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+#       - APP_NAME=App1
+#       - DATABASE_URL=${DATABASE_URL}
+#       - REPLICA_URL=${REPLICA_URL1}
+#       - REPLICA_URL=${REPLICA_URL2}
+#       - REDIS_URL=redis://redis:6379
+#     depends_on:
+#       migration:
+#         condition: service_completed_successfully
+#       redis:
+#         condition: service_healthy
+#     ports:
+#       - "8001:8000"
+
+#   app2:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile
+#     volumes:
+#       - .:/app
+#       - /app/node_modules
+#     environment:
+#       - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+#       - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+#       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+#       - APP_NAME=App2
+#       - DATABASE_URL=${DATABASE_URL}
+#       - REPLICA_URL=${REPLICA_URL1}
+#       - REPLICA_URL=${REPLICA_URL2}
+#       - REDIS_URL=redis://redis:6379
+#     depends_on:
+#       migration:
+#         condition: service_completed_successfully
+#       redis:
+#         condition: service_healthy
+#     ports:
+#       - "8002:8000"
+
+#   app3:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile
+#     volumes:
+#       - .:/app
+#       - /app/node_modules
+#     environment:
+#       - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+#       - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+#       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+#       - APP_NAME=App3
+#       - DATABASE_URL=${DATABASE_URL}
+#       - REPLICA_URL=${REPLICA_URL1}
+#       - REPLICA_URL=${REPLICA_URL2}
+#       - REDIS_URL=redis://redis:6379
+#     depends_on:
+#       migration:
+#         condition: service_completed_successfully
+#       redis:
+#         condition: service_healthy
+#     ports:
+#       - "8003:8000"
+
+# volumes:
+#   measurement-data:
+#   repliica1-data:
+#   repliica2-data:
+#   redis-data:
+  
 services:
   db:
     image: postgres:16-alpine
@@ -14,15 +177,30 @@ services:
       timeout: 5s
       retries: 5
 
-  replica-db:
+  replica-db1:
     image: postgres:16-alpine
     restart: always
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "5434:5432" # <-- External port 5433 maps to container port 5432
+      - "5434:5432" # <-- External port 5434 maps to container port 5432
     volumes:
-      - replica-data:/var/lib/postgresql/data
+      - replica1-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  replica-db2:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5435:5432" # <-- External port 5435 maps to container port 5432
+    volumes:
+      - replica2-data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -63,6 +241,7 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
+      - redis
       - app1
       - app2
       - app3
@@ -80,7 +259,8 @@ services:
       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
       - APP_NAME=App1
       - DATABASE_URL=${DATABASE_URL}
-      - REPLICA_URL=${REPLICA_URL}
+      - REPLICA_URL1=${REPLICA_URL1}
+      - REPLICA_URL2=${REPLICA_URL2}
       - REDIS_URL=redis://redis:6379
     depends_on:
       migration:
@@ -103,7 +283,8 @@ services:
       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
       - APP_NAME=App2
       - DATABASE_URL=${DATABASE_URL}
-      - REPLICA_URL=${REPLICA_URL}
+      - REPLICA_URL1=${REPLICA_URL1}
+      - REPLICA_URL2=${REPLICA_URL2}
       - REDIS_URL=redis://redis:6379
     depends_on:
       migration:
@@ -126,7 +307,8 @@ services:
       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
       - APP_NAME=App3
       - DATABASE_URL=${DATABASE_URL}
-      - REPLICA_URL=${REPLICA_URL}
+      - REPLICA_URL1=${REPLICA_URL1}
+      - REPLICA_URL2=${REPLICA_URL2}
       - REDIS_URL=redis://redis:6379
     depends_on:
       migration:
@@ -138,6 +320,6 @@ services:
 
 volumes:
   measurement-data:
-  repliica-date:
+  replica1-data:
+  replica2-data:
   redis-data:
-  

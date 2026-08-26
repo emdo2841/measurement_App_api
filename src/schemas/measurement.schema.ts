@@ -5,7 +5,11 @@ export const createMeasurementSchema = z.object({
     .trim()
     .min(2, "Title must be at least 2 characters"),
 
-  data: z.number({ error: "Data is required" }),
+  // e.g. { chest: 40, waist: 32, hips: 38 }
+  data: z.record(z.string(), z.number(), { error: "Data is required" })
+    .refine((obj) => Object.keys(obj).length > 0, {
+      message: "At least one measurement value is required",
+    }),
 
   // Validates that unit is either "CM" or "INCHES"
   unit: z.enum(["CM", "INCHES"], {

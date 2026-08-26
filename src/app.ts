@@ -12,6 +12,7 @@ import { userRouter } from './router/user.route';
 import { clientRouter } from './router/client.route';
 import { orderRouter } from './router/order.route';
 import { authRouter } from './router/auth.route';
+import { measurementtRouter } from './router/measurement.route';
 
 const app = express();
 app.set('trust proxy', 1);
@@ -30,6 +31,7 @@ app.disable('x-powered-by');
 app.use("/api/v1/users", publicLimiter, userRouter);
 app.use("/api/v1/clients", publicLimiter, clientRouter);
 app.use("/api/v1/orders", publicLimiter, orderRouter);
+app.use("/api/v1/measurement", publicLimiter, measurementtRouter);
 app.use("/api/v1/auth", authLimiter, authRouter);
 
 app.get("/", async (req: Request, res: Response) => {
