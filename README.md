@@ -30,17 +30,17 @@ Database Layer (Replicated Clusters)
 
 Prevents Single Points of Failure (SPOF) by providing data redundancy and high availability.
 
-🛠 Tech Stack
+Tech Stack
 
 Reverse Proxy / Load Balancer: Nginx
 
 Container Orchestration: Docker / Docker Compose
 
-Application Servers: Node.js / Python / Go (Adapt as applicable)
+Application Servers: Node.js 
 
 Caching Layer: Redis
 
-Database: PostgreSQL / MySQL (Configured with 3 replicas)
+Database: PostgreSQL (Configured with 3 replicas)
 
 Key Features
 
