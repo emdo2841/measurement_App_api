@@ -13,7 +13,7 @@ DOMAIN=$1
 EMAIL=$2
 DATA_PATH="./certbot"
 RSA_KEY_SIZE=4096
-COMPOSE="docker compose -f docker-compose.prod.yml"
+COMPOSE="docker compose -f docker-compose.yaml"
 
 # 1. Put the real domain into nginx.conf
 sed -i "s/YOUR_DOMAIN/${DOMAIN}/g" ./nginx.conf
