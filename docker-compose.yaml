@@ -150,6 +150,10 @@ services:
       - REPLICA_URL2=${REPLICA_URL2}
       - REPLICA_URL3=${REPLICA_URL3}
       - REDIS_URL=redis://redis:6379
+      - GOOGLE_APP_PASSWORD=${GOOGLE_APP_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRE=${JWT_EXPIRE}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
     depends_on:
       migration:
         condition: service_completed_successfully
@@ -172,6 +176,11 @@ services:
       - REPLICA_URL2=${REPLICA_URL2}
       - REPLICA_URL3=${REPLICA_URL3}
       - REDIS_URL=redis://redis:6379
+      - EMAIL=${EMAIL}
+      - GOOGLE_APP_PASSWORD=${GOOGLE_APP_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRE=${JWT_EXPIRE}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
     depends_on:
       migration:
         condition: service_completed_successfully
@@ -194,6 +203,10 @@ services:
       - REPLICA_URL2=${REPLICA_URL2}
       - REPLICA_URL3=${REPLICA_URL3}
       - REDIS_URL=redis://redis:6379
+      - GOOGLE_APP_PASSWORD=${GOOGLE_APP_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRE=${JWT_EXPIRE}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
     depends_on:
       migration:
         condition: service_completed_successfully
