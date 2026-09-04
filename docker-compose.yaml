@@ -1,176 +1,21 @@
-# services:
-#   db:
-#     image: postgres:16-alpine
-#     restart: always
-#     environment:
-#       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-#     ports:
-#       - "5432:5432"
-#     volumes:
-#       - measurement-data:/var/lib/postgresql/data
-#     healthcheck:
-#       test: ["CMD-SHELL", "pg_isready -U postgres"]
-#       interval: 5s
-#       timeout: 5s
-#       retries: 5
-
-#   replica-db1:
-#     image: postgres:16-alpine
-#     restart: always
-#     environment:
-#       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-#     ports:
-#       - "5434:5432" # <-- External port 5433 maps to container port 5432
-#     volumes:
-#       - replica1-data:/var/lib/postgresql/data
-#     healthcheck:
-#       test: ["CMD-SHELL", "pg_isready -U postgres"]
-#       interval: 5s
-#       timeout: 5s
-#       retries: 5
-
-#   replica-db2:
-#     image: postgres:16-alpine
-#     restart: always
-#     environment:
-#       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-#     ports:
-#       - "5435:5432" # <-- External port 5433 maps to container port 5432
-#     volumes:
-#       - replica2-data:/var/lib/postgresql/data
-#     healthcheck:
-#       test: ["CMD-SHELL", "pg_isready -U postgres"]
-#       interval: 5s
-#       timeout: 5s
-#       retries: 5
-
-#   redis:
-#     image: redis:8.8.2-alpine
-#     restart: always
-#     ports:
-#       - "6379:6379"
-#     volumes:
-#       - redis-data:/data
-#     healthcheck:
-#       test: ["CMD", "redis-cli", "ping"]
-#       interval: 5s
-#       timeout: 5s
-#       retries: 5
-
-#   # Dedicated Migration Runner
-#   migration:
-#     build:
-#       context: .
-#       dockerfile: Dockerfile
-#     command: npx prisma migrate deploy
-#     environment:
-#       - DATABASE_URL=${DATABASE_URL}
-#     depends_on:
-#       db:
-#         condition: service_healthy
-
-#   # Nginx Load Balancer
-#   nginx:
-#     image: nginx:alpine
-#     restart: always
-#     ports:
-#       - "80:80"
-#     volumes:
-#       - ./nginx.conf:/etc/nginx/nginx.conf:ro
-#     depends_on:
-#       - redis
-#       - app1
-#       - app2
-#       - app3
-
-#   app1:
-#     build:
-#       context: .
-#       dockerfile: Dockerfile
-#     volumes:
-#       - .:/app
-#       - /app/node_modules
-#     environment:
-#       - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
-#       - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
-#       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
-#       - APP_NAME=App1
-#       - DATABASE_URL=${DATABASE_URL}
-#       - REPLICA_URL=${REPLICA_URL1}
-#       - REPLICA_URL=${REPLICA_URL2}
-#       - REDIS_URL=redis://redis:6379
-#     depends_on:
-#       migration:
-#         condition: service_completed_successfully
-#       redis:
-#         condition: service_healthy
-#     ports:
-#       - "8001:8000"
-
-#   app2:
-#     build:
-#       context: .
-#       dockerfile: Dockerfile
-#     volumes:
-#       - .:/app
-#       - /app/node_modules
-#     environment:
-#       - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
-#       - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
-#       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
-#       - APP_NAME=App2
-#       - DATABASE_URL=${DATABASE_URL}
-#       - REPLICA_URL=${REPLICA_URL1}
-#       - REPLICA_URL=${REPLICA_URL2}
-#       - REDIS_URL=redis://redis:6379
-#     depends_on:
-#       migration:
-#         condition: service_completed_successfully
-#       redis:
-#         condition: service_healthy
-#     ports:
-#       - "8002:8000"
-
-#   app3:
-#     build:
-#       context: .
-#       dockerfile: Dockerfile
-#     volumes:
-#       - .:/app
-#       - /app/node_modules
-#     environment:
-#       - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
-#       - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
-#       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
-#       - APP_NAME=App3
-#       - DATABASE_URL=${DATABASE_URL}
-#       - REPLICA_URL=${REPLICA_URL1}
-#       - REPLICA_URL=${REPLICA_URL2}
-#       - REDIS_URL=redis://redis:6379
-#     depends_on:
-#       migration:
-#         condition: service_completed_successfully
-#       redis:
-#         condition: service_healthy
-#     ports:
-#       - "8003:8000"
-
-# volumes:
-#   measurement-data:
-#   repliica1-data:
-#   repliica2-data:
-#   redis-data:
-  
 services:
   db:
     image: postgres:16-alpine
     restart: always
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    ports:
-      - "5432:5432"
+    command: >
+      postgres
+      -c wal_level=replica
+      -c max_wal_senders=10
+      -c max_replication_slots=10
+      -c hot_standby=on
+    # No public port — only containers on this compose network need to reach it.
+    expose:
+      - "5432"
     volumes:
       - measurement-data:/var/lib/postgresql/data
+      - ./postgres/primary-init.sh:/docker-entrypoint-initdb.d/primary-init.sh:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -181,11 +26,17 @@ services:
     image: postgres:16-alpine
     restart: always
     environment:
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    ports:
-      - "5434:5432" # <-- External port 5434 maps to container port 5432
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PRIMARY_HOST: db
+    entrypoint: ["/bin/bash", "/docker-entrypoint-replica.sh"]
     volumes:
       - replica1-data:/var/lib/postgresql/data
+      - ./postgres/replica-entrypoint.sh:/docker-entrypoint-replica.sh:ro
+    expose:
+      - "5432"
+    depends_on:
+      db:
+        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -196,11 +47,38 @@ services:
     image: postgres:16-alpine
     restart: always
     environment:
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    ports:
-      - "5435:5432" # <-- External port 5435 maps to container port 5432
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PRIMARY_HOST: db
+    entrypoint: ["/bin/bash", "/docker-entrypoint-replica.sh"]
     volumes:
       - replica2-data:/var/lib/postgresql/data
+      - ./postgres/replica-entrypoint.sh:/docker-entrypoint-replica.sh:ro
+    expose:
+      - "5432"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  replica-db3:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PRIMARY_HOST: db
+    entrypoint: ["/bin/bash", "/docker-entrypoint-replica.sh"]
+    volumes:
+      - replica3-data:/var/lib/postgresql/data
+      - ./postgres/replica-entrypoint.sh:/docker-entrypoint-replica.sh:ro
+    expose:
+      - "5432"
+    depends_on:
+      db:
+        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -210,8 +88,8 @@ services:
   redis:
     image: redis:8.8.2-alpine
     restart: always
-    ports:
-      - "6379:6379"
+    expose:
+      - "6379"
     volumes:
       - redis-data:/data
     healthcheck:
@@ -220,39 +98,48 @@ services:
       timeout: 5s
       retries: 5
 
-  # Dedicated Migration Runner
+  # Dedicated migration runner — only ever targets the primary.
+  # Replicas receive schema changes automatically via WAL streaming.
   migration:
     build:
       context: .
-      dockerfile: Dockerfile
-    command: npx prisma migrate deploy
+      dockerfile: Dockerfile        # production Dockerfile, not Dockerfile.dev
+    command: npx prisma db push
     environment:
       - DATABASE_URL=${DATABASE_URL}
     depends_on:
       db:
         condition: service_healthy
 
-  # Nginx Load Balancer
   nginx:
     image: nginx:alpine
     restart: always
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - certbot_conf:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
     depends_on:
       - redis
       - app1
       - app2
       - app3
 
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - certbot_conf:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+    entrypoint: >
+      /bin/sh -c "trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot; sleep 12h & wait $${!}; done"
+
   app1:
     build:
       context: .
-      dockerfile: Dockerfile
-    volumes:
-      - .:/app
-      - /app/node_modules
+      dockerfile: Dockerfile        # production Dockerfile, not Dockerfile.dev
+    # No source bind-mount in prod — the image already has the built code.
     environment:
       - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
       - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
@@ -261,22 +148,20 @@ services:
       - DATABASE_URL=${DATABASE_URL}
       - REPLICA_URL1=${REPLICA_URL1}
       - REPLICA_URL2=${REPLICA_URL2}
+      - REPLICA_URL3=${REPLICA_URL3}
       - REDIS_URL=redis://redis:6379
     depends_on:
       migration:
         condition: service_completed_successfully
       redis:
         condition: service_healthy
-    ports:
-      - "8001:8000"
+    expose:
+      - "8000"
 
   app2:
     build:
       context: .
       dockerfile: Dockerfile
-    volumes:
-      - .:/app
-      - /app/node_modules
     environment:
       - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
       - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
@@ -285,22 +170,20 @@ services:
       - DATABASE_URL=${DATABASE_URL}
       - REPLICA_URL1=${REPLICA_URL1}
       - REPLICA_URL2=${REPLICA_URL2}
+      - REPLICA_URL3=${REPLICA_URL3}
       - REDIS_URL=redis://redis:6379
     depends_on:
       migration:
         condition: service_completed_successfully
       redis:
         condition: service_healthy
-    ports:
-      - "8002:8000"
+    expose:
+      - "8000"
 
   app3:
     build:
       context: .
       dockerfile: Dockerfile
-    volumes:
-      - .:/app
-      - /app/node_modules
     environment:
       - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
       - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
@@ -309,17 +192,21 @@ services:
       - DATABASE_URL=${DATABASE_URL}
       - REPLICA_URL1=${REPLICA_URL1}
       - REPLICA_URL2=${REPLICA_URL2}
+      - REPLICA_URL3=${REPLICA_URL3}
       - REDIS_URL=redis://redis:6379
     depends_on:
       migration:
         condition: service_completed_successfully
       redis:
         condition: service_healthy
-    ports:
-      - "8003:8000"
+    expose:
+      - "8000"
 
 volumes:
   measurement-data:
   replica1-data:
   replica2-data:
+  replica3-data:
   redis-data:
+  certbot_conf:
+  certbot_www:
