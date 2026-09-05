@@ -34,13 +34,10 @@ app.use("/api/v1/orders", publicLimiter, orderRouter);
 app.use("/api/v1/measurement", publicLimiter, measurementtRouter);
 app.use("/api/v1/auth", authLimiter, authRouter);
 
-app.get("/", async (req: Request, res: Response) => {
+app.get("/", (req: Request, res: Response) => {
   res.status(200).json({
     message: `Welcome to ${process.env.APP_NAME || 'App'}`,
     status: "success",
-    data: {
-      users: await prisma.user.findMany()
-    } 
   });
 });
 
