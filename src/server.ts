@@ -7,6 +7,7 @@ const appName = process.env.APP_NAME || 'App';
 
 let server: Server;
 
+
 async function start() {
   try {
     // Connect Redis BEFORE app.ts (and therefore rateLimiters.ts / RedisStore) is ever loaded
@@ -29,6 +30,16 @@ async function start() {
     process.exit(1);
   }
 }
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled Rejection:', reason);
+  // log it, don't crash — let the specific request fail instead
+});
+
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+  // same idea — log and continue rather than let Node kill the process
+});
+
 
 async function shutdown(signal: string) {
   console.log(`Received ${signal}. Shutting down gracefully...`);
