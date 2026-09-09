@@ -8,14 +8,14 @@ APP_SERVICES=("app1" "app2" "app3")
 HEALTH_TIMEOUT=60   # seconds to wait for each app container to become healthy
 
 echo "==> Pulling latest code"
-git pull
+git fetch origin
+git reset --hard origin/main
 
-echo "==> Building images"
-$COMPOSE build --parallel 1
+echo "==> Building the shared app image (used by app1, app2, app3, migration)"
+docker build -t measurement_app_api-app:latest -f Dockerfile .
 
 echo "==> Applying database migrations"
 $COMPOSE up -d migration
-# Wait for the one-off migration container to actually exit before checking its code
 sleep 2
 MIGRATION_EXIT=$($COMPOSE ps -a migration --format json | python3 -c "import json,sys; print(json.load(sys.stdin).get('ExitCode', 1))" 2>/dev/null || echo 1)
 if [ "$MIGRATION_EXIT" != "0" ]; then
@@ -31,19 +31,16 @@ wait_healthy() {
   local waited=0
   echo "==> Waiting for $service to become ready..."
 
-  # If the service has no HEALTHCHECK defined in compose, docker inspect returns
-  # an empty/'<no value>' status forever — fall back to just checking the
-  # container is running, plus the curl check that follows this function.
   has_healthcheck=$(docker inspect -f '{{if .State.Health}}yes{{else}}no{{end}}' "$container" 2>/dev/null || echo "no")
 
   if [ "$has_healthcheck" = "no" ]; then
-    sleep 5   # give the process a moment to boot
+    sleep 5
     if [ "$(docker inspect -f '{{.State.Running}}' "$container" 2>/dev/null)" = "true" ]; then
-      echo "==> $service is running (no healthcheck defined, add one for stronger guarantees)"
+      echo "==> $service is running (no healthcheck defined)"
       return 0
     else
       echo "!! $service is not running"
-      docker compose -f docker-compose.yaml logs "$service" --tail=50
+      $COMPOSE logs "$service" --tail=50
       return 1
     fi
   fi
@@ -56,7 +53,7 @@ wait_healthy() {
     fi
     if [ "$waited" -ge "$HEALTH_TIMEOUT" ]; then
       echo "!! $service did not become healthy within ${HEALTH_TIMEOUT}s"
-      docker compose -f docker-compose.yaml logs "$service" --tail=50
+      $COMPOSE logs "$service" --tail=50
       return 1
     fi
     sleep 2
@@ -66,7 +63,9 @@ wait_healthy() {
 
 for service in "${APP_SERVICES[@]}"; do
   echo "==> Rolling $service"
-  $COMPOSE up -d --no-deps --build "$service"
+  # NOTE: no --build here anymore — the image was already built above.
+  # --no-deps just recreates this one container with the new image.
+  $COMPOSE up -d --no-deps "$service"
 
   if ! wait_healthy "$service"; then
     echo "!! Rollout of $service failed health check. Stopping here — $service may be down."
