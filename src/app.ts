@@ -37,7 +37,7 @@ app.use("/api/v1/auth", authLimiter, authRouter);
 app.get("/", (req: Request, res: Response) => {
   res.status(200).json({
     message: `Welcome to ${process.env.APP_NAME || 'App'}`,
-    status: "success",
+    status: "successful",
   });
 });
 
