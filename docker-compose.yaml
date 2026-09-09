@@ -122,10 +122,14 @@ services:
       - certbot_conf:/etc/letsencrypt
       - certbot_www:/var/www/certbot
     depends_on:
-      - redis
-      - app1
-      - app2
-      - app3
+      app1:
+        condition: service_started
+      app2:
+        condition: service_started
+      app3:
+        condition: service_started
+      redis:
+        condition: service_healthy
 
   certbot:
     image: certbot/certbot
