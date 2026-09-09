@@ -10,7 +10,6 @@ services:
       -c max_wal_senders=10
       -c max_replication_slots=10
       -c hot_standby=on
-    # No public port — only containers on this compose network need to reach it.
     expose:
       - "5432"
     volumes:
@@ -100,10 +99,9 @@ services:
 
   # Dedicated migration runner — only ever targets the primary.
   # Replicas receive schema changes automatically via WAL streaming.
+  # Reuses the same pre-built app image (see deploy.sh) instead of building its own.
   migration:
-    build:
-      context: .
-      dockerfile: Dockerfile        # production Dockerfile, not Dockerfile.dev
+    image: measurement_app_api-app:latest
     command: npx prisma db push
     environment:
       - DATABASE_URL=${DATABASE_URL}
@@ -139,11 +137,11 @@ services:
     entrypoint: >
       /bin/sh -c "trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot; sleep 12h & wait $${!}; done"
 
+  # app1/app2/app3 all reuse the SAME pre-built image (measurement_app_api-app:latest)
+  # instead of each building their own copy — cuts build memory/CPU usage ~3x.
+  # The image is built once by deploy.sh before `docker compose up` runs.
   app1:
-    build:
-      context: .
-      dockerfile: Dockerfile        # production Dockerfile, not Dockerfile.dev
-    # No source bind-mount in prod — the image already has the built code.
+    image: measurement_app_api-app:latest
     environment:
       - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
       - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
@@ -166,11 +164,15 @@ services:
         condition: service_healthy
     expose:
       - "8000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8000/', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
 
   app2:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: measurement_app_api-app:latest
     environment:
       - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
       - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
@@ -193,11 +195,15 @@ services:
         condition: service_healthy
     expose:
       - "8000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8000/', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
 
   app3:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: measurement_app_api-app:latest
     environment:
       - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
       - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
@@ -212,7 +218,7 @@ services:
       - GOOGLE_APP_PASSWORD=${GOOGLE_APP_PASSWORD}
       - JWT_SECRET=${JWT_SECRET}
       - JWT_EXPIRE=${JWT_EXPIRE}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}T}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
     depends_on:
       migration:
         condition: service_completed_successfully
@@ -220,6 +226,12 @@ services:
         condition: service_healthy
     expose:
       - "8000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8000/', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
 
 volumes:
   measurement-data:

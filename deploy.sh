@@ -11,7 +11,7 @@ echo "==> Pulling latest code"
 git pull
 
 echo "==> Building images"
-$COMPOSE build
+$COMPOSE build --parallel 1
 
 echo "==> Applying database migrations"
 $COMPOSE up -d migration
