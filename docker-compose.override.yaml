@@ -134,7 +134,6 @@ services:
       - APP_NAME=App2
       - DATABASE_URL=${DATABASE_URL}
       - REPLICA_URL1=${REPLICA_URL1}
-      - REPLICA_URL2=${REPLICA_URL2}
       - REDIS_URL=redis://redis:6379
       - EMAIL=${EMAIL}
       - GOOGLE_APP_PASSWORD=${GOOGLE_APP_PASSWORD}
