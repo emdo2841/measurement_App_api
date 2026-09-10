@@ -42,60 +42,60 @@ services:
       timeout: 5s
       retries: 5
 
-  replica-db2:
-    image: postgres:16-alpine
-    restart: always
-    environment:
-      PGPASSWORD: ${POSTGRES_PASSWORD}
-      PRIMARY_HOST: db
-    entrypoint: ["/bin/bash", "/docker-entrypoint-replica.sh"]
-    volumes:
-      - replica2-data:/var/lib/postgresql/data
-      - ./postgres/replica-entrypoint.sh:/docker-entrypoint-replica.sh:ro
-    expose:
-      - "5432"
-    depends_on:
-      db:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+  # replica-db2:
+  #   image: postgres:16-alpine
+  #   restart: always
+  #   environment:
+  #     PGPASSWORD: ${POSTGRES_PASSWORD}
+  #     PRIMARY_HOST: db
+  #   entrypoint: ["/bin/bash", "/docker-entrypoint-replica.sh"]
+  #   volumes:
+  #     - replica2-data:/var/lib/postgresql/data
+  #     - ./postgres/replica-entrypoint.sh:/docker-entrypoint-replica.sh:ro
+  #   expose:
+  #     - "5432"
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U postgres"]
+  #     interval: 5s
+  #     timeout: 5s
+  #     retries: 5
 
-  replica-db3:
-    image: postgres:16-alpine
-    restart: always
-    environment:
-      PGPASSWORD: ${POSTGRES_PASSWORD}
-      PRIMARY_HOST: db
-    entrypoint: ["/bin/bash", "/docker-entrypoint-replica.sh"]
-    volumes:
-      - replica3-data:/var/lib/postgresql/data
-      - ./postgres/replica-entrypoint.sh:/docker-entrypoint-replica.sh:ro
-    expose:
-      - "5432"
-    depends_on:
-      db:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+  # replica-db3:
+  #   image: postgres:16-alpine
+  #   restart: always
+  #   environment:
+  #     PGPASSWORD: ${POSTGRES_PASSWORD}
+  #     PRIMARY_HOST: db
+  #   entrypoint: ["/bin/bash", "/docker-entrypoint-replica.sh"]
+  #   volumes:
+  #     - replica3-data:/var/lib/postgresql/data
+  #     - ./postgres/replica-entrypoint.sh:/docker-entrypoint-replica.sh:ro
+  #   expose:
+  #     - "5432"
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U postgres"]
+  #     interval: 5s
+  #     timeout: 5s
+  #     retries: 5
 
-  redis:
-    image: redis:8.8.2-alpine
-    restart: always
-    expose:
-      - "6379"
-    volumes:
-      - redis-data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+  # redis:
+  #   image: redis:8.8.2-alpine
+  #   restart: always
+  #   expose:
+  #     - "6379"
+  #   volumes:
+  #     - redis-data:/data
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 5s
+  #     timeout: 5s
+  #     retries: 5
 
   # Dedicated migration runner — only ever targets the primary.
   # Replicas receive schema changes automatically via WAL streaming.
@@ -124,8 +124,8 @@ services:
         condition: service_started
       app2:
         condition: service_started
-      app3:
-        condition: service_started
+      # app3:
+      #   condition: service_started
       redis:
         condition: service_healthy
 
@@ -149,8 +149,8 @@ services:
       - APP_NAME=App1
       - DATABASE_URL=${DATABASE_URL}
       - REPLICA_URL1=${REPLICA_URL1}
-      - REPLICA_URL2=${REPLICA_URL2}
-      - REPLICA_URL3=${REPLICA_URL3}
+      # - REPLICA_URL2=${REPLICA_URL2}
+      # - REPLICA_URL3=${REPLICA_URL3}
       - REDIS_URL=redis://redis:6379
       - EMAIL=${EMAIL}
       - GOOGLE_APP_PASSWORD=${GOOGLE_APP_PASSWORD}
@@ -180,8 +180,8 @@ services:
       - APP_NAME=App2
       - DATABASE_URL=${DATABASE_URL}
       - REPLICA_URL1=${REPLICA_URL1}
-      - REPLICA_URL2=${REPLICA_URL2}
-      - REPLICA_URL3=${REPLICA_URL3}
+      # - REPLICA_URL2=${REPLICA_URL2}
+      # - REPLICA_URL3=${REPLICA_URL3}
       - REDIS_URL=redis://redis:6379
       - EMAIL=${EMAIL}
       - GOOGLE_APP_PASSWORD=${GOOGLE_APP_PASSWORD}
@@ -202,42 +202,42 @@ services:
       retries: 5
       start_period: 10s
 
-  app3:
-    image: measurement_app_api-app:latest
-    environment:
-      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
-      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
-      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
-      - APP_NAME=App3
-      - DATABASE_URL=${DATABASE_URL}
-      - REPLICA_URL1=${REPLICA_URL1}
-      - REPLICA_URL2=${REPLICA_URL2}
-      - REPLICA_URL3=${REPLICA_URL3}
-      - REDIS_URL=redis://redis:6379
-      - EMAIL=${EMAIL}
-      - GOOGLE_APP_PASSWORD=${GOOGLE_APP_PASSWORD}
-      - JWT_SECRET=${JWT_SECRET}
-      - JWT_EXPIRE=${JWT_EXPIRE}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
-    depends_on:
-      migration:
-        condition: service_completed_successfully
-      redis:
-        condition: service_healthy
-    expose:
-      - "8000"
-    healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8000/', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-      start_period: 10s
+  # app3:
+  #   image: measurement_app_api-app:latest
+  #   environment:
+  #     - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+  #     - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+  #     - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+  #     - APP_NAME=App3
+  #     - DATABASE_URL=${DATABASE_URL}
+  #     - REPLICA_URL1=${REPLICA_URL1}
+  #     - REPLICA_URL2=${REPLICA_URL2}
+  #     - REPLICA_URL3=${REPLICA_URL3}
+  #     - REDIS_URL=redis://redis:6379
+  #     - EMAIL=${EMAIL}
+  #     - GOOGLE_APP_PASSWORD=${GOOGLE_APP_PASSWORD}
+  #     - JWT_SECRET=${JWT_SECRET}
+  #     - JWT_EXPIRE=${JWT_EXPIRE}
+  #     - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+  #   depends_on:
+  #     migration:
+  #       condition: service_completed_successfully
+  #     redis:
+  #       condition: service_healthy
+  #   expose:
+  #     - "8000"
+  #   healthcheck:
+  #     test: ["CMD", "node", "-e", "require('http').get('http://localhost:8000/', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+  #     interval: 5s
+  #     timeout: 3s
+  #     retries: 5
+  #     start_period: 10s
 
 volumes:
   measurement-data:
   replica1-data:
-  replica2-data:
-  replica3-data:
+  # replica2-data:
+  # replica3-data:
   redis-data:
   certbot_conf:
   certbot_www:
