@@ -4,18 +4,18 @@
 set -e
 
 COMPOSE="docker compose -f docker-compose.yaml"
-APP_SERVICES=("app1" "app2" "app3")
+APP_SERVICES=("app1" "app2")
 HEALTH_TIMEOUT=60   # seconds to wait for each app container to become healthy
 
 echo "==> Pulling latest code"
 git fetch origin
 git reset --hard origin/main
 
-echo "==> Building the shared app image (used by app1, app2, app3, migration)"
+echo "==> Building the shared app image (used by app1, app2, migration)"
 docker build -t measurement_app_api-app:latest -f Dockerfile .
 
 echo "==> Applying database migrations"
-$COMPOSE up -d migration
+$COMPOSE up -d --remove-orphans migration
 sleep 2
 MIGRATION_EXIT=$($COMPOSE ps -a migration --format json | python3 -c "import json,sys; print(json.load(sys.stdin).get('ExitCode', 1))" 2>/dev/null || echo 1)
 if [ "$MIGRATION_EXIT" != "0" ]; then
@@ -65,7 +65,7 @@ for service in "${APP_SERVICES[@]}"; do
   echo "==> Rolling $service"
   # NOTE: no --build here anymore — the image was already built above.
   # --no-deps just recreates this one container with the new image.
-  $COMPOSE up -d --no-deps "$service"
+  $COMPOSE up -d --no-deps --remove-orphans "$service"
 
   if ! wait_healthy "$service"; then
     echo "!! Rollout of $service failed health check. Stopping here — $service may be down."
