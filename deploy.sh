@@ -11,6 +11,16 @@ echo "==> Pulling latest code"
 git fetch origin
 git reset --hard origin/main
 
+# This script rewrites itself via the git reset above. Bash reads scripts
+# incrementally rather than fully buffering them, so a currently-running
+# process can end up executing a stale mix of old/new content after the
+# file underneath it changes. Re-exec once from a fresh file handle so
+# everything past this point always reflects what's actually on disk.
+if [ -z "${DEPLOY_REEXECED:-}" ]; then
+  export DEPLOY_REEXECED=1
+  exec bash "$0" "$@"
+fi
+
 echo "==> Building the shared app image (used by app1, app2, migration)"
 docker build -t measurement_app_api-app:latest -f Dockerfile .
 
