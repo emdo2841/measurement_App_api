@@ -54,7 +54,8 @@ export const login = async (req: Request, res: Response) => {
     setRefreshTokenCookie(res, refreshToken);
     return res.status(200).json({ message: "successfully Login", accessToken });
   } catch (error) {
-    return res.status(200).json({ error: "Internal server Error", })
+    console.error('Login error:', error); // add this — see below
+    return res.status(500).json({ error: "Internal server error" })
   }
 }
 
