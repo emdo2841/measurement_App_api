@@ -25,8 +25,10 @@ RUN npm ci --only=production
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/prisma ./prisma
 COPY --from=build /app/prisma.config.ts ./prisma.config.ts
-COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=build /app/node_modules/@prisma/client ./node_modules/@prisma/client
+
+# Copy the native query engine binary — tsc doesn't compile/copy non-.ts files,
+# so this has to be moved explicitly, sitting next to the compiled client code.
+COPY --from=build /app/src/generated/prisma/libquery_engine-debian-openssl-3.0.x.so.node ./dist/generated/prisma/
 
 EXPOSE 8000
 
