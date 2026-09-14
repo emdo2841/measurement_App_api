@@ -1,7 +1,5 @@
-.vscode
-node_modules
-.DS_Store
-/src/generated/prisma
 .env
+nodes_modules
 .dockerignore
-
+API_DOCUMENTATION.nd
+node_modules
