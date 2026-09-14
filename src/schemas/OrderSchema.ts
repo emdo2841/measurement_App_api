@@ -1,4 +1,4 @@
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus } from "../generated/prisma/client";
 import { z } from 'zod';
 
 // 1. Create Order Schema (for POST requests)

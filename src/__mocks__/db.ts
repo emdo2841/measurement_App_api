@@ -1,4 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+// src/__mocks__/db.ts
+import { PrismaClient } from "../generated/prisma/client";
 import { beforeEach, vi } from 'vitest'; // 1. Added 'vi' import
 import { mockDeep, mockReset, DeepMockProxy } from 'vitest-mock-extended';
 
