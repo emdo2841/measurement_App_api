@@ -1,0 +1,1 @@
+{"version":3,"file":"cloudinary.d.ts","sourceRoot":"","sources":["../../src/Utils/cloudinary.ts"],"names":[],"mappings":"AA0BA,eAAO,MAAM,iBAAiB,GAC1B,QAAQ,MAAM,EACd,QAAQ,MAAM,KACf,OAAO,CAAC;IAAE,GAAG,EAAE,MAAM,CAAC;IAAC,QAAQ,EAAE,MAAM,CAAA;CAAE,CAe3C,CAAC;AAEF,eAAO,MAAM,WAAW,GAAU,UAAU,MAAM,KAAG,OAAO,CAAC,IAAI,CAEhE,CAAC"}
