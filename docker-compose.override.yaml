@@ -146,7 +146,7 @@ services:
       redis:
         condition: service_healthy
     ports:
-      - "8002:8000"
+      - "8002:8000"         
 
 
 volumes:
