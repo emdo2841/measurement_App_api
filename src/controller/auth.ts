@@ -22,7 +22,7 @@ export const login = async (req: Request, res: Response) => {
     const validatedDate = LoginSchema.safeParse(req.body);
     if (!validatedDate.success) {
       return res.status(400).json({ error: validatedDate.error.format() })
-    }
+    } 
 
     const { email, password } = validatedDate.data;
 
@@ -54,7 +54,12 @@ export const login = async (req: Request, res: Response) => {
     setRefreshTokenCookie(res, refreshToken);
     return res.status(200).json({ message: "successfully Login", accessToken });
   } catch (error) {
-    console.error('Login error:', error); // add this — see below
+    console.error("LOGIN ERROR");
+    console.error(error);
+    console.error(error instanceof Error ? error.message : error);
+    console.error(error instanceof Error ? error.stack : undefined);
+
+
     return res.status(500).json({ error: "Internal server error" })
   }
 }
