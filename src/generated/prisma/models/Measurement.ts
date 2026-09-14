@@ -8,7 +8,7 @@
  *
  * 🟢 You can import this file directly.
  */
-import type * as runtime from "@prisma/client/runtime/library"
+import type * as runtime from "@prisma/client/runtime/client"
 import type * as $Enums from "../enums"
 import type * as Prisma from "../internal/prismaNamespace"
 
@@ -20,100 +20,64 @@ export type MeasurementModel = runtime.Types.Result.DefaultSelection<Prisma.$Mea
 
 export type AggregateMeasurement = {
   _count: MeasurementCountAggregateOutputType | null
-  _avg: MeasurementAvgAggregateOutputType | null
-  _sum: MeasurementSumAggregateOutputType | null
   _min: MeasurementMinAggregateOutputType | null
   _max: MeasurementMaxAggregateOutputType | null
 }
 
-export type MeasurementAvgAggregateOutputType = {
-  id: number | null
-  value: number | null
-  tailorId: number | null
-}
-
-export type MeasurementSumAggregateOutputType = {
-  id: number | null
-  value: number | null
-  tailorId: number | null
-}
-
 export type MeasurementMinAggregateOutputType = {
-  id: number | null
-  client_name: string | null
-  client_phone: string | null
-  value: number | null
-  unit: string | null
-  tailorId: number | null
+  id: string | null
+  title: string | null
+  unit: $Enums.Unit | null
+  clientId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
 
 export type MeasurementMaxAggregateOutputType = {
-  id: number | null
-  client_name: string | null
-  client_phone: string | null
-  value: number | null
-  unit: string | null
-  tailorId: number | null
+  id: string | null
+  title: string | null
+  unit: $Enums.Unit | null
+  clientId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
 
 export type MeasurementCountAggregateOutputType = {
   id: number
-  client_name: number
-  client_phone: number
-  value: number
+  title: number
   unit: number
-  tailorId: number
+  data: number
+  clientId: number
   createdAt: number
   updatedAt: number
   _all: number
 }
 
 
-export type MeasurementAvgAggregateInputType = {
-  id?: true
-  value?: true
-  tailorId?: true
-}
-
-export type MeasurementSumAggregateInputType = {
-  id?: true
-  value?: true
-  tailorId?: true
-}
-
 export type MeasurementMinAggregateInputType = {
   id?: true
-  client_name?: true
-  client_phone?: true
-  value?: true
+  title?: true
   unit?: true
-  tailorId?: true
+  clientId?: true
   createdAt?: true
   updatedAt?: true
 }
 
 export type MeasurementMaxAggregateInputType = {
   id?: true
-  client_name?: true
-  client_phone?: true
-  value?: true
+  title?: true
   unit?: true
-  tailorId?: true
+  clientId?: true
   createdAt?: true
   updatedAt?: true
 }
 
 export type MeasurementCountAggregateInputType = {
   id?: true
-  client_name?: true
-  client_phone?: true
-  value?: true
+  title?: true
   unit?: true
-  tailorId?: true
+  data?: true
+  clientId?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -157,18 +121,6 @@ export type MeasurementAggregateArgs<ExtArgs extends runtime.Types.Extensions.In
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
-   * Select which fields to average
-  **/
-  _avg?: MeasurementAvgAggregateInputType
-  /**
-   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-   * 
-   * Select which fields to sum
-  **/
-  _sum?: MeasurementSumAggregateInputType
-  /**
-   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-   * 
    * Select which fields to find the minimum value
   **/
   _min?: MeasurementMinAggregateInputType
@@ -199,29 +151,24 @@ export type MeasurementGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   _count?: MeasurementCountAggregateInputType | true
-  _avg?: MeasurementAvgAggregateInputType
-  _sum?: MeasurementSumAggregateInputType
   _min?: MeasurementMinAggregateInputType
   _max?: MeasurementMaxAggregateInputType
 }
 
 export type MeasurementGroupByOutputType = {
-  id: number
-  client_name: string
-  client_phone: string
-  value: number
-  unit: string
-  tailorId: number | null
+  id: string
+  title: string
+  unit: $Enums.Unit
+  data: runtime.JsonValue
+  clientId: string
   createdAt: Date
   updatedAt: Date
   _count: MeasurementCountAggregateOutputType | null
-  _avg: MeasurementAvgAggregateOutputType | null
-  _sum: MeasurementSumAggregateOutputType | null
   _min: MeasurementMinAggregateOutputType | null
   _max: MeasurementMaxAggregateOutputType | null
 }
 
-type GetMeasurementGroupByPayload<T extends MeasurementGroupByArgs> = Prisma.PrismaPromise<
+export type GetMeasurementGroupByPayload<T extends MeasurementGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<MeasurementGroupByOutputType, T['by']> &
       {
@@ -240,143 +187,132 @@ export type MeasurementWhereInput = {
   AND?: Prisma.MeasurementWhereInput | Prisma.MeasurementWhereInput[]
   OR?: Prisma.MeasurementWhereInput[]
   NOT?: Prisma.MeasurementWhereInput | Prisma.MeasurementWhereInput[]
-  id?: Prisma.IntFilter<"Measurement"> | number
-  client_name?: Prisma.StringFilter<"Measurement"> | string
-  client_phone?: Prisma.StringFilter<"Measurement"> | string
-  value?: Prisma.FloatFilter<"Measurement"> | number
-  unit?: Prisma.StringFilter<"Measurement"> | string
-  tailorId?: Prisma.IntNullableFilter<"Measurement"> | number | null
+  id?: Prisma.StringFilter<"Measurement"> | string
+  title?: Prisma.StringFilter<"Measurement"> | string
+  unit?: Prisma.EnumUnitFilter<"Measurement"> | $Enums.Unit
+  data?: Prisma.JsonFilter<"Measurement">
+  clientId?: Prisma.StringFilter<"Measurement"> | string
   createdAt?: Prisma.DateTimeFilter<"Measurement"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Measurement"> | Date | string
-  tailor?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  client?: Prisma.XOR<Prisma.ClientScalarRelationFilter, Prisma.ClientWhereInput>
 }
 
 export type MeasurementOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  client_name?: Prisma.SortOrder
-  client_phone?: Prisma.SortOrder
-  value?: Prisma.SortOrder
+  title?: Prisma.SortOrder
   unit?: Prisma.SortOrder
-  tailorId?: Prisma.SortOrderInput | Prisma.SortOrder
+  data?: Prisma.SortOrder
+  clientId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  tailor?: Prisma.UserOrderByWithRelationInput
+  client?: Prisma.ClientOrderByWithRelationInput
 }
 
 export type MeasurementWhereUniqueInput = Prisma.AtLeast<{
-  id?: number
+  id?: string
   AND?: Prisma.MeasurementWhereInput | Prisma.MeasurementWhereInput[]
   OR?: Prisma.MeasurementWhereInput[]
   NOT?: Prisma.MeasurementWhereInput | Prisma.MeasurementWhereInput[]
-  client_name?: Prisma.StringFilter<"Measurement"> | string
-  client_phone?: Prisma.StringFilter<"Measurement"> | string
-  value?: Prisma.FloatFilter<"Measurement"> | number
-  unit?: Prisma.StringFilter<"Measurement"> | string
-  tailorId?: Prisma.IntNullableFilter<"Measurement"> | number | null
+  title?: Prisma.StringFilter<"Measurement"> | string
+  unit?: Prisma.EnumUnitFilter<"Measurement"> | $Enums.Unit
+  data?: Prisma.JsonFilter<"Measurement">
+  clientId?: Prisma.StringFilter<"Measurement"> | string
   createdAt?: Prisma.DateTimeFilter<"Measurement"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Measurement"> | Date | string
-  tailor?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  client?: Prisma.XOR<Prisma.ClientScalarRelationFilter, Prisma.ClientWhereInput>
 }, "id">
 
 export type MeasurementOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  client_name?: Prisma.SortOrder
-  client_phone?: Prisma.SortOrder
-  value?: Prisma.SortOrder
+  title?: Prisma.SortOrder
   unit?: Prisma.SortOrder
-  tailorId?: Prisma.SortOrderInput | Prisma.SortOrder
+  data?: Prisma.SortOrder
+  clientId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.MeasurementCountOrderByAggregateInput
-  _avg?: Prisma.MeasurementAvgOrderByAggregateInput
   _max?: Prisma.MeasurementMaxOrderByAggregateInput
   _min?: Prisma.MeasurementMinOrderByAggregateInput
-  _sum?: Prisma.MeasurementSumOrderByAggregateInput
 }
 
 export type MeasurementScalarWhereWithAggregatesInput = {
   AND?: Prisma.MeasurementScalarWhereWithAggregatesInput | Prisma.MeasurementScalarWhereWithAggregatesInput[]
   OR?: Prisma.MeasurementScalarWhereWithAggregatesInput[]
   NOT?: Prisma.MeasurementScalarWhereWithAggregatesInput | Prisma.MeasurementScalarWhereWithAggregatesInput[]
-  id?: Prisma.IntWithAggregatesFilter<"Measurement"> | number
-  client_name?: Prisma.StringWithAggregatesFilter<"Measurement"> | string
-  client_phone?: Prisma.StringWithAggregatesFilter<"Measurement"> | string
-  value?: Prisma.FloatWithAggregatesFilter<"Measurement"> | number
-  unit?: Prisma.StringWithAggregatesFilter<"Measurement"> | string
-  tailorId?: Prisma.IntNullableWithAggregatesFilter<"Measurement"> | number | null
+  id?: Prisma.StringWithAggregatesFilter<"Measurement"> | string
+  title?: Prisma.StringWithAggregatesFilter<"Measurement"> | string
+  unit?: Prisma.EnumUnitWithAggregatesFilter<"Measurement"> | $Enums.Unit
+  data?: Prisma.JsonWithAggregatesFilter<"Measurement">
+  clientId?: Prisma.StringWithAggregatesFilter<"Measurement"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Measurement"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Measurement"> | Date | string
 }
 
 export type MeasurementCreateInput = {
-  client_name: string
-  client_phone: string
-  value: number
-  unit: string
+  id?: string
+  title: string
+  unit?: $Enums.Unit
+  data: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
-  tailor?: Prisma.UserCreateNestedOneWithoutMeasurementsInput
+  client: Prisma.ClientCreateNestedOneWithoutMeasurementsInput
 }
 
 export type MeasurementUncheckedCreateInput = {
-  id?: number
-  client_name: string
-  client_phone: string
-  value: number
-  unit: string
-  tailorId?: number | null
+  id?: string
+  title: string
+  unit?: $Enums.Unit
+  data: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  clientId: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type MeasurementUpdateInput = {
-  client_name?: Prisma.StringFieldUpdateOperationsInput | string
-  client_phone?: Prisma.StringFieldUpdateOperationsInput | string
-  value?: Prisma.FloatFieldUpdateOperationsInput | number
-  unit?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  unit?: Prisma.EnumUnitFieldUpdateOperationsInput | $Enums.Unit
+  data?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  tailor?: Prisma.UserUpdateOneWithoutMeasurementsNestedInput
+  client?: Prisma.ClientUpdateOneRequiredWithoutMeasurementsNestedInput
 }
 
 export type MeasurementUncheckedUpdateInput = {
-  id?: Prisma.IntFieldUpdateOperationsInput | number
-  client_name?: Prisma.StringFieldUpdateOperationsInput | string
-  client_phone?: Prisma.StringFieldUpdateOperationsInput | string
-  value?: Prisma.FloatFieldUpdateOperationsInput | number
-  unit?: Prisma.StringFieldUpdateOperationsInput | string
-  tailorId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  unit?: Prisma.EnumUnitFieldUpdateOperationsInput | $Enums.Unit
+  data?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  clientId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type MeasurementCreateManyInput = {
-  id?: number
-  client_name: string
-  client_phone: string
-  value: number
-  unit: string
-  tailorId?: number | null
+  id?: string
+  title: string
+  unit?: $Enums.Unit
+  data: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  clientId: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type MeasurementUpdateManyMutationInput = {
-  client_name?: Prisma.StringFieldUpdateOperationsInput | string
-  client_phone?: Prisma.StringFieldUpdateOperationsInput | string
-  value?: Prisma.FloatFieldUpdateOperationsInput | number
-  unit?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  unit?: Prisma.EnumUnitFieldUpdateOperationsInput | $Enums.Unit
+  data?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type MeasurementUncheckedUpdateManyInput = {
-  id?: Prisma.IntFieldUpdateOperationsInput | number
-  client_name?: Prisma.StringFieldUpdateOperationsInput | string
-  client_phone?: Prisma.StringFieldUpdateOperationsInput | string
-  value?: Prisma.FloatFieldUpdateOperationsInput | number
-  unit?: Prisma.StringFieldUpdateOperationsInput | string
-  tailorId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  unit?: Prisma.EnumUnitFieldUpdateOperationsInput | $Enums.Unit
+  data?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  clientId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -393,201 +329,167 @@ export type MeasurementOrderByRelationAggregateInput = {
 
 export type MeasurementCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  client_name?: Prisma.SortOrder
-  client_phone?: Prisma.SortOrder
-  value?: Prisma.SortOrder
+  title?: Prisma.SortOrder
   unit?: Prisma.SortOrder
-  tailorId?: Prisma.SortOrder
+  data?: Prisma.SortOrder
+  clientId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
-export type MeasurementAvgOrderByAggregateInput = {
-  id?: Prisma.SortOrder
-  value?: Prisma.SortOrder
-  tailorId?: Prisma.SortOrder
-}
-
 export type MeasurementMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  client_name?: Prisma.SortOrder
-  client_phone?: Prisma.SortOrder
-  value?: Prisma.SortOrder
+  title?: Prisma.SortOrder
   unit?: Prisma.SortOrder
-  tailorId?: Prisma.SortOrder
+  clientId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type MeasurementMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  client_name?: Prisma.SortOrder
-  client_phone?: Prisma.SortOrder
-  value?: Prisma.SortOrder
+  title?: Prisma.SortOrder
   unit?: Prisma.SortOrder
-  tailorId?: Prisma.SortOrder
+  clientId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
-export type MeasurementSumOrderByAggregateInput = {
-  id?: Prisma.SortOrder
-  value?: Prisma.SortOrder
-  tailorId?: Prisma.SortOrder
-}
-
-export type MeasurementCreateNestedManyWithoutTailorInput = {
-  create?: Prisma.XOR<Prisma.MeasurementCreateWithoutTailorInput, Prisma.MeasurementUncheckedCreateWithoutTailorInput> | Prisma.MeasurementCreateWithoutTailorInput[] | Prisma.MeasurementUncheckedCreateWithoutTailorInput[]
-  connectOrCreate?: Prisma.MeasurementCreateOrConnectWithoutTailorInput | Prisma.MeasurementCreateOrConnectWithoutTailorInput[]
-  createMany?: Prisma.MeasurementCreateManyTailorInputEnvelope
+export type MeasurementCreateNestedManyWithoutClientInput = {
+  create?: Prisma.XOR<Prisma.MeasurementCreateWithoutClientInput, Prisma.MeasurementUncheckedCreateWithoutClientInput> | Prisma.MeasurementCreateWithoutClientInput[] | Prisma.MeasurementUncheckedCreateWithoutClientInput[]
+  connectOrCreate?: Prisma.MeasurementCreateOrConnectWithoutClientInput | Prisma.MeasurementCreateOrConnectWithoutClientInput[]
+  createMany?: Prisma.MeasurementCreateManyClientInputEnvelope
   connect?: Prisma.MeasurementWhereUniqueInput | Prisma.MeasurementWhereUniqueInput[]
 }
 
-export type MeasurementUncheckedCreateNestedManyWithoutTailorInput = {
-  create?: Prisma.XOR<Prisma.MeasurementCreateWithoutTailorInput, Prisma.MeasurementUncheckedCreateWithoutTailorInput> | Prisma.MeasurementCreateWithoutTailorInput[] | Prisma.MeasurementUncheckedCreateWithoutTailorInput[]
-  connectOrCreate?: Prisma.MeasurementCreateOrConnectWithoutTailorInput | Prisma.MeasurementCreateOrConnectWithoutTailorInput[]
-  createMany?: Prisma.MeasurementCreateManyTailorInputEnvelope
+export type MeasurementUncheckedCreateNestedManyWithoutClientInput = {
+  create?: Prisma.XOR<Prisma.MeasurementCreateWithoutClientInput, Prisma.MeasurementUncheckedCreateWithoutClientInput> | Prisma.MeasurementCreateWithoutClientInput[] | Prisma.MeasurementUncheckedCreateWithoutClientInput[]
+  connectOrCreate?: Prisma.MeasurementCreateOrConnectWithoutClientInput | Prisma.MeasurementCreateOrConnectWithoutClientInput[]
+  createMany?: Prisma.MeasurementCreateManyClientInputEnvelope
   connect?: Prisma.MeasurementWhereUniqueInput | Prisma.MeasurementWhereUniqueInput[]
 }
 
-export type MeasurementUpdateManyWithoutTailorNestedInput = {
-  create?: Prisma.XOR<Prisma.MeasurementCreateWithoutTailorInput, Prisma.MeasurementUncheckedCreateWithoutTailorInput> | Prisma.MeasurementCreateWithoutTailorInput[] | Prisma.MeasurementUncheckedCreateWithoutTailorInput[]
-  connectOrCreate?: Prisma.MeasurementCreateOrConnectWithoutTailorInput | Prisma.MeasurementCreateOrConnectWithoutTailorInput[]
-  upsert?: Prisma.MeasurementUpsertWithWhereUniqueWithoutTailorInput | Prisma.MeasurementUpsertWithWhereUniqueWithoutTailorInput[]
-  createMany?: Prisma.MeasurementCreateManyTailorInputEnvelope
+export type MeasurementUpdateManyWithoutClientNestedInput = {
+  create?: Prisma.XOR<Prisma.MeasurementCreateWithoutClientInput, Prisma.MeasurementUncheckedCreateWithoutClientInput> | Prisma.MeasurementCreateWithoutClientInput[] | Prisma.MeasurementUncheckedCreateWithoutClientInput[]
+  connectOrCreate?: Prisma.MeasurementCreateOrConnectWithoutClientInput | Prisma.MeasurementCreateOrConnectWithoutClientInput[]
+  upsert?: Prisma.MeasurementUpsertWithWhereUniqueWithoutClientInput | Prisma.MeasurementUpsertWithWhereUniqueWithoutClientInput[]
+  createMany?: Prisma.MeasurementCreateManyClientInputEnvelope
   set?: Prisma.MeasurementWhereUniqueInput | Prisma.MeasurementWhereUniqueInput[]
   disconnect?: Prisma.MeasurementWhereUniqueInput | Prisma.MeasurementWhereUniqueInput[]
   delete?: Prisma.MeasurementWhereUniqueInput | Prisma.MeasurementWhereUniqueInput[]
   connect?: Prisma.MeasurementWhereUniqueInput | Prisma.MeasurementWhereUniqueInput[]
-  update?: Prisma.MeasurementUpdateWithWhereUniqueWithoutTailorInput | Prisma.MeasurementUpdateWithWhereUniqueWithoutTailorInput[]
-  updateMany?: Prisma.MeasurementUpdateManyWithWhereWithoutTailorInput | Prisma.MeasurementUpdateManyWithWhereWithoutTailorInput[]
+  update?: Prisma.MeasurementUpdateWithWhereUniqueWithoutClientInput | Prisma.MeasurementUpdateWithWhereUniqueWithoutClientInput[]
+  updateMany?: Prisma.MeasurementUpdateManyWithWhereWithoutClientInput | Prisma.MeasurementUpdateManyWithWhereWithoutClientInput[]
   deleteMany?: Prisma.MeasurementScalarWhereInput | Prisma.MeasurementScalarWhereInput[]
 }
 
-export type MeasurementUncheckedUpdateManyWithoutTailorNestedInput = {
-  create?: Prisma.XOR<Prisma.MeasurementCreateWithoutTailorInput, Prisma.MeasurementUncheckedCreateWithoutTailorInput> | Prisma.MeasurementCreateWithoutTailorInput[] | Prisma.MeasurementUncheckedCreateWithoutTailorInput[]
-  connectOrCreate?: Prisma.MeasurementCreateOrConnectWithoutTailorInput | Prisma.MeasurementCreateOrConnectWithoutTailorInput[]
-  upsert?: Prisma.MeasurementUpsertWithWhereUniqueWithoutTailorInput | Prisma.MeasurementUpsertWithWhereUniqueWithoutTailorInput[]
-  createMany?: Prisma.MeasurementCreateManyTailorInputEnvelope
+export type MeasurementUncheckedUpdateManyWithoutClientNestedInput = {
+  create?: Prisma.XOR<Prisma.MeasurementCreateWithoutClientInput, Prisma.MeasurementUncheckedCreateWithoutClientInput> | Prisma.MeasurementCreateWithoutClientInput[] | Prisma.MeasurementUncheckedCreateWithoutClientInput[]
+  connectOrCreate?: Prisma.MeasurementCreateOrConnectWithoutClientInput | Prisma.MeasurementCreateOrConnectWithoutClientInput[]
+  upsert?: Prisma.MeasurementUpsertWithWhereUniqueWithoutClientInput | Prisma.MeasurementUpsertWithWhereUniqueWithoutClientInput[]
+  createMany?: Prisma.MeasurementCreateManyClientInputEnvelope
   set?: Prisma.MeasurementWhereUniqueInput | Prisma.MeasurementWhereUniqueInput[]
   disconnect?: Prisma.MeasurementWhereUniqueInput | Prisma.MeasurementWhereUniqueInput[]
   delete?: Prisma.MeasurementWhereUniqueInput | Prisma.MeasurementWhereUniqueInput[]
   connect?: Prisma.MeasurementWhereUniqueInput | Prisma.MeasurementWhereUniqueInput[]
-  update?: Prisma.MeasurementUpdateWithWhereUniqueWithoutTailorInput | Prisma.MeasurementUpdateWithWhereUniqueWithoutTailorInput[]
-  updateMany?: Prisma.MeasurementUpdateManyWithWhereWithoutTailorInput | Prisma.MeasurementUpdateManyWithWhereWithoutTailorInput[]
+  update?: Prisma.MeasurementUpdateWithWhereUniqueWithoutClientInput | Prisma.MeasurementUpdateWithWhereUniqueWithoutClientInput[]
+  updateMany?: Prisma.MeasurementUpdateManyWithWhereWithoutClientInput | Prisma.MeasurementUpdateManyWithWhereWithoutClientInput[]
   deleteMany?: Prisma.MeasurementScalarWhereInput | Prisma.MeasurementScalarWhereInput[]
 }
 
-export type FloatFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
+export type EnumUnitFieldUpdateOperationsInput = {
+  set?: $Enums.Unit
 }
 
-export type NullableIntFieldUpdateOperationsInput = {
-  set?: number | null
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
-export type MeasurementCreateWithoutTailorInput = {
-  client_name: string
-  client_phone: string
-  value: number
-  unit: string
+export type MeasurementCreateWithoutClientInput = {
+  id?: string
+  title: string
+  unit?: $Enums.Unit
+  data: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
-export type MeasurementUncheckedCreateWithoutTailorInput = {
-  id?: number
-  client_name: string
-  client_phone: string
-  value: number
-  unit: string
+export type MeasurementUncheckedCreateWithoutClientInput = {
+  id?: string
+  title: string
+  unit?: $Enums.Unit
+  data: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
-export type MeasurementCreateOrConnectWithoutTailorInput = {
+export type MeasurementCreateOrConnectWithoutClientInput = {
   where: Prisma.MeasurementWhereUniqueInput
-  create: Prisma.XOR<Prisma.MeasurementCreateWithoutTailorInput, Prisma.MeasurementUncheckedCreateWithoutTailorInput>
+  create: Prisma.XOR<Prisma.MeasurementCreateWithoutClientInput, Prisma.MeasurementUncheckedCreateWithoutClientInput>
 }
 
-export type MeasurementCreateManyTailorInputEnvelope = {
-  data: Prisma.MeasurementCreateManyTailorInput | Prisma.MeasurementCreateManyTailorInput[]
+export type MeasurementCreateManyClientInputEnvelope = {
+  data: Prisma.MeasurementCreateManyClientInput | Prisma.MeasurementCreateManyClientInput[]
   skipDuplicates?: boolean
 }
 
-export type MeasurementUpsertWithWhereUniqueWithoutTailorInput = {
+export type MeasurementUpsertWithWhereUniqueWithoutClientInput = {
   where: Prisma.MeasurementWhereUniqueInput
-  update: Prisma.XOR<Prisma.MeasurementUpdateWithoutTailorInput, Prisma.MeasurementUncheckedUpdateWithoutTailorInput>
-  create: Prisma.XOR<Prisma.MeasurementCreateWithoutTailorInput, Prisma.MeasurementUncheckedCreateWithoutTailorInput>
+  update: Prisma.XOR<Prisma.MeasurementUpdateWithoutClientInput, Prisma.MeasurementUncheckedUpdateWithoutClientInput>
+  create: Prisma.XOR<Prisma.MeasurementCreateWithoutClientInput, Prisma.MeasurementUncheckedCreateWithoutClientInput>
 }
 
-export type MeasurementUpdateWithWhereUniqueWithoutTailorInput = {
+export type MeasurementUpdateWithWhereUniqueWithoutClientInput = {
   where: Prisma.MeasurementWhereUniqueInput
-  data: Prisma.XOR<Prisma.MeasurementUpdateWithoutTailorInput, Prisma.MeasurementUncheckedUpdateWithoutTailorInput>
+  data: Prisma.XOR<Prisma.MeasurementUpdateWithoutClientInput, Prisma.MeasurementUncheckedUpdateWithoutClientInput>
 }
 
-export type MeasurementUpdateManyWithWhereWithoutTailorInput = {
+export type MeasurementUpdateManyWithWhereWithoutClientInput = {
   where: Prisma.MeasurementScalarWhereInput
-  data: Prisma.XOR<Prisma.MeasurementUpdateManyMutationInput, Prisma.MeasurementUncheckedUpdateManyWithoutTailorInput>
+  data: Prisma.XOR<Prisma.MeasurementUpdateManyMutationInput, Prisma.MeasurementUncheckedUpdateManyWithoutClientInput>
 }
 
 export type MeasurementScalarWhereInput = {
   AND?: Prisma.MeasurementScalarWhereInput | Prisma.MeasurementScalarWhereInput[]
   OR?: Prisma.MeasurementScalarWhereInput[]
   NOT?: Prisma.MeasurementScalarWhereInput | Prisma.MeasurementScalarWhereInput[]
-  id?: Prisma.IntFilter<"Measurement"> | number
-  client_name?: Prisma.StringFilter<"Measurement"> | string
-  client_phone?: Prisma.StringFilter<"Measurement"> | string
-  value?: Prisma.FloatFilter<"Measurement"> | number
-  unit?: Prisma.StringFilter<"Measurement"> | string
-  tailorId?: Prisma.IntNullableFilter<"Measurement"> | number | null
+  id?: Prisma.StringFilter<"Measurement"> | string
+  title?: Prisma.StringFilter<"Measurement"> | string
+  unit?: Prisma.EnumUnitFilter<"Measurement"> | $Enums.Unit
+  data?: Prisma.JsonFilter<"Measurement">
+  clientId?: Prisma.StringFilter<"Measurement"> | string
   createdAt?: Prisma.DateTimeFilter<"Measurement"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Measurement"> | Date | string
 }
 
-export type MeasurementCreateManyTailorInput = {
-  id?: number
-  client_name: string
-  client_phone: string
-  value: number
-  unit: string
+export type MeasurementCreateManyClientInput = {
+  id?: string
+  title: string
+  unit?: $Enums.Unit
+  data: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
-export type MeasurementUpdateWithoutTailorInput = {
-  client_name?: Prisma.StringFieldUpdateOperationsInput | string
-  client_phone?: Prisma.StringFieldUpdateOperationsInput | string
-  value?: Prisma.FloatFieldUpdateOperationsInput | number
-  unit?: Prisma.StringFieldUpdateOperationsInput | string
+export type MeasurementUpdateWithoutClientInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  unit?: Prisma.EnumUnitFieldUpdateOperationsInput | $Enums.Unit
+  data?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type MeasurementUncheckedUpdateWithoutTailorInput = {
-  id?: Prisma.IntFieldUpdateOperationsInput | number
-  client_name?: Prisma.StringFieldUpdateOperationsInput | string
-  client_phone?: Prisma.StringFieldUpdateOperationsInput | string
-  value?: Prisma.FloatFieldUpdateOperationsInput | number
-  unit?: Prisma.StringFieldUpdateOperationsInput | string
+export type MeasurementUncheckedUpdateWithoutClientInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  unit?: Prisma.EnumUnitFieldUpdateOperationsInput | $Enums.Unit
+  data?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type MeasurementUncheckedUpdateManyWithoutTailorInput = {
-  id?: Prisma.IntFieldUpdateOperationsInput | number
-  client_name?: Prisma.StringFieldUpdateOperationsInput | string
-  client_phone?: Prisma.StringFieldUpdateOperationsInput | string
-  value?: Prisma.FloatFieldUpdateOperationsInput | number
-  unit?: Prisma.StringFieldUpdateOperationsInput | string
+export type MeasurementUncheckedUpdateManyWithoutClientInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  unit?: Prisma.EnumUnitFieldUpdateOperationsInput | $Enums.Unit
+  data?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -596,74 +498,69 @@ export type MeasurementUncheckedUpdateManyWithoutTailorInput = {
 
 export type MeasurementSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  client_name?: boolean
-  client_phone?: boolean
-  value?: boolean
+  title?: boolean
   unit?: boolean
-  tailorId?: boolean
+  data?: boolean
+  clientId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  tailor?: boolean | Prisma.Measurement$tailorArgs<ExtArgs>
+  client?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["measurement"]>
 
 export type MeasurementSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  client_name?: boolean
-  client_phone?: boolean
-  value?: boolean
+  title?: boolean
   unit?: boolean
-  tailorId?: boolean
+  data?: boolean
+  clientId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  tailor?: boolean | Prisma.Measurement$tailorArgs<ExtArgs>
+  client?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["measurement"]>
 
 export type MeasurementSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  client_name?: boolean
-  client_phone?: boolean
-  value?: boolean
+  title?: boolean
   unit?: boolean
-  tailorId?: boolean
+  data?: boolean
+  clientId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  tailor?: boolean | Prisma.Measurement$tailorArgs<ExtArgs>
+  client?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["measurement"]>
 
 export type MeasurementSelectScalar = {
   id?: boolean
-  client_name?: boolean
-  client_phone?: boolean
-  value?: boolean
+  title?: boolean
   unit?: boolean
-  tailorId?: boolean
+  data?: boolean
+  clientId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type MeasurementOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "client_name" | "client_phone" | "value" | "unit" | "tailorId" | "createdAt" | "updatedAt", ExtArgs["result"]["measurement"]>
+export type MeasurementOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "unit" | "data" | "clientId" | "createdAt" | "updatedAt", ExtArgs["result"]["measurement"]>
 export type MeasurementInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  tailor?: boolean | Prisma.Measurement$tailorArgs<ExtArgs>
+  client?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
 }
 export type MeasurementIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  tailor?: boolean | Prisma.Measurement$tailorArgs<ExtArgs>
+  client?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
 }
 export type MeasurementIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  tailor?: boolean | Prisma.Measurement$tailorArgs<ExtArgs>
+  client?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
 }
 
 export type $MeasurementPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Measurement"
   objects: {
-    tailor: Prisma.$UserPayload<ExtArgs> | null
+    client: Prisma.$ClientPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
-    id: number
-    client_name: string
-    client_phone: string
-    value: number
-    unit: string
-    tailorId: number | null
+    id: string
+    title: string
+    unit: $Enums.Unit
+    data: runtime.JsonValue
+    clientId: string
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["measurement"]>
@@ -1060,7 +957,7 @@ readonly fields: MeasurementFieldRefs;
  */
 export interface Prisma__MeasurementClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  tailor<T extends Prisma.Measurement$tailorArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Measurement$tailorArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  client<T extends Prisma.ClientDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ClientDefaultArgs<ExtArgs>>): Prisma.Prisma__ClientClient<runtime.Types.Result.GetResult<Prisma.$ClientPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1090,12 +987,11 @@ export interface Prisma__MeasurementClient<T, Null = never, ExtArgs extends runt
  * Fields of the Measurement model
  */
 export interface MeasurementFieldRefs {
-  readonly id: Prisma.FieldRef<"Measurement", 'Int'>
-  readonly client_name: Prisma.FieldRef<"Measurement", 'String'>
-  readonly client_phone: Prisma.FieldRef<"Measurement", 'String'>
-  readonly value: Prisma.FieldRef<"Measurement", 'Float'>
-  readonly unit: Prisma.FieldRef<"Measurement", 'String'>
-  readonly tailorId: Prisma.FieldRef<"Measurement", 'Int'>
+  readonly id: Prisma.FieldRef<"Measurement", 'String'>
+  readonly title: Prisma.FieldRef<"Measurement", 'String'>
+  readonly unit: Prisma.FieldRef<"Measurement", 'Unit'>
+  readonly data: Prisma.FieldRef<"Measurement", 'Json'>
+  readonly clientId: Prisma.FieldRef<"Measurement", 'String'>
   readonly createdAt: Prisma.FieldRef<"Measurement", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Measurement", 'DateTime'>
 }
@@ -1294,6 +1190,11 @@ export type MeasurementFindManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Skip the first `n` Measurements.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of Measurements.
+   */
   distinct?: Prisma.MeasurementScalarFieldEnum | Prisma.MeasurementScalarFieldEnum[]
 }
 
@@ -1491,25 +1392,6 @@ export type MeasurementDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.I
    * Limit how many Measurements to delete.
    */
   limit?: number
-}
-
-/**
- * Measurement.tailor
- */
-export type Measurement$tailorArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the User
-   */
-  select?: Prisma.UserSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the User
-   */
-  omit?: Prisma.UserOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.UserInclude<ExtArgs> | null
-  where?: Prisma.UserWhereInput
 }
 
 /**
