@@ -30,7 +30,7 @@ export const createUser = async (req: Request, res: Response) => {
 
         const existingUser = await prisma.user.findUnique({ where: { email } });
         if (existingUser) {
-            return res.status(400).json({ message: "User already exists" });
+            return res.status(409).json({ message: "User already exists" });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
