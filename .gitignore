@@ -3,3 +3,5 @@ nodes_modules
 .dockerignore
 API_DOCUMENTATION.nd
 node_modules
+
+/src/generated/prisma/
