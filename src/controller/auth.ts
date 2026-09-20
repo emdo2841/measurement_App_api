@@ -10,60 +10,171 @@ import {
   hashToken,
   setRefreshTokenCookie,
 } from '../Utils/auth';
-
+import { z } from "zod";
+import { OAuth2Client } from "google-auth-library";
 import { generateResetToken } from '../Utils/cryptos';
 import { sendEmail } from "../services/email";
-import { passwordResetTemplate } from "../template/emailTemplate";
+import { passwordResetTemplate, signupTemplate  } from "../template/emailTemplate";
+
+
+const GoogleLoginSchema = z.object({
+  credential: z.string().min(1),
+});
+const googleClient = new OAuth2Client();
+
+// Both password login and Google login use your EXISTING session system.
+async function issueSession(
+  res: Response,
+  user: { id: string; email: string }
+) {
+  const accessToken = generateAccessToken(user.id, user.email);
+  const refreshToken = generateRefreshToken(user.id);
+
+  await prisma.refreshToken.create({
+    data: {
+      hashedToken: hashToken(refreshToken),
+      userId: user.id,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    },
+  });
+
+  setRefreshTokenCookie(res, refreshToken);
+  return accessToken;
+}
+
+
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret'
 
+// Your existing email-and-password login, updated.
 export const login = async (req: Request, res: Response) => {
   try {
-    const validatedDate = LoginSchema.safeParse(req.body);
-    if (!validatedDate.success) {
-      return res.status(400).json({ error: validatedDate.error.format() })
-    } 
+    const validatedData = LoginSchema.safeParse(req.body);
 
-    const { email, password } = validatedDate.data;
-
-    const user = await prisma.user.findUnique({ where: { email } })
-    if (!user) {
-      return res.status(401).json({ error: "Invalid Credentials" })
+    if (!validatedData.success) {
+      return res.status(400).json({
+        error: validatedData.error.format(),
+      });
     }
 
-    const isValidPassword = await bcrypt.compare(password, user.password)
+    const { email, password } = validatedData.data;
+    const user = await prisma.user.findUnique({ where: { email } });
+
+    // A Google-only user has password = null.
+    if (!user?.password) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
-      return res.status(401).json({ error: "invalid credentials" })
+      return res.status(401).json({ error: "Invalid credentials" });
     }
-    // generate token with non sensitive payload
 
-    const accessToken = generateAccessToken(user.id, user.email);
-    const refreshToken = generateRefreshToken(user.id);
-    const hashedRefreshToken = hashToken(refreshToken);
+    const accessToken = await issueSession(res, user);
 
-    // Store the hashed refresh token in the database   
-    await prisma.refreshToken.create({
-      data: {
-        hashedToken: hashedRefreshToken,
-        userId: user.id,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
-      },
+    return res.status(200).json({
+      message: "Successfully logged in",
+      accessToken,
+    });
+  } catch (error) {
+    req.log.error({ err: error }, "GOOGLE TOKEN VERIFICATION ERROR");
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// New endpoint: the SAME Google button handles Google signup and login.
+export const googleLogin = async (req: Request, res: Response) => {
+  const validatedData = GoogleLoginSchema.safeParse(req.body);
+
+  if (!validatedData.success) {
+    return res.status(400).json({
+      error: "Google credential is required",
+    });
+  }
+
+  const clientId = process.env.GOOGLE_CLIENT_ID;
+  if (!clientId) {
+    console.error("GOOGLE_CLIENT_ID is missing");
+    return res.status(500).json({ error: "Server configuration error" });
+  }
+
+  let googleId: string;
+  let email: string;
+  let name: string;
+
+  try {
+    const ticket = await googleClient.verifyIdToken({
+      idToken: validatedData.data.credential,
+      audience: clientId,
     });
 
-    // Set the refresh token in an httpOnly cookie
-    setRefreshTokenCookie(res, refreshToken);
-    return res.status(200).json({ message: "successfully Login", accessToken });
+    const payload = ticket.getPayload();
+
+    if (!payload?.sub || !payload.email || !payload.email_verified) {
+      return res.status(401).json({ error: "Invalid Google account" });
+    }
+
+    googleId = payload.sub;
+    email = payload.email.trim().toLowerCase();
+    name = payload.name ?? email;
   } catch (error) {
-    console.error("LOGIN ERROR");
-    console.error(error);
-    console.error(error instanceof Error ? error.message : error);
-    console.error(error instanceof Error ? error.stack : undefined);
+    req.log.error({ err: error }, "GOOGLE TOKEN VERIFICATION ERROR");
+    return res.status(401).json({ error: "Invalid Google credential" });
+  }
 
+  try {
+    // Returning Google user: identify them by Google's stable ID.
+    let user = await prisma.user.findUnique({ where: { googleId } });
+    let isNewUser = false;
 
-    return res.status(500).json({ error: "Internal server error" })
+    if (!user) {
+      // An existing password account needs a separate, authenticated
+      // account-linking flow. Do not take it over by matching email.
+      const existingUser = await prisma.user.findUnique({
+        where: { email },
+      });
+
+      if (existingUser) {
+        return res.status(409).json({
+          error: "This email already has an account. Sign in with your password first.",
+        });
+      }
+
+      // First Google visit: create the user. No password or phone required.
+      user = await prisma.user.create({
+        data: {
+          googleId,
+          email,
+          name,
+        },
+      });
+       isNewUser = true;
+    }
+
+    // Google users get the SAME access token, refresh-token record,
+    // and httpOnly refresh cookie as password users.
+    const accessToken = await issueSession(res, user);
+    if (isNewUser) {
+  try {
+    await sendEmail({
+      to: user.email,
+      subject: "Welcome to EJ Services!",
+      html: signupTemplate(user.name),
+    });
+  } catch (emailError) {
+    req.log.error({ err: emailError }, "Google signup welcome email failed");
+    // Email failure should not undo a successfully created account.
   }
 }
-
+    return res.status(200).json({
+      message: "Successfully logged in",
+      accessToken,
+    });
+  } catch (error) {
+    req.log.error({ err: error }, "Welcome email failed");
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
 
 
 export const refreshToken = async (req: Request, res: Response) => {
@@ -129,6 +240,7 @@ export const refreshToken = async (req: Request, res: Response) => {
     setRefreshTokenCookie(res, newRefreshToken);
     return res.status(200).json({ accessToken: newAccessToken });
   } catch (error) {
+    req.log.error(error)
     return res.status(403).json({ error: 'Invalid refresh token' });
   }
 };
@@ -197,6 +309,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
       where: { id: user.id },
       data: { resetTokens: null, resetTokenExpiry: null },
     });
+    req.log.error(error)
     return res.status(500).json({ error: 'Failed to send reset email. Please try again.' });
   }
 

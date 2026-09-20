@@ -19,7 +19,11 @@ export const createUser = async (req: Request, res: Response) => {
             return res.status(400).json({ error: validatedData.error.format() });
         }
         const { email, name, password, phone } = validatedData.data;
-
+        if (typeof password !== "string" || password.length < 8) {
+            return res.status(400).json({
+                error: "Password must be at least 8 characters",
+         });
+        }
         let imageUrl: string | undefined;
         let imagePublicId: string | undefined;
         if (file) {

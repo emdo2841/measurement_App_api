@@ -24,7 +24,7 @@ export const sendEmail = async ({to, subject , html, text}: SendEmailOptions) =>
         console.log(`message sent to ${to}. Message ID: ${info.messageId}`)
         return { success: true, messageId: info.messageId };
     }catch(error){
-        console.error(`❌ Failed to send email to ${to}:`, error);
+        console.error(` Failed to send email to ${to}:`, error);
         throw new Error('Email service error');
     }
 }
