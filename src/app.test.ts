@@ -16,6 +16,7 @@ describe('GET /', () => {
         name: 'Joy Zabura',
         email: 'john@example.com',
         password: 'hashedpassword',
+        googleId: null,
         phone: null,
         image: null,
         imagePublicId: null,

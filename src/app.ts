@@ -14,13 +14,19 @@ import { clientRouter } from './router/client.route';
 import { orderRouter } from './router/order.route';
 import { authRouter } from './router/auth.route';
 import { measurementtRouter } from './router/measurement.route';
+import { logger } from "./logger";
 
 const app = express();
 app.set('trust proxy', 1);
 
-if (process.env.NODE_ENV !== 'test') {
-  app.use(pinoHttp());
-}
+app.use(pinoHttp({
+  logger,
+  customLogLevel: (_req, res, err) => {
+    if (err || res.statusCode >= 500) return "error";
+    if (res.statusCode >= 400) return "warn";
+    return "info";
+  },
+}));
 
 app.use(helmet());
 app.use(compression());
@@ -56,11 +62,18 @@ app.use((req: Request, res: Response) => {
 });
 
 // Central Error Handler
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  if (err.type === 'entity.parse.failed' || err instanceof SyntaxError) {
-    return res.status(400).json({ error: 'Invalid JSON in request body' });
+app.use((err: unknown, req: Request, res: Response, _next: NextFunction) => {
+  if (
+    (typeof err === "object" && err !== null && "type" in err &&
+      err.type === "entity.parse.failed") ||
+    err instanceof SyntaxError
+  ) {
+    req.log.warn({ err }, "Invalid JSON in request body");
+    return res.status(400).json({ error: "Invalid JSON in request body" });
   }
-  return res.status(500).json({ error: 'Internal server error' });
+
+  req.log.error({ err }, "Unhandled request error");
+  return res.status(500).json({ error: "Internal server error" });
 });
 
 export default app;
