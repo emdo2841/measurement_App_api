@@ -15,7 +15,7 @@ import { authRouter } from './router/auth.route';
 import { measurementtRouter } from './router/measurement.route';
 import { pushRouter } from './router/push.route';
 import { logger } from "./logger";
-import { authenticateToken } from '../middleWare/authMiddleware';
+import { authenticateToken } from './middleWare/authMiddleware';
 
 const app = express();
 app.set('trust proxy', 1);
