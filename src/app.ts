@@ -44,12 +44,12 @@ app.use(cookieParser());
 app.disable('x-powered-by');
 
 // Routes protected by limiters
-app.use("/api/v1/users", authenticateToken publicLimiter, userRouter);
+app.use("/api/v1/users", authenticateToken, publicLimiter, userRouter);
 app.use("/api/v1/clients", authenticateToken, publicLimiter, clientRouter);
 app.use("/api/v1/orders", publicLimiter, orderRouter);
 app.use("/api/v1/measurement", authenticateToken, publicLimiter, measurementtRouter);
 app.use("/api/v1/auth", authLimiter, authRouter);
-app.use('/api/v1/push', authenticateToken publicLimiter, pushRouter);
+app.use('/api/v1/push', authenticateToken, publicLimiter, pushRouter);
 
 app.get("/", (req: Request, res: Response) => {
   res.status(200).json({
