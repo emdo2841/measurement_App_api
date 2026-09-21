@@ -8,12 +8,12 @@ import helmet from 'helmet';
 import 'dotenv/config';
 
 import { publicLimiter, authLimiter } from "./middleWare/rateLimiters";
-import { prisma } from './db';
 import { userRouter } from './router/user.route';
 import { clientRouter } from './router/client.route';
 import { orderRouter } from './router/order.route';
 import { authRouter } from './router/auth.route';
 import { measurementtRouter } from './router/measurement.route';
+import { pushRouter } from './router/push.route';
 import { logger } from "./logger";
 
 const app = express();
@@ -48,6 +48,7 @@ app.use("/api/v1/clients", publicLimiter, clientRouter);
 app.use("/api/v1/orders", publicLimiter, orderRouter);
 app.use("/api/v1/measurement", publicLimiter, measurementtRouter);
 app.use("/api/v1/auth", authLimiter, authRouter);
+app.use('/api/v1/push', publicLimiter, pushRouter);
 
 app.get("/", (req: Request, res: Response) => {
   res.status(200).json({

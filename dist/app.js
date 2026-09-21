@@ -16,11 +16,20 @@ const client_route_1 = require("./router/client.route");
 const order_route_1 = require("./router/order.route");
 const auth_route_1 = require("./router/auth.route");
 const measurement_route_1 = require("./router/measurement.route");
+const push_route_1 = require("./router/push.route");
+const logger_1 = require("./logger");
 const app = (0, express_1.default)();
 app.set('trust proxy', 1);
-if (process.env.NODE_ENV !== 'test') {
-    app.use((0, pino_http_1.default)());
-}
+app.use((0, pino_http_1.default)({
+    logger: logger_1.logger,
+    customLogLevel: (_req, res, err) => {
+        if (err || res.statusCode >= 500)
+            return "error";
+        if (res.statusCode >= 400)
+            return "warn";
+        return "info";
+    },
+}));
 app.use((0, helmet_1.default)());
 app.use((0, compression_1.default)());
 app.use((0, cors_1.default)({
@@ -38,6 +47,7 @@ app.use("/api/v1/clients", rateLimiters_1.publicLimiter, client_route_1.clientRo
 app.use("/api/v1/orders", rateLimiters_1.publicLimiter, order_route_1.orderRouter);
 app.use("/api/v1/measurement", rateLimiters_1.publicLimiter, measurement_route_1.measurementtRouter);
 app.use("/api/v1/auth", rateLimiters_1.authLimiter, auth_route_1.authRouter);
+app.use('/api/v1/push', rateLimiters_1.publicLimiter, push_route_1.pushRouter);
 app.get("/", (req, res) => {
     res.status(200).json({
         message: `Welcome to ${process.env.APP_NAME || 'App'}`,
@@ -49,11 +59,15 @@ app.use((req, res) => {
     res.status(404).json({ error: "Sorry, can't find that!" });
 });
 // Central Error Handler
-app.use((err, req, res, next) => {
-    if (err.type === 'entity.parse.failed' || err instanceof SyntaxError) {
-        return res.status(400).json({ error: 'Invalid JSON in request body' });
+app.use((err, req, res, _next) => {
+    if ((typeof err === "object" && err !== null && "type" in err &&
+        err.type === "entity.parse.failed") ||
+        err instanceof SyntaxError) {
+        req.log.warn({ err }, "Invalid JSON in request body");
+        return res.status(400).json({ error: "Invalid JSON in request body" });
     }
-    return res.status(500).json({ error: 'Internal server error' });
+    req.log.error({ err }, "Unhandled request error");
+    return res.status(500).json({ error: "Internal server error" });
 });
 exports.default = app;
 //# sourceMappingURL=app.js.map

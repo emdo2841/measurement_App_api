@@ -1,7 +1,7 @@
 "use strict";
 // templates/emailTemplates.ts
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.orderReceiptTemplate = exports.passwordResetSuccessTemplate = exports.passwordResetTemplate = exports.signupTemplate = void 0;
+exports.orderDueReminderTemplate = exports.orderReceiptTemplate = exports.passwordResetSuccessTemplate = exports.passwordResetTemplate = exports.signupTemplate = void 0;
 // Base wrapper to maintain consistent branding and styling
 const emailLayout = (title, content) => `
 <!DOCTYPE html>
@@ -106,4 +106,16 @@ const orderReceiptTemplate = (clientName, orderNumber, totalAmount) => {
     return emailLayout(`Order Confirmation #${orderNumber}`, content);
 };
 exports.orderReceiptTemplate = orderReceiptTemplate;
+const escapeReminderHtml = (value) => value.replace(/[&<>"']/g, (char) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+})[char]);
+const orderDueReminderTemplate = (tailorName, clientName, dueDate) => {
+    const date = new Intl.DateTimeFormat('en-NG', { dateStyle: 'long', timeZone: 'UTC' }).format(dueDate);
+    return emailLayout('Order due in 3 days', `
+    <p>Hi ${escapeReminderHtml(tailorName)},</p>
+    <p>An unfinished order for <strong>${escapeReminderHtml(clientName)}</strong> is due on <strong>${date}</strong>.</p>
+    <p>Check the order in your dashboard and plan the remaining work.</p>
+  `);
+};
+exports.orderDueReminderTemplate = orderDueReminderTemplate;
 //# sourceMappingURL=emailTemplate.js.map

@@ -27,4 +27,19 @@ export type Measurement = Prisma.MeasurementModel;
  *
  */
 export type Order = Prisma.OrderModel;
+/**
+ * Model PushSubscription
+ *
+ */
+export type PushSubscription = Prisma.PushSubscriptionModel;
+/**
+ * Model OrderReminder
+ *
+ */
+export type OrderReminder = Prisma.OrderReminderModel;
+/**
+ * Model EmailOrderReminder
+ *
+ */
+export type EmailOrderReminder = Prisma.EmailOrderReminderModel;
 //# sourceMappingURL=browser.d.ts.map

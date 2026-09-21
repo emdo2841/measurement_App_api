@@ -5,3 +5,6 @@ API_DOCUMENTATION.nd
 node_modules
 
 /src/generated/prisma/
+nginx.dev.conf
+
+docker-compose.dev.yaml

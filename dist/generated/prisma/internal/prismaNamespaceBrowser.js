@@ -48,7 +48,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.JsonNullValueFilter = exports.NullsOrder = exports.QueryMode = exports.JsonNullValueInput = exports.SortOrder = exports.OrderScalarFieldEnum = exports.MeasurementScalarFieldEnum = exports.ClientScalarFieldEnum = exports.RefreshTokenScalarFieldEnum = exports.UserScalarFieldEnum = exports.TransactionIsolationLevel = exports.ModelName = exports.AnyNull = exports.JsonNull = exports.DbNull = exports.NullTypes = exports.Decimal = void 0;
+exports.JsonNullValueFilter = exports.NullsOrder = exports.QueryMode = exports.JsonNullValueInput = exports.SortOrder = exports.EmailOrderReminderScalarFieldEnum = exports.OrderReminderScalarFieldEnum = exports.PushSubscriptionScalarFieldEnum = exports.OrderScalarFieldEnum = exports.MeasurementScalarFieldEnum = exports.ClientScalarFieldEnum = exports.RefreshTokenScalarFieldEnum = exports.UserScalarFieldEnum = exports.TransactionIsolationLevel = exports.ModelName = exports.AnyNull = exports.JsonNull = exports.DbNull = exports.NullTypes = exports.Decimal = void 0;
 const runtime = __importStar(require("@prisma/client/runtime/index-browser"));
 exports.Decimal = runtime.Decimal;
 exports.NullTypes = {
@@ -79,7 +79,10 @@ exports.ModelName = {
     RefreshToken: 'RefreshToken',
     Client: 'Client',
     Measurement: 'Measurement',
-    Order: 'Order'
+    Order: 'Order',
+    PushSubscription: 'PushSubscription',
+    OrderReminder: 'OrderReminder',
+    EmailOrderReminder: 'EmailOrderReminder'
 };
 /*
  * Enums
@@ -95,6 +98,7 @@ exports.UserScalarFieldEnum = {
     name: 'name',
     email: 'email',
     password: 'password',
+    googleId: 'googleId',
     phone: 'phone',
     image: 'image',
     imagePublicId: 'imagePublicId',
@@ -144,6 +148,31 @@ exports.OrderScalarFieldEnum = {
     notes: 'notes',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
+};
+exports.PushSubscriptionScalarFieldEnum = {
+    id: 'id',
+    userId: 'userId',
+    endpoint: 'endpoint',
+    p256dh: 'p256dh',
+    auth: 'auth',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+};
+exports.OrderReminderScalarFieldEnum = {
+    id: 'id',
+    orderId: 'orderId',
+    subscriptionId: 'subscriptionId',
+    dueDate: 'dueDate',
+    kind: 'kind',
+    sentAt: 'sentAt'
+};
+exports.EmailOrderReminderScalarFieldEnum = {
+    id: 'id',
+    orderId: 'orderId',
+    dueDate: 'dueDate',
+    kind: 'kind',
+    recipient: 'recipient',
+    sentAt: 'sentAt'
 };
 exports.SortOrder = {
     asc: 'asc',

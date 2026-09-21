@@ -16,7 +16,7 @@ RUN npm install
 COPY . .
 
 # 4. Generate Prisma client from the single copied source
-RUN npx prisma generate
+RUN DATABASE_URL=postgresql://postgres:placeholder@db:5432/postgres npx prisma generate
 
 EXPOSE 8000
 

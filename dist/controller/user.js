@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.profile = exports.deleteUser = exports.updateUser = exports.getUser = exports.createUser = void 0;
+exports.getAllUsers = exports.profile = exports.deleteUser = exports.updateUser = exports.getUser = exports.createUser = void 0;
 const db_1 = require("../db");
 const user_schema_1 = require("../schemas/user.schema");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
@@ -22,6 +22,11 @@ const createUser = async (req, res) => {
             return res.status(400).json({ error: validatedData.error.format() });
         }
         const { email, name, password, phone } = validatedData.data;
+        if (typeof password !== "string" || password.length < 8) {
+            return res.status(400).json({
+                error: "Password must be at least 8 characters",
+            });
+        }
         let imageUrl;
         let imagePublicId;
         if (file) {
@@ -195,7 +200,7 @@ const profile = async (req, res) => {
         }
         // 3. Populate cache
         await (0, cache_1.setCache)(cacheKey, user);
-        return res.status(200).json(user);
+        return res.status(200).json({ status: "successful", data: user });
     }
     catch (error) {
         console.log(error);
@@ -203,4 +208,15 @@ const profile = async (req, res) => {
     }
 };
 exports.profile = profile;
+const getAllUsers = async (req, res) => {
+    try {
+        const user = await db_1.prisma.user.findMany();
+        return res.status(200).json({ status: "success", data: user });
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: "Internal server error" });
+    }
+};
+exports.getAllUsers = getAllUsers;
 //# sourceMappingURL=user.js.map

@@ -31,6 +31,9 @@ export declare const ModelName: {
     readonly Client: "Client";
     readonly Measurement: "Measurement";
     readonly Order: "Order";
+    readonly PushSubscription: "PushSubscription";
+    readonly OrderReminder: "OrderReminder";
+    readonly EmailOrderReminder: "EmailOrderReminder";
 };
 export type ModelName = (typeof ModelName)[keyof typeof ModelName];
 export declare const TransactionIsolationLevel: {
@@ -45,6 +48,7 @@ export declare const UserScalarFieldEnum: {
     readonly name: "name";
     readonly email: "email";
     readonly password: "password";
+    readonly googleId: "googleId";
     readonly phone: "phone";
     readonly image: "image";
     readonly imagePublicId: "imagePublicId";
@@ -100,6 +104,34 @@ export declare const OrderScalarFieldEnum: {
     readonly updatedAt: "updatedAt";
 };
 export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum];
+export declare const PushSubscriptionScalarFieldEnum: {
+    readonly id: "id";
+    readonly userId: "userId";
+    readonly endpoint: "endpoint";
+    readonly p256dh: "p256dh";
+    readonly auth: "auth";
+    readonly createdAt: "createdAt";
+    readonly updatedAt: "updatedAt";
+};
+export type PushSubscriptionScalarFieldEnum = (typeof PushSubscriptionScalarFieldEnum)[keyof typeof PushSubscriptionScalarFieldEnum];
+export declare const OrderReminderScalarFieldEnum: {
+    readonly id: "id";
+    readonly orderId: "orderId";
+    readonly subscriptionId: "subscriptionId";
+    readonly dueDate: "dueDate";
+    readonly kind: "kind";
+    readonly sentAt: "sentAt";
+};
+export type OrderReminderScalarFieldEnum = (typeof OrderReminderScalarFieldEnum)[keyof typeof OrderReminderScalarFieldEnum];
+export declare const EmailOrderReminderScalarFieldEnum: {
+    readonly id: "id";
+    readonly orderId: "orderId";
+    readonly dueDate: "dueDate";
+    readonly kind: "kind";
+    readonly recipient: "recipient";
+    readonly sentAt: "sentAt";
+};
+export type EmailOrderReminderScalarFieldEnum = (typeof EmailOrderReminderScalarFieldEnum)[keyof typeof EmailOrderReminderScalarFieldEnum];
 export declare const SortOrder: {
     readonly asc: "asc";
     readonly desc: "desc";

@@ -172,6 +172,39 @@ export interface PrismaClient<in LogOpts extends Prisma.LogLevel = never, in out
     get order(): Prisma.OrderDelegate<ExtArgs, {
         omit: OmitOpts;
     }>;
+    /**
+     * `prisma.pushSubscription`: Exposes CRUD operations for the **PushSubscription** model.
+      * Example usage:
+      * ```ts
+      * // Fetch zero or more PushSubscriptions
+      * const pushSubscriptions = await prisma.pushSubscription.findMany()
+      * ```
+      */
+    get pushSubscription(): Prisma.PushSubscriptionDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
+    /**
+     * `prisma.orderReminder`: Exposes CRUD operations for the **OrderReminder** model.
+      * Example usage:
+      * ```ts
+      * // Fetch zero or more OrderReminders
+      * const orderReminders = await prisma.orderReminder.findMany()
+      * ```
+      */
+    get orderReminder(): Prisma.OrderReminderDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
+    /**
+     * `prisma.emailOrderReminder`: Exposes CRUD operations for the **EmailOrderReminder** model.
+      * Example usage:
+      * ```ts
+      * // Fetch zero or more EmailOrderReminders
+      * const emailOrderReminders = await prisma.emailOrderReminder.findMany()
+      * ```
+      */
+    get emailOrderReminder(): Prisma.EmailOrderReminderDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
 }
 export declare function getPrismaClientClass(): PrismaClientConstructor;
 //# sourceMappingURL=class.d.ts.map

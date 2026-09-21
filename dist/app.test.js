@@ -19,6 +19,7 @@ vitest_1.vi.mock('./Utils/mail', () => ({
                 name: 'Joy Zabura',
                 email: 'john@example.com',
                 password: 'hashedpassword',
+                googleId: null,
                 phone: null,
                 image: null,
                 imagePublicId: null,

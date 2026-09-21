@@ -13,6 +13,10 @@ const createOrder = async (req, res) => {
             return res.status(400).json({ error: validatedData.error.format() });
         }
         const { clientId, ...orderData } = validatedData.data;
+        const client = await db_1.prisma.client.findFirst({ where: { id: clientId, tailorId: req.user.userId } });
+        if (!client) {
+            return res.status(404).json({ error: "Client not found or not owned by user" });
+        }
         const order = await db_1.prisma.order.create({
             data: {
                 ...orderData,
@@ -28,6 +32,7 @@ const createOrder = async (req, res) => {
                 }
             }
         });
+        await (0, cache_1.delCache)(ORDERS_LIST_CACHE_KEY);
         return res.status(201).json(order);
     }
     catch (error) {
@@ -38,12 +43,8 @@ const createOrder = async (req, res) => {
 exports.createOrder = createOrder;
 const getOrders = async (req, res) => {
     try {
-        // 1. Try cache f
-        const cached = await (0, cache_1.getCache)(ORDERS_LIST_CACHE_KEY);
-        if (cached) {
-            return res.status(200).json(cached);
-        }
         const order = await db_1.prisma.order.findMany({
+            where: { client: { tailorId: req.user.userId } },
             include: {
                 client: {
                     select: {
@@ -71,8 +72,8 @@ const getOrder = async (req, res) => {
         if (cached) {
             return res.status(200).json(cached);
         }
-        const order = await db_1.prisma.order.findUnique({
-            where: { id },
+        const order = await db_1.prisma.order.findFirst({
+            where: { id, client: { tailorId: req.user.userId } },
             include: {
                 client: {
                     select: {
@@ -83,6 +84,9 @@ const getOrder = async (req, res) => {
                 }
             }
         });
+        return res.status(200).json(order);
+        if (!order)
+            return res.status(404).json({ error: 'Order not found' });
         return res.status(200).json(order);
     }
     catch (error) {
@@ -98,18 +102,26 @@ const updateOrder = async (req, res) => {
             return res.status(400).json({ error: validatedData.error.format() });
         }
         const { clientId, ...orderData } = validatedData.data;
+        if (clientId) {
+            const client = await db_1.prisma.client.findFirst({ where: { id: clientId, tailorId: req.user.userId } });
+            if (!client)
+                return res.status(404).json({ error: 'Client not found' });
+        }
         const order = await db_1.prisma.order.update({
-            where: { id },
+            where: { id, client: { tailorId: req.user.userId } },
             data: {
                 ...orderData,
                 ...(clientId ? { client: { connect: { id: clientId } } } : {})
             },
         });
         // Invalidate stale cache entries for this user
-        await (0, cache_1.delCache)('orders:all');
+        await (0, cache_1.delCache)(ORDERS_LIST_CACHE_KEY, orderCacheKey(id));
         return res.status(200).json(order);
     }
     catch (error) {
+        if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'P2025') {
+            return res.status(404).json({ error: 'Order not found' });
+        }
         console.log(error);
         return res.status(500).json({ error: "internal server error" });
     }
@@ -119,13 +131,16 @@ const deleteOrder = async (req, res) => {
     try {
         const id = req.params.id;
         const order = await db_1.prisma.order.delete({
-            where: { id }
+            where: { id, client: { tailorId: req.user.userId } }
         });
         // Invalidate stale cache entries for this user
-        await (0, cache_1.delCache)('orders:all');
+        await (0, cache_1.delCache)(ORDERS_LIST_CACHE_KEY, orderCacheKey(id));
         return res.status(200).json({ message: "order deleted successfully" });
     }
     catch (error) {
+        if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'P2025') {
+            return res.status(404).json({ error: 'Order not found' });
+        }
         console.log(error);
         return res.status(500).json({ error: "internal server error" });
     }

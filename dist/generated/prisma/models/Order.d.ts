@@ -210,6 +210,8 @@ export type OrderWhereInput = {
     createdAt?: Prisma.DateTimeFilter<"Order"> | Date | string;
     updatedAt?: Prisma.DateTimeFilter<"Order"> | Date | string;
     client?: Prisma.XOR<Prisma.ClientScalarRelationFilter, Prisma.ClientWhereInput>;
+    reminders?: Prisma.OrderReminderListRelationFilter;
+    emailReminders?: Prisma.EmailOrderReminderListRelationFilter;
 };
 export type OrderOrderByWithRelationInput = {
     id?: Prisma.SortOrder;
@@ -223,6 +225,8 @@ export type OrderOrderByWithRelationInput = {
     createdAt?: Prisma.SortOrder;
     updatedAt?: Prisma.SortOrder;
     client?: Prisma.ClientOrderByWithRelationInput;
+    reminders?: Prisma.OrderReminderOrderByRelationAggregateInput;
+    emailReminders?: Prisma.EmailOrderReminderOrderByRelationAggregateInput;
 };
 export type OrderWhereUniqueInput = Prisma.AtLeast<{
     id?: string;
@@ -239,6 +243,8 @@ export type OrderWhereUniqueInput = Prisma.AtLeast<{
     createdAt?: Prisma.DateTimeFilter<"Order"> | Date | string;
     updatedAt?: Prisma.DateTimeFilter<"Order"> | Date | string;
     client?: Prisma.XOR<Prisma.ClientScalarRelationFilter, Prisma.ClientWhereInput>;
+    reminders?: Prisma.OrderReminderListRelationFilter;
+    emailReminders?: Prisma.EmailOrderReminderListRelationFilter;
 }, "id">;
 export type OrderOrderByWithAggregationInput = {
     id?: Prisma.SortOrder;
@@ -283,6 +289,8 @@ export type OrderCreateInput = {
     createdAt?: Date | string;
     updatedAt?: Date | string;
     client: Prisma.ClientCreateNestedOneWithoutOrdersInput;
+    reminders?: Prisma.OrderReminderCreateNestedManyWithoutOrderInput;
+    emailReminders?: Prisma.EmailOrderReminderCreateNestedManyWithoutOrderInput;
 };
 export type OrderUncheckedCreateInput = {
     id?: string;
@@ -295,6 +303,8 @@ export type OrderUncheckedCreateInput = {
     notes?: string | null;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    reminders?: Prisma.OrderReminderUncheckedCreateNestedManyWithoutOrderInput;
+    emailReminders?: Prisma.EmailOrderReminderUncheckedCreateNestedManyWithoutOrderInput;
 };
 export type OrderUpdateInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -307,6 +317,8 @@ export type OrderUpdateInput = {
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     client?: Prisma.ClientUpdateOneRequiredWithoutOrdersNestedInput;
+    reminders?: Prisma.OrderReminderUpdateManyWithoutOrderNestedInput;
+    emailReminders?: Prisma.EmailOrderReminderUpdateManyWithoutOrderNestedInput;
 };
 export type OrderUncheckedUpdateInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -319,6 +331,8 @@ export type OrderUncheckedUpdateInput = {
     notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    reminders?: Prisma.OrderReminderUncheckedUpdateManyWithoutOrderNestedInput;
+    emailReminders?: Prisma.EmailOrderReminderUncheckedUpdateManyWithoutOrderNestedInput;
 };
 export type OrderCreateManyInput = {
     id?: string;
@@ -405,6 +419,10 @@ export type OrderMinOrderByAggregateInput = {
 export type OrderSumOrderByAggregateInput = {
     totalAmount?: Prisma.SortOrder;
 };
+export type OrderScalarRelationFilter = {
+    is?: Prisma.OrderWhereInput;
+    isNot?: Prisma.OrderWhereInput;
+};
 export type OrderCreateNestedManyWithoutClientInput = {
     create?: Prisma.XOR<Prisma.OrderCreateWithoutClientInput, Prisma.OrderUncheckedCreateWithoutClientInput> | Prisma.OrderCreateWithoutClientInput[] | Prisma.OrderUncheckedCreateWithoutClientInput[];
     connectOrCreate?: Prisma.OrderCreateOrConnectWithoutClientInput | Prisma.OrderCreateOrConnectWithoutClientInput[];
@@ -453,6 +471,30 @@ export type NullableFloatFieldUpdateOperationsInput = {
     multiply?: number;
     divide?: number;
 };
+export type OrderCreateNestedOneWithoutRemindersInput = {
+    create?: Prisma.XOR<Prisma.OrderCreateWithoutRemindersInput, Prisma.OrderUncheckedCreateWithoutRemindersInput>;
+    connectOrCreate?: Prisma.OrderCreateOrConnectWithoutRemindersInput;
+    connect?: Prisma.OrderWhereUniqueInput;
+};
+export type OrderUpdateOneRequiredWithoutRemindersNestedInput = {
+    create?: Prisma.XOR<Prisma.OrderCreateWithoutRemindersInput, Prisma.OrderUncheckedCreateWithoutRemindersInput>;
+    connectOrCreate?: Prisma.OrderCreateOrConnectWithoutRemindersInput;
+    upsert?: Prisma.OrderUpsertWithoutRemindersInput;
+    connect?: Prisma.OrderWhereUniqueInput;
+    update?: Prisma.XOR<Prisma.XOR<Prisma.OrderUpdateToOneWithWhereWithoutRemindersInput, Prisma.OrderUpdateWithoutRemindersInput>, Prisma.OrderUncheckedUpdateWithoutRemindersInput>;
+};
+export type OrderCreateNestedOneWithoutEmailRemindersInput = {
+    create?: Prisma.XOR<Prisma.OrderCreateWithoutEmailRemindersInput, Prisma.OrderUncheckedCreateWithoutEmailRemindersInput>;
+    connectOrCreate?: Prisma.OrderCreateOrConnectWithoutEmailRemindersInput;
+    connect?: Prisma.OrderWhereUniqueInput;
+};
+export type OrderUpdateOneRequiredWithoutEmailRemindersNestedInput = {
+    create?: Prisma.XOR<Prisma.OrderCreateWithoutEmailRemindersInput, Prisma.OrderUncheckedCreateWithoutEmailRemindersInput>;
+    connectOrCreate?: Prisma.OrderCreateOrConnectWithoutEmailRemindersInput;
+    upsert?: Prisma.OrderUpsertWithoutEmailRemindersInput;
+    connect?: Prisma.OrderWhereUniqueInput;
+    update?: Prisma.XOR<Prisma.XOR<Prisma.OrderUpdateToOneWithWhereWithoutEmailRemindersInput, Prisma.OrderUpdateWithoutEmailRemindersInput>, Prisma.OrderUncheckedUpdateWithoutEmailRemindersInput>;
+};
 export type OrderCreateWithoutClientInput = {
     id?: string;
     image?: string | null;
@@ -463,6 +505,8 @@ export type OrderCreateWithoutClientInput = {
     notes?: string | null;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    reminders?: Prisma.OrderReminderCreateNestedManyWithoutOrderInput;
+    emailReminders?: Prisma.EmailOrderReminderCreateNestedManyWithoutOrderInput;
 };
 export type OrderUncheckedCreateWithoutClientInput = {
     id?: string;
@@ -474,6 +518,8 @@ export type OrderUncheckedCreateWithoutClientInput = {
     notes?: string | null;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    reminders?: Prisma.OrderReminderUncheckedCreateNestedManyWithoutOrderInput;
+    emailReminders?: Prisma.EmailOrderReminderUncheckedCreateNestedManyWithoutOrderInput;
 };
 export type OrderCreateOrConnectWithoutClientInput = {
     where: Prisma.OrderWhereUniqueInput;
@@ -511,6 +557,136 @@ export type OrderScalarWhereInput = {
     createdAt?: Prisma.DateTimeFilter<"Order"> | Date | string;
     updatedAt?: Prisma.DateTimeFilter<"Order"> | Date | string;
 };
+export type OrderCreateWithoutRemindersInput = {
+    id?: string;
+    image?: string | null;
+    imagePublicId?: string | null;
+    status?: $Enums.OrderStatus;
+    dueDate?: Date | string | null;
+    totalAmount?: number | null;
+    notes?: string | null;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    client: Prisma.ClientCreateNestedOneWithoutOrdersInput;
+    emailReminders?: Prisma.EmailOrderReminderCreateNestedManyWithoutOrderInput;
+};
+export type OrderUncheckedCreateWithoutRemindersInput = {
+    id?: string;
+    clientId: string;
+    image?: string | null;
+    imagePublicId?: string | null;
+    status?: $Enums.OrderStatus;
+    dueDate?: Date | string | null;
+    totalAmount?: number | null;
+    notes?: string | null;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    emailReminders?: Prisma.EmailOrderReminderUncheckedCreateNestedManyWithoutOrderInput;
+};
+export type OrderCreateOrConnectWithoutRemindersInput = {
+    where: Prisma.OrderWhereUniqueInput;
+    create: Prisma.XOR<Prisma.OrderCreateWithoutRemindersInput, Prisma.OrderUncheckedCreateWithoutRemindersInput>;
+};
+export type OrderUpsertWithoutRemindersInput = {
+    update: Prisma.XOR<Prisma.OrderUpdateWithoutRemindersInput, Prisma.OrderUncheckedUpdateWithoutRemindersInput>;
+    create: Prisma.XOR<Prisma.OrderCreateWithoutRemindersInput, Prisma.OrderUncheckedCreateWithoutRemindersInput>;
+    where?: Prisma.OrderWhereInput;
+};
+export type OrderUpdateToOneWithWhereWithoutRemindersInput = {
+    where?: Prisma.OrderWhereInput;
+    data: Prisma.XOR<Prisma.OrderUpdateWithoutRemindersInput, Prisma.OrderUncheckedUpdateWithoutRemindersInput>;
+};
+export type OrderUpdateWithoutRemindersInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    imagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus;
+    dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    totalAmount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
+    notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    client?: Prisma.ClientUpdateOneRequiredWithoutOrdersNestedInput;
+    emailReminders?: Prisma.EmailOrderReminderUpdateManyWithoutOrderNestedInput;
+};
+export type OrderUncheckedUpdateWithoutRemindersInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    clientId?: Prisma.StringFieldUpdateOperationsInput | string;
+    image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    imagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus;
+    dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    totalAmount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
+    notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    emailReminders?: Prisma.EmailOrderReminderUncheckedUpdateManyWithoutOrderNestedInput;
+};
+export type OrderCreateWithoutEmailRemindersInput = {
+    id?: string;
+    image?: string | null;
+    imagePublicId?: string | null;
+    status?: $Enums.OrderStatus;
+    dueDate?: Date | string | null;
+    totalAmount?: number | null;
+    notes?: string | null;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    client: Prisma.ClientCreateNestedOneWithoutOrdersInput;
+    reminders?: Prisma.OrderReminderCreateNestedManyWithoutOrderInput;
+};
+export type OrderUncheckedCreateWithoutEmailRemindersInput = {
+    id?: string;
+    clientId: string;
+    image?: string | null;
+    imagePublicId?: string | null;
+    status?: $Enums.OrderStatus;
+    dueDate?: Date | string | null;
+    totalAmount?: number | null;
+    notes?: string | null;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    reminders?: Prisma.OrderReminderUncheckedCreateNestedManyWithoutOrderInput;
+};
+export type OrderCreateOrConnectWithoutEmailRemindersInput = {
+    where: Prisma.OrderWhereUniqueInput;
+    create: Prisma.XOR<Prisma.OrderCreateWithoutEmailRemindersInput, Prisma.OrderUncheckedCreateWithoutEmailRemindersInput>;
+};
+export type OrderUpsertWithoutEmailRemindersInput = {
+    update: Prisma.XOR<Prisma.OrderUpdateWithoutEmailRemindersInput, Prisma.OrderUncheckedUpdateWithoutEmailRemindersInput>;
+    create: Prisma.XOR<Prisma.OrderCreateWithoutEmailRemindersInput, Prisma.OrderUncheckedCreateWithoutEmailRemindersInput>;
+    where?: Prisma.OrderWhereInput;
+};
+export type OrderUpdateToOneWithWhereWithoutEmailRemindersInput = {
+    where?: Prisma.OrderWhereInput;
+    data: Prisma.XOR<Prisma.OrderUpdateWithoutEmailRemindersInput, Prisma.OrderUncheckedUpdateWithoutEmailRemindersInput>;
+};
+export type OrderUpdateWithoutEmailRemindersInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    imagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus;
+    dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    totalAmount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
+    notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    client?: Prisma.ClientUpdateOneRequiredWithoutOrdersNestedInput;
+    reminders?: Prisma.OrderReminderUpdateManyWithoutOrderNestedInput;
+};
+export type OrderUncheckedUpdateWithoutEmailRemindersInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    clientId?: Prisma.StringFieldUpdateOperationsInput | string;
+    image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    imagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus;
+    dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    totalAmount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null;
+    notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    reminders?: Prisma.OrderReminderUncheckedUpdateManyWithoutOrderNestedInput;
+};
 export type OrderCreateManyClientInput = {
     id?: string;
     image?: string | null;
@@ -532,6 +708,8 @@ export type OrderUpdateWithoutClientInput = {
     notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    reminders?: Prisma.OrderReminderUpdateManyWithoutOrderNestedInput;
+    emailReminders?: Prisma.EmailOrderReminderUpdateManyWithoutOrderNestedInput;
 };
 export type OrderUncheckedUpdateWithoutClientInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -543,6 +721,8 @@ export type OrderUncheckedUpdateWithoutClientInput = {
     notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    reminders?: Prisma.OrderReminderUncheckedUpdateManyWithoutOrderNestedInput;
+    emailReminders?: Prisma.EmailOrderReminderUncheckedUpdateManyWithoutOrderNestedInput;
 };
 export type OrderUncheckedUpdateManyWithoutClientInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -554,6 +734,38 @@ export type OrderUncheckedUpdateManyWithoutClientInput = {
     notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+};
+/**
+ * Count Type OrderCountOutputType
+ */
+export type OrderCountOutputType = {
+    reminders: number;
+    emailReminders: number;
+};
+export type OrderCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    reminders?: boolean | OrderCountOutputTypeCountRemindersArgs;
+    emailReminders?: boolean | OrderCountOutputTypeCountEmailRemindersArgs;
+};
+/**
+ * OrderCountOutputType without action
+ */
+export type OrderCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OrderCountOutputType
+     */
+    select?: Prisma.OrderCountOutputTypeSelect<ExtArgs> | null;
+};
+/**
+ * OrderCountOutputType without action
+ */
+export type OrderCountOutputTypeCountRemindersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    where?: Prisma.OrderReminderWhereInput;
+};
+/**
+ * OrderCountOutputType without action
+ */
+export type OrderCountOutputTypeCountEmailRemindersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    where?: Prisma.EmailOrderReminderWhereInput;
 };
 export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
     id?: boolean;
@@ -567,6 +779,9 @@ export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
     createdAt?: boolean;
     updatedAt?: boolean;
     client?: boolean | Prisma.ClientDefaultArgs<ExtArgs>;
+    reminders?: boolean | Prisma.Order$remindersArgs<ExtArgs>;
+    emailReminders?: boolean | Prisma.Order$emailRemindersArgs<ExtArgs>;
+    _count?: boolean | Prisma.OrderCountOutputTypeDefaultArgs<ExtArgs>;
 }, ExtArgs["result"]["order"]>;
 export type OrderSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
     id?: boolean;
@@ -609,6 +824,9 @@ export type OrderSelectScalar = {
 export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "clientId" | "image" | "imagePublicId" | "status" | "dueDate" | "totalAmount" | "notes" | "createdAt" | "updatedAt", ExtArgs["result"]["order"]>;
 export type OrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     client?: boolean | Prisma.ClientDefaultArgs<ExtArgs>;
+    reminders?: boolean | Prisma.Order$remindersArgs<ExtArgs>;
+    emailReminders?: boolean | Prisma.Order$emailRemindersArgs<ExtArgs>;
+    _count?: boolean | Prisma.OrderCountOutputTypeDefaultArgs<ExtArgs>;
 };
 export type OrderIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     client?: boolean | Prisma.ClientDefaultArgs<ExtArgs>;
@@ -620,6 +838,8 @@ export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     name: "Order";
     objects: {
         client: Prisma.$ClientPayload<ExtArgs>;
+        reminders: Prisma.$OrderReminderPayload<ExtArgs>[];
+        emailReminders: Prisma.$EmailOrderReminderPayload<ExtArgs>[];
     };
     scalars: runtime.Types.Extensions.GetPayloadResult<{
         id: string;
@@ -962,6 +1182,8 @@ export interface OrderDelegate<ExtArgs extends runtime.Types.Extensions.Internal
 export interface Prisma__OrderClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise";
     client<T extends Prisma.ClientDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ClientDefaultArgs<ExtArgs>>): Prisma.Prisma__ClientClient<runtime.Types.Result.GetResult<Prisma.$ClientPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>;
+    reminders<T extends Prisma.Order$remindersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$remindersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderReminderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
+    emailReminders<T extends Prisma.Order$emailRemindersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$emailRemindersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EmailOrderReminderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1379,6 +1601,52 @@ export type OrderDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Interna
      * Limit how many Orders to delete.
      */
     limit?: number;
+};
+/**
+ * Order.reminders
+ */
+export type Order$remindersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the OrderReminder
+     */
+    select?: Prisma.OrderReminderSelect<ExtArgs> | null;
+    /**
+     * Omit specific fields from the OrderReminder
+     */
+    omit?: Prisma.OrderReminderOmit<ExtArgs> | null;
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: Prisma.OrderReminderInclude<ExtArgs> | null;
+    where?: Prisma.OrderReminderWhereInput;
+    orderBy?: Prisma.OrderReminderOrderByWithRelationInput | Prisma.OrderReminderOrderByWithRelationInput[];
+    cursor?: Prisma.OrderReminderWhereUniqueInput;
+    take?: number;
+    skip?: number;
+    distinct?: Prisma.OrderReminderScalarFieldEnum | Prisma.OrderReminderScalarFieldEnum[];
+};
+/**
+ * Order.emailReminders
+ */
+export type Order$emailRemindersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailOrderReminder
+     */
+    select?: Prisma.EmailOrderReminderSelect<ExtArgs> | null;
+    /**
+     * Omit specific fields from the EmailOrderReminder
+     */
+    omit?: Prisma.EmailOrderReminderOmit<ExtArgs> | null;
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: Prisma.EmailOrderReminderInclude<ExtArgs> | null;
+    where?: Prisma.EmailOrderReminderWhereInput;
+    orderBy?: Prisma.EmailOrderReminderOrderByWithRelationInput | Prisma.EmailOrderReminderOrderByWithRelationInput[];
+    cursor?: Prisma.EmailOrderReminderWhereUniqueInput;
+    take?: number;
+    skip?: number;
+    distinct?: Prisma.EmailOrderReminderScalarFieldEnum | Prisma.EmailOrderReminderScalarFieldEnum[];
 };
 /**
  * Order without action

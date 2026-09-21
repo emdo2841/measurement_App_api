@@ -15,6 +15,7 @@ export type UserMinAggregateOutputType = {
     name: string | null;
     email: string | null;
     password: string | null;
+    googleId: string | null;
     phone: string | null;
     image: string | null;
     imagePublicId: string | null;
@@ -28,6 +29,7 @@ export type UserMaxAggregateOutputType = {
     name: string | null;
     email: string | null;
     password: string | null;
+    googleId: string | null;
     phone: string | null;
     image: string | null;
     imagePublicId: string | null;
@@ -41,6 +43,7 @@ export type UserCountAggregateOutputType = {
     name: number;
     email: number;
     password: number;
+    googleId: number;
     phone: number;
     image: number;
     imagePublicId: number;
@@ -55,6 +58,7 @@ export type UserMinAggregateInputType = {
     name?: true;
     email?: true;
     password?: true;
+    googleId?: true;
     phone?: true;
     image?: true;
     imagePublicId?: true;
@@ -68,6 +72,7 @@ export type UserMaxAggregateInputType = {
     name?: true;
     email?: true;
     password?: true;
+    googleId?: true;
     phone?: true;
     image?: true;
     imagePublicId?: true;
@@ -81,6 +86,7 @@ export type UserCountAggregateInputType = {
     name?: true;
     email?: true;
     password?: true;
+    googleId?: true;
     phone?: true;
     image?: true;
     imagePublicId?: true;
@@ -156,7 +162,8 @@ export type UserGroupByOutputType = {
     id: string;
     name: string;
     email: string;
-    password: string;
+    password: string | null;
+    googleId: string | null;
     phone: string | null;
     image: string | null;
     imagePublicId: string | null;
@@ -178,7 +185,8 @@ export type UserWhereInput = {
     id?: Prisma.StringFilter<"User"> | string;
     name?: Prisma.StringFilter<"User"> | string;
     email?: Prisma.StringFilter<"User"> | string;
-    password?: Prisma.StringFilter<"User"> | string;
+    password?: Prisma.StringNullableFilter<"User"> | string | null;
+    googleId?: Prisma.StringNullableFilter<"User"> | string | null;
     phone?: Prisma.StringNullableFilter<"User"> | string | null;
     image?: Prisma.StringNullableFilter<"User"> | string | null;
     imagePublicId?: Prisma.StringNullableFilter<"User"> | string | null;
@@ -187,13 +195,15 @@ export type UserWhereInput = {
     createdAt?: Prisma.DateTimeFilter<"User"> | Date | string;
     updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string;
     refreshToken?: Prisma.RefreshTokenListRelationFilter;
+    pushSubscriptions?: Prisma.PushSubscriptionListRelationFilter;
     clients?: Prisma.ClientListRelationFilter;
 };
 export type UserOrderByWithRelationInput = {
     id?: Prisma.SortOrder;
     name?: Prisma.SortOrder;
     email?: Prisma.SortOrder;
-    password?: Prisma.SortOrder;
+    password?: Prisma.SortOrderInput | Prisma.SortOrder;
+    googleId?: Prisma.SortOrderInput | Prisma.SortOrder;
     phone?: Prisma.SortOrderInput | Prisma.SortOrder;
     image?: Prisma.SortOrderInput | Prisma.SortOrder;
     imagePublicId?: Prisma.SortOrderInput | Prisma.SortOrder;
@@ -202,16 +212,18 @@ export type UserOrderByWithRelationInput = {
     createdAt?: Prisma.SortOrder;
     updatedAt?: Prisma.SortOrder;
     refreshToken?: Prisma.RefreshTokenOrderByRelationAggregateInput;
+    pushSubscriptions?: Prisma.PushSubscriptionOrderByRelationAggregateInput;
     clients?: Prisma.ClientOrderByRelationAggregateInput;
 };
 export type UserWhereUniqueInput = Prisma.AtLeast<{
     id?: string;
     email?: string;
+    googleId?: string;
     AND?: Prisma.UserWhereInput | Prisma.UserWhereInput[];
     OR?: Prisma.UserWhereInput[];
     NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[];
     name?: Prisma.StringFilter<"User"> | string;
-    password?: Prisma.StringFilter<"User"> | string;
+    password?: Prisma.StringNullableFilter<"User"> | string | null;
     phone?: Prisma.StringNullableFilter<"User"> | string | null;
     image?: Prisma.StringNullableFilter<"User"> | string | null;
     imagePublicId?: Prisma.StringNullableFilter<"User"> | string | null;
@@ -220,13 +232,15 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
     createdAt?: Prisma.DateTimeFilter<"User"> | Date | string;
     updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string;
     refreshToken?: Prisma.RefreshTokenListRelationFilter;
+    pushSubscriptions?: Prisma.PushSubscriptionListRelationFilter;
     clients?: Prisma.ClientListRelationFilter;
-}, "id" | "email">;
+}, "id" | "email" | "googleId">;
 export type UserOrderByWithAggregationInput = {
     id?: Prisma.SortOrder;
     name?: Prisma.SortOrder;
     email?: Prisma.SortOrder;
-    password?: Prisma.SortOrder;
+    password?: Prisma.SortOrderInput | Prisma.SortOrder;
+    googleId?: Prisma.SortOrderInput | Prisma.SortOrder;
     phone?: Prisma.SortOrderInput | Prisma.SortOrder;
     image?: Prisma.SortOrderInput | Prisma.SortOrder;
     imagePublicId?: Prisma.SortOrderInput | Prisma.SortOrder;
@@ -245,7 +259,8 @@ export type UserScalarWhereWithAggregatesInput = {
     id?: Prisma.StringWithAggregatesFilter<"User"> | string;
     name?: Prisma.StringWithAggregatesFilter<"User"> | string;
     email?: Prisma.StringWithAggregatesFilter<"User"> | string;
-    password?: Prisma.StringWithAggregatesFilter<"User"> | string;
+    password?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null;
+    googleId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null;
     phone?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null;
     image?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null;
     imagePublicId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null;
@@ -258,7 +273,8 @@ export type UserCreateInput = {
     id?: string;
     name: string;
     email: string;
-    password: string;
+    password?: string | null;
+    googleId?: string | null;
     phone?: string | null;
     image?: string | null;
     imagePublicId?: string | null;
@@ -267,13 +283,15 @@ export type UserCreateInput = {
     createdAt?: Date | string;
     updatedAt?: Date | string;
     refreshToken?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput;
+    pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput;
     clients?: Prisma.ClientCreateNestedManyWithoutTailorInput;
 };
 export type UserUncheckedCreateInput = {
     id?: string;
     name: string;
     email: string;
-    password: string;
+    password?: string | null;
+    googleId?: string | null;
     phone?: string | null;
     image?: string | null;
     imagePublicId?: string | null;
@@ -282,13 +300,15 @@ export type UserUncheckedCreateInput = {
     createdAt?: Date | string;
     updatedAt?: Date | string;
     refreshToken?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput;
+    pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput;
     clients?: Prisma.ClientUncheckedCreateNestedManyWithoutTailorInput;
 };
 export type UserUpdateInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
-    password?: Prisma.StringFieldUpdateOperationsInput | string;
+    password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     imagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
@@ -297,13 +317,15 @@ export type UserUpdateInput = {
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     refreshToken?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput;
+    pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput;
     clients?: Prisma.ClientUpdateManyWithoutTailorNestedInput;
 };
 export type UserUncheckedUpdateInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
-    password?: Prisma.StringFieldUpdateOperationsInput | string;
+    password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     imagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
@@ -312,13 +334,15 @@ export type UserUncheckedUpdateInput = {
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     refreshToken?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput;
+    pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput;
     clients?: Prisma.ClientUncheckedUpdateManyWithoutTailorNestedInput;
 };
 export type UserCreateManyInput = {
     id?: string;
     name: string;
     email: string;
-    password: string;
+    password?: string | null;
+    googleId?: string | null;
     phone?: string | null;
     image?: string | null;
     imagePublicId?: string | null;
@@ -331,7 +355,8 @@ export type UserUpdateManyMutationInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
-    password?: Prisma.StringFieldUpdateOperationsInput | string;
+    password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     imagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
@@ -344,7 +369,8 @@ export type UserUncheckedUpdateManyInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
-    password?: Prisma.StringFieldUpdateOperationsInput | string;
+    password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     imagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
@@ -358,6 +384,7 @@ export type UserCountOrderByAggregateInput = {
     name?: Prisma.SortOrder;
     email?: Prisma.SortOrder;
     password?: Prisma.SortOrder;
+    googleId?: Prisma.SortOrder;
     phone?: Prisma.SortOrder;
     image?: Prisma.SortOrder;
     imagePublicId?: Prisma.SortOrder;
@@ -371,6 +398,7 @@ export type UserMaxOrderByAggregateInput = {
     name?: Prisma.SortOrder;
     email?: Prisma.SortOrder;
     password?: Prisma.SortOrder;
+    googleId?: Prisma.SortOrder;
     phone?: Prisma.SortOrder;
     image?: Prisma.SortOrder;
     imagePublicId?: Prisma.SortOrder;
@@ -384,6 +412,7 @@ export type UserMinOrderByAggregateInput = {
     name?: Prisma.SortOrder;
     email?: Prisma.SortOrder;
     password?: Prisma.SortOrder;
+    googleId?: Prisma.SortOrder;
     phone?: Prisma.SortOrder;
     image?: Prisma.SortOrder;
     imagePublicId?: Prisma.SortOrder;
@@ -432,11 +461,24 @@ export type UserUpdateOneRequiredWithoutClientsNestedInput = {
     connect?: Prisma.UserWhereUniqueInput;
     update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutClientsInput, Prisma.UserUpdateWithoutClientsInput>, Prisma.UserUncheckedUpdateWithoutClientsInput>;
 };
+export type UserCreateNestedOneWithoutPushSubscriptionsInput = {
+    create?: Prisma.XOR<Prisma.UserCreateWithoutPushSubscriptionsInput, Prisma.UserUncheckedCreateWithoutPushSubscriptionsInput>;
+    connectOrCreate?: Prisma.UserCreateOrConnectWithoutPushSubscriptionsInput;
+    connect?: Prisma.UserWhereUniqueInput;
+};
+export type UserUpdateOneRequiredWithoutPushSubscriptionsNestedInput = {
+    create?: Prisma.XOR<Prisma.UserCreateWithoutPushSubscriptionsInput, Prisma.UserUncheckedCreateWithoutPushSubscriptionsInput>;
+    connectOrCreate?: Prisma.UserCreateOrConnectWithoutPushSubscriptionsInput;
+    upsert?: Prisma.UserUpsertWithoutPushSubscriptionsInput;
+    connect?: Prisma.UserWhereUniqueInput;
+    update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPushSubscriptionsInput, Prisma.UserUpdateWithoutPushSubscriptionsInput>, Prisma.UserUncheckedUpdateWithoutPushSubscriptionsInput>;
+};
 export type UserCreateWithoutRefreshTokenInput = {
     id?: string;
     name: string;
     email: string;
-    password: string;
+    password?: string | null;
+    googleId?: string | null;
     phone?: string | null;
     image?: string | null;
     imagePublicId?: string | null;
@@ -444,13 +486,15 @@ export type UserCreateWithoutRefreshTokenInput = {
     resetTokenExpiry?: Date | string | null;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput;
     clients?: Prisma.ClientCreateNestedManyWithoutTailorInput;
 };
 export type UserUncheckedCreateWithoutRefreshTokenInput = {
     id?: string;
     name: string;
     email: string;
-    password: string;
+    password?: string | null;
+    googleId?: string | null;
     phone?: string | null;
     image?: string | null;
     imagePublicId?: string | null;
@@ -458,6 +502,7 @@ export type UserUncheckedCreateWithoutRefreshTokenInput = {
     resetTokenExpiry?: Date | string | null;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput;
     clients?: Prisma.ClientUncheckedCreateNestedManyWithoutTailorInput;
 };
 export type UserCreateOrConnectWithoutRefreshTokenInput = {
@@ -477,7 +522,8 @@ export type UserUpdateWithoutRefreshTokenInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
-    password?: Prisma.StringFieldUpdateOperationsInput | string;
+    password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     imagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
@@ -485,13 +531,15 @@ export type UserUpdateWithoutRefreshTokenInput = {
     resetTokenExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput;
     clients?: Prisma.ClientUpdateManyWithoutTailorNestedInput;
 };
 export type UserUncheckedUpdateWithoutRefreshTokenInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
-    password?: Prisma.StringFieldUpdateOperationsInput | string;
+    password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     imagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
@@ -499,13 +547,15 @@ export type UserUncheckedUpdateWithoutRefreshTokenInput = {
     resetTokenExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput;
     clients?: Prisma.ClientUncheckedUpdateManyWithoutTailorNestedInput;
 };
 export type UserCreateWithoutClientsInput = {
     id?: string;
     name: string;
     email: string;
-    password: string;
+    password?: string | null;
+    googleId?: string | null;
     phone?: string | null;
     image?: string | null;
     imagePublicId?: string | null;
@@ -514,12 +564,14 @@ export type UserCreateWithoutClientsInput = {
     createdAt?: Date | string;
     updatedAt?: Date | string;
     refreshToken?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput;
+    pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput;
 };
 export type UserUncheckedCreateWithoutClientsInput = {
     id?: string;
     name: string;
     email: string;
-    password: string;
+    password?: string | null;
+    googleId?: string | null;
     phone?: string | null;
     image?: string | null;
     imagePublicId?: string | null;
@@ -528,6 +580,7 @@ export type UserUncheckedCreateWithoutClientsInput = {
     createdAt?: Date | string;
     updatedAt?: Date | string;
     refreshToken?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput;
+    pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput;
 };
 export type UserCreateOrConnectWithoutClientsInput = {
     where: Prisma.UserWhereUniqueInput;
@@ -546,7 +599,8 @@ export type UserUpdateWithoutClientsInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
-    password?: Prisma.StringFieldUpdateOperationsInput | string;
+    password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     imagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
@@ -555,12 +609,14 @@ export type UserUpdateWithoutClientsInput = {
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     refreshToken?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput;
+    pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput;
 };
 export type UserUncheckedUpdateWithoutClientsInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
-    password?: Prisma.StringFieldUpdateOperationsInput | string;
+    password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     imagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
@@ -569,16 +625,96 @@ export type UserUncheckedUpdateWithoutClientsInput = {
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     refreshToken?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput;
+    pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput;
+};
+export type UserCreateWithoutPushSubscriptionsInput = {
+    id?: string;
+    name: string;
+    email: string;
+    password?: string | null;
+    googleId?: string | null;
+    phone?: string | null;
+    image?: string | null;
+    imagePublicId?: string | null;
+    resetTokens?: string | null;
+    resetTokenExpiry?: Date | string | null;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    refreshToken?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput;
+    clients?: Prisma.ClientCreateNestedManyWithoutTailorInput;
+};
+export type UserUncheckedCreateWithoutPushSubscriptionsInput = {
+    id?: string;
+    name: string;
+    email: string;
+    password?: string | null;
+    googleId?: string | null;
+    phone?: string | null;
+    image?: string | null;
+    imagePublicId?: string | null;
+    resetTokens?: string | null;
+    resetTokenExpiry?: Date | string | null;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    refreshToken?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput;
+    clients?: Prisma.ClientUncheckedCreateNestedManyWithoutTailorInput;
+};
+export type UserCreateOrConnectWithoutPushSubscriptionsInput = {
+    where: Prisma.UserWhereUniqueInput;
+    create: Prisma.XOR<Prisma.UserCreateWithoutPushSubscriptionsInput, Prisma.UserUncheckedCreateWithoutPushSubscriptionsInput>;
+};
+export type UserUpsertWithoutPushSubscriptionsInput = {
+    update: Prisma.XOR<Prisma.UserUpdateWithoutPushSubscriptionsInput, Prisma.UserUncheckedUpdateWithoutPushSubscriptionsInput>;
+    create: Prisma.XOR<Prisma.UserCreateWithoutPushSubscriptionsInput, Prisma.UserUncheckedCreateWithoutPushSubscriptionsInput>;
+    where?: Prisma.UserWhereInput;
+};
+export type UserUpdateToOneWithWhereWithoutPushSubscriptionsInput = {
+    where?: Prisma.UserWhereInput;
+    data: Prisma.XOR<Prisma.UserUpdateWithoutPushSubscriptionsInput, Prisma.UserUncheckedUpdateWithoutPushSubscriptionsInput>;
+};
+export type UserUpdateWithoutPushSubscriptionsInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    name?: Prisma.StringFieldUpdateOperationsInput | string;
+    email?: Prisma.StringFieldUpdateOperationsInput | string;
+    password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    imagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    resetTokens?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    resetTokenExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    refreshToken?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput;
+    clients?: Prisma.ClientUpdateManyWithoutTailorNestedInput;
+};
+export type UserUncheckedUpdateWithoutPushSubscriptionsInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    name?: Prisma.StringFieldUpdateOperationsInput | string;
+    email?: Prisma.StringFieldUpdateOperationsInput | string;
+    password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    imagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    resetTokens?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    resetTokenExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    refreshToken?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput;
+    clients?: Prisma.ClientUncheckedUpdateManyWithoutTailorNestedInput;
 };
 /**
  * Count Type UserCountOutputType
  */
 export type UserCountOutputType = {
     refreshToken: number;
+    pushSubscriptions: number;
     clients: number;
 };
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     refreshToken?: boolean | UserCountOutputTypeCountRefreshTokenArgs;
+    pushSubscriptions?: boolean | UserCountOutputTypeCountPushSubscriptionsArgs;
     clients?: boolean | UserCountOutputTypeCountClientsArgs;
 };
 /**
@@ -599,6 +735,12 @@ export type UserCountOutputTypeCountRefreshTokenArgs<ExtArgs extends runtime.Typ
 /**
  * UserCountOutputType without action
  */
+export type UserCountOutputTypeCountPushSubscriptionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    where?: Prisma.PushSubscriptionWhereInput;
+};
+/**
+ * UserCountOutputType without action
+ */
 export type UserCountOutputTypeCountClientsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     where?: Prisma.ClientWhereInput;
 };
@@ -607,6 +749,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
     name?: boolean;
     email?: boolean;
     password?: boolean;
+    googleId?: boolean;
     phone?: boolean;
     image?: boolean;
     imagePublicId?: boolean;
@@ -615,6 +758,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
     createdAt?: boolean;
     updatedAt?: boolean;
     refreshToken?: boolean | Prisma.User$refreshTokenArgs<ExtArgs>;
+    pushSubscriptions?: boolean | Prisma.User$pushSubscriptionsArgs<ExtArgs>;
     clients?: boolean | Prisma.User$clientsArgs<ExtArgs>;
     _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>;
 }, ExtArgs["result"]["user"]>;
@@ -623,6 +767,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
     name?: boolean;
     email?: boolean;
     password?: boolean;
+    googleId?: boolean;
     phone?: boolean;
     image?: boolean;
     imagePublicId?: boolean;
@@ -636,6 +781,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
     name?: boolean;
     email?: boolean;
     password?: boolean;
+    googleId?: boolean;
     phone?: boolean;
     image?: boolean;
     imagePublicId?: boolean;
@@ -649,6 +795,7 @@ export type UserSelectScalar = {
     name?: boolean;
     email?: boolean;
     password?: boolean;
+    googleId?: boolean;
     phone?: boolean;
     image?: boolean;
     imagePublicId?: boolean;
@@ -657,9 +804,10 @@ export type UserSelectScalar = {
     createdAt?: boolean;
     updatedAt?: boolean;
 };
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "password" | "phone" | "image" | "imagePublicId" | "resetTokens" | "resetTokenExpiry" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>;
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "password" | "googleId" | "phone" | "image" | "imagePublicId" | "resetTokens" | "resetTokenExpiry" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>;
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     refreshToken?: boolean | Prisma.User$refreshTokenArgs<ExtArgs>;
+    pushSubscriptions?: boolean | Prisma.User$pushSubscriptionsArgs<ExtArgs>;
     clients?: boolean | Prisma.User$clientsArgs<ExtArgs>;
     _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>;
 };
@@ -669,13 +817,15 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     name: "User";
     objects: {
         refreshToken: Prisma.$RefreshTokenPayload<ExtArgs>[];
+        pushSubscriptions: Prisma.$PushSubscriptionPayload<ExtArgs>[];
         clients: Prisma.$ClientPayload<ExtArgs>[];
     };
     scalars: runtime.Types.Extensions.GetPayloadResult<{
         id: string;
         name: string;
         email: string;
-        password: string;
+        password: string | null;
+        googleId: string | null;
         phone: string | null;
         image: string | null;
         imagePublicId: string | null;
@@ -1013,6 +1163,7 @@ export interface UserDelegate<ExtArgs extends runtime.Types.Extensions.InternalA
 export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise";
     refreshToken<T extends Prisma.User$refreshTokenArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$refreshTokenArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RefreshTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
+    pushSubscriptions<T extends Prisma.User$pushSubscriptionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$pushSubscriptionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PushSubscriptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
     clients<T extends Prisma.User$clientsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$clientsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ClientPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1043,6 +1194,7 @@ export interface UserFieldRefs {
     readonly name: Prisma.FieldRef<"User", 'String'>;
     readonly email: Prisma.FieldRef<"User", 'String'>;
     readonly password: Prisma.FieldRef<"User", 'String'>;
+    readonly googleId: Prisma.FieldRef<"User", 'String'>;
     readonly phone: Prisma.FieldRef<"User", 'String'>;
     readonly image: Prisma.FieldRef<"User", 'String'>;
     readonly imagePublicId: Prisma.FieldRef<"User", 'String'>;
@@ -1447,6 +1599,29 @@ export type User$refreshTokenArgs<ExtArgs extends runtime.Types.Extensions.Inter
     take?: number;
     skip?: number;
     distinct?: Prisma.RefreshTokenScalarFieldEnum | Prisma.RefreshTokenScalarFieldEnum[];
+};
+/**
+ * User.pushSubscriptions
+ */
+export type User$pushSubscriptionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PushSubscription
+     */
+    select?: Prisma.PushSubscriptionSelect<ExtArgs> | null;
+    /**
+     * Omit specific fields from the PushSubscription
+     */
+    omit?: Prisma.PushSubscriptionOmit<ExtArgs> | null;
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: Prisma.PushSubscriptionInclude<ExtArgs> | null;
+    where?: Prisma.PushSubscriptionWhereInput;
+    orderBy?: Prisma.PushSubscriptionOrderByWithRelationInput | Prisma.PushSubscriptionOrderByWithRelationInput[];
+    cursor?: Prisma.PushSubscriptionWhereUniqueInput;
+    take?: number;
+    skip?: number;
+    distinct?: Prisma.PushSubscriptionScalarFieldEnum | Prisma.PushSubscriptionScalarFieldEnum[];
 };
 /**
  * User.clients

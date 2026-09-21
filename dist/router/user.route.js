@@ -12,6 +12,7 @@ const upload = (0, multer_1.default)({ storage: multer_1.default.memoryStorage()
 const router = express_1.default.Router();
 exports.userRouter = router;
 router.get("/profile", authMiddleware_1.authenticateToken, user_1.profile);
+router.get("/", user_1.getAllUsers);
 router.post("/", upload.single("image"), user_1.createUser);
 router.get("/:id", user_1.getUser);
 router.patch("/:id", user_1.updateUser);

@@ -14,6 +14,11 @@ export const createOrder = async (req: Request, res:Response) => {
             return res.status(400).json({error: validatedData.error.format()});
         }
         const { clientId, ...orderData } = validatedData.data;
+        const client = await prisma.client.findFirst({ where: { id: clientId, tailorId: req.user!.userId } });
+        if (!client) {
+            return res.status(404).json({ error: "Client not found or not owned by user" });
+        }
+        
         const order = await prisma.order.create({
             data:{
                 ...orderData,
@@ -30,6 +35,7 @@ export const createOrder = async (req: Request, res:Response) => {
                 }
             }
         })
+        await delCache(ORDERS_LIST_CACHE_KEY);
         return res.status(201).json(order)
     }catch(error){
         console.log({"error":error})
@@ -41,12 +47,8 @@ export const createOrder = async (req: Request, res:Response) => {
 export const getOrders = async (req: Request, res: Response) =>{
     try{
 
-        // 1. Try cache f
-        const cached = await getCache(ORDERS_LIST_CACHE_KEY);
-        if (cached) {
-            return res.status(200).json(cached);
-        }
         const order = await prisma.order.findMany({
+             where: { client: { tailorId: req.user!.userId } },
             include: {
                 client: {
                     select:{
@@ -75,11 +77,11 @@ export const getOrder = async (req: Request, res: Response) => {
             return res.status(200).json(cached);
         }
 
-        const order = await prisma.order.findUnique({
-            where: {id},
-            include: {
-                client: {
-                    select: {
+        const order = await prisma.order.findFirst({
+            where: {id, client: { tailorId: req.user!.userId }},
+             include: {
+                 client: {
+                     select: {
                         id: true,
                         name: true,
                         image:true
@@ -89,6 +91,8 @@ export const getOrder = async (req: Request, res: Response) => {
             }
         })
         return res.status(200).json(order)
+        if (!order) return res.status(404).json({ error: 'Order not found' });
+         return res.status(200).json(order)
     }catch(error) {
         return res.status(500).json({error: "Internal server error"})
     }
@@ -102,8 +106,12 @@ export const updateOrder = async (req: Request, res: Response) => {
             return res.status(400).json({error: validatedData.error.format()})
         }
         const {clientId, ...orderData} = validatedData.data
+        if (clientId) {
+            const client = await prisma.client.findFirst({ where: { id: clientId, tailorId: req.user!.userId } });
+            if (!client) return res.status(404).json({ error: 'Client not found' });
+        }
         const order = await prisma.order.update({
-            where: {id},
+            where: {id, client: { tailorId: req.user!.userId }},
             data: {
                 ...orderData,
                 ...(clientId? { client: { connect: { id: clientId } } } : {})
@@ -111,10 +119,13 @@ export const updateOrder = async (req: Request, res: Response) => {
         
         })
         // Invalidate stale cache entries for this user
-        await delCache('orders:all');
+        await delCache(ORDERS_LIST_CACHE_KEY, orderCacheKey(id))
 
         return res.status(200).json(order)
     }catch (error){
+        if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'P2025') {
+            return res.status(404).json({error: 'Order not found'});
+       }
         console.log(error)
         return res.status(500).json({error: "internal server error"})
     }
@@ -124,14 +135,17 @@ export const deleteOrder = async (req: Request, res: Response) =>{
     try{
          const id = req.params.id;
         const order = await prisma.order.delete({
-            where: {id}
+            where: {id, client: { tailorId: req.user!.userId }}
     })
 
     // Invalidate stale cache entries for this user
-    await delCache('orders:all');
+    await delCache(ORDERS_LIST_CACHE_KEY, orderCacheKey(id));
 
     return res.status(200).json({message : "order deleted successfully"})
     }catch(error) {
+        if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'P2025') {
+            return res.status(404).json({error: 'Order not found'});
+       }
         console.log(error)
         return res.status(500).json({error: "internal server error"})
     }

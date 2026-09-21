@@ -217,9 +217,20 @@ export const profile = async (req: Request, res: Response) => {
         // 3. Populate cache
         await setCache(cacheKey, user);
  
-        return res.status(200).json(user)
+        return res.status(200).json({status: "successful", data: user})
     } catch (error) {
         console.log(error);
         return res.status(500).json({ error: "Internal server error" })
     }
+}
+
+export const getAllUsers = async (req: Request, res: Response) => {
+    try{
+        const user = await prisma.user.findMany();
+    return res.status(200).json({ status: "success", data: user  });
+    }catch(error){
+        console.log(error);
+        return res.status(500).json({ error: "Internal server error" });
+    }
+    
 }

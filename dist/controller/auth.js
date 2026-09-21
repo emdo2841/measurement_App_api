@@ -3,57 +3,153 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.resetPassword = exports.forgotPassword = exports.logout = exports.refreshToken = exports.login = void 0;
+exports.resetPassword = exports.forgotPassword = exports.logout = exports.refreshToken = exports.googleLogin = exports.login = void 0;
 const db_1 = require("../db");
 const user_schema_1 = require("../schemas/user.schema");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 require("dotenv/config");
 const auth_1 = require("../Utils/auth");
+const zod_1 = require("zod");
+const google_auth_library_1 = require("google-auth-library");
 const cryptos_1 = require("../Utils/cryptos");
 const email_1 = require("../services/email");
 const emailTemplate_1 = require("../template/emailTemplate");
+const GoogleLoginSchema = zod_1.z.object({
+    credential: zod_1.z.string().min(1),
+});
+const googleClient = new google_auth_library_1.OAuth2Client();
+// Both password login and Google login use your EXISTING session system.
+async function issueSession(res, user) {
+    const accessToken = (0, auth_1.generateAccessToken)(user.id, user.email);
+    const refreshToken = (0, auth_1.generateRefreshToken)(user.id);
+    await db_1.prisma.refreshToken.create({
+        data: {
+            hashedToken: (0, auth_1.hashToken)(refreshToken),
+            userId: user.id,
+            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        },
+    });
+    (0, auth_1.setRefreshTokenCookie)(res, refreshToken);
+    return accessToken;
+}
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
+// Your existing email-and-password login, updated.
 const login = async (req, res) => {
     try {
-        const validatedDate = user_schema_1.LoginSchema.safeParse(req.body);
-        if (!validatedDate.success) {
-            return res.status(400).json({ error: validatedDate.error.format() });
+        const validatedData = user_schema_1.LoginSchema.safeParse(req.body);
+        if (!validatedData.success) {
+            return res.status(400).json({
+                error: validatedData.error.format(),
+            });
         }
-        const { email, password } = validatedDate.data;
+        const { email, password } = validatedData.data;
         const user = await db_1.prisma.user.findUnique({ where: { email } });
-        if (!user) {
-            return res.status(401).json({ error: "Invalid Credentials" });
+        // A Google-only user has password = null.
+        if (!user?.password) {
+            return res.status(401).json({ error: "Invalid credentials" });
         }
         const isValidPassword = await bcryptjs_1.default.compare(password, user.password);
         if (!isValidPassword) {
-            return res.status(401).json({ error: "invalid credentials" });
+            return res.status(401).json({ error: "Invalid credentials" });
         }
-        // generate token with non sensitive payload
-        const accessToken = (0, auth_1.generateAccessToken)(user.id, user.email);
-        const refreshToken = (0, auth_1.generateRefreshToken)(user.id);
-        const hashedRefreshToken = (0, auth_1.hashToken)(refreshToken);
-        // Store the hashed refresh token in the database   
-        await db_1.prisma.refreshToken.create({
-            data: {
-                hashedToken: hashedRefreshToken,
-                userId: user.id,
-                expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
-            },
+        const accessToken = await issueSession(res, user);
+        return res.status(200).json({
+            message: "Successfully logged in",
+            accessToken,
         });
-        // Set the refresh token in an httpOnly cookie
-        (0, auth_1.setRefreshTokenCookie)(res, refreshToken);
-        return res.status(200).json({ message: "successfully Login", accessToken });
     }
     catch (error) {
-        console.error("LOGIN ERROR");
-        console.error(error);
-        console.error(error instanceof Error ? error.message : error);
-        console.error(error instanceof Error ? error.stack : undefined);
+        req.log.error({ err: error }, "GOOGLE TOKEN VERIFICATION ERROR");
         return res.status(500).json({ error: "Internal server error" });
     }
 };
 exports.login = login;
+// New endpoint: the SAME Google button handles Google signup and login.
+const googleLogin = async (req, res) => {
+    const validatedData = GoogleLoginSchema.safeParse(req.body);
+    if (!validatedData.success) {
+        return res.status(400).json({
+            error: "Google credential is required",
+        });
+    }
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    if (!clientId) {
+        console.error("GOOGLE_CLIENT_ID is missing");
+        return res.status(500).json({ error: "Server configuration error" });
+    }
+    let googleId;
+    let email;
+    let name;
+    try {
+        const ticket = await googleClient.verifyIdToken({
+            idToken: validatedData.data.credential,
+            audience: clientId,
+        });
+        const payload = ticket.getPayload();
+        if (!payload?.sub || !payload.email || !payload.email_verified) {
+            return res.status(401).json({ error: "Invalid Google account" });
+        }
+        googleId = payload.sub;
+        email = payload.email.trim().toLowerCase();
+        name = payload.name ?? email;
+    }
+    catch (error) {
+        req.log.error({ err: error }, "GOOGLE TOKEN VERIFICATION ERROR");
+        return res.status(401).json({ error: "Invalid Google credential" });
+    }
+    try {
+        // Returning Google user: identify them by Google's stable ID.
+        let user = await db_1.prisma.user.findUnique({ where: { googleId } });
+        let isNewUser = false;
+        if (!user) {
+            // An existing password account needs a separate, authenticated
+            // account-linking flow. Do not take it over by matching email.
+            const existingUser = await db_1.prisma.user.findUnique({
+                where: { email },
+            });
+            if (existingUser) {
+                return res.status(409).json({
+                    error: "This email already has an account. Sign in with your password first.",
+                });
+            }
+            // First Google visit: create the user. No password or phone required.
+            user = await db_1.prisma.user.create({
+                data: {
+                    googleId,
+                    email,
+                    name,
+                },
+            });
+            isNewUser = true;
+        }
+        // Google users get the SAME access token, refresh-token record,
+        // and httpOnly refresh cookie as password users.
+        const accessToken = await issueSession(res, user);
+        if (isNewUser) {
+            try {
+                await (0, email_1.sendEmail)({
+                    to: user.email,
+                    subject: "Welcome to EJ Services!",
+                    html: (0, emailTemplate_1.signupTemplate)(user.name),
+                });
+            }
+            catch (emailError) {
+                req.log.error({ err: emailError }, "Google signup welcome email failed");
+                // Email failure should not undo a successfully created account.
+            }
+        }
+        return res.status(200).json({
+            message: "Successfully logged in",
+            accessToken,
+        });
+    }
+    catch (error) {
+        req.log.error({ err: error }, "Welcome email failed");
+        return res.status(500).json({ error: "Internal server error" });
+    }
+};
+exports.googleLogin = googleLogin;
 const refreshToken = async (req, res) => {
     const incomingToken = req.cookies.refreshToken;
     if (!incomingToken) {
@@ -107,6 +203,7 @@ const refreshToken = async (req, res) => {
         return res.status(200).json({ accessToken: newAccessToken });
     }
     catch (error) {
+        req.log.error(error);
         return res.status(403).json({ error: 'Invalid refresh token' });
     }
 };
@@ -166,6 +263,7 @@ const forgotPassword = async (req, res) => {
             where: { id: user.id },
             data: { resetTokens: null, resetTokenExpiry: null },
         });
+        req.log.error(error);
         return res.status(500).json({ error: 'Failed to send reset email. Please try again.' });
     }
     return res.status(200).json(genericResponse);

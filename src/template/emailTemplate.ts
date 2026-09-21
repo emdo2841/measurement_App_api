@@ -108,3 +108,17 @@ export const orderReceiptTemplate = (clientName: string, orderNumber: string, to
 
   return emailLayout(`Order Confirmation #${orderNumber}`, content);
 };
+
+
+const escapeReminderHtml = (value: string) => value.replace(/[&<>"']/g, (char) => ({
+  '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+})[char]!);
+
+export const orderDueReminderTemplate = (tailorName: string, clientName: string, dueDate: Date) => {
+  const date = new Intl.DateTimeFormat('en-NG', { dateStyle: 'long', timeZone: 'UTC' }).format(dueDate);
+  return emailLayout('Order due in 3 days', `
+    <p>Hi ${escapeReminderHtml(tailorName)},</p>
+    <p>An unfinished order for <strong>${escapeReminderHtml(clientName)}</strong> is due on <strong>${date}</strong>.</p>
+    <p>Check the order in your dashboard and plan the remaining work.</p>
+  `);
+};

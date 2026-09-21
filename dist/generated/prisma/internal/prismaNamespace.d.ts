@@ -249,6 +249,9 @@ export declare const ModelName: {
     readonly Client: "Client";
     readonly Measurement: "Measurement";
     readonly Order: "Order";
+    readonly PushSubscription: "PushSubscription";
+    readonly OrderReminder: "OrderReminder";
+    readonly EmailOrderReminder: "EmailOrderReminder";
 };
 export type ModelName = (typeof ModelName)[keyof typeof ModelName];
 export interface TypeMapCb<GlobalOmitOptions = {}> extends runtime.Types.Utils.Fn<{
@@ -261,7 +264,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         omit: GlobalOmitOptions;
     };
     meta: {
-        modelProps: "user" | "refreshToken" | "client" | "measurement" | "order";
+        modelProps: "user" | "refreshToken" | "client" | "measurement" | "order" | "pushSubscription" | "orderReminder" | "emailOrderReminder";
         txIsolationLevel: TransactionIsolationLevel;
     };
     model: {
@@ -635,6 +638,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
                 };
             };
         };
+        PushSubscription: {
+            payload: Prisma.$PushSubscriptionPayload<ExtArgs>;
+            fields: Prisma.PushSubscriptionFieldRefs;
+            operations: {
+                findUnique: {
+                    args: Prisma.PushSubscriptionFindUniqueArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PushSubscriptionPayload> | null;
+                };
+                findUniqueOrThrow: {
+                    args: Prisma.PushSubscriptionFindUniqueOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PushSubscriptionPayload>;
+                };
+                findFirst: {
+                    args: Prisma.PushSubscriptionFindFirstArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PushSubscriptionPayload> | null;
+                };
+                findFirstOrThrow: {
+                    args: Prisma.PushSubscriptionFindFirstOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PushSubscriptionPayload>;
+                };
+                findMany: {
+                    args: Prisma.PushSubscriptionFindManyArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PushSubscriptionPayload>[];
+                };
+                create: {
+                    args: Prisma.PushSubscriptionCreateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PushSubscriptionPayload>;
+                };
+                createMany: {
+                    args: Prisma.PushSubscriptionCreateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                createManyAndReturn: {
+                    args: Prisma.PushSubscriptionCreateManyAndReturnArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PushSubscriptionPayload>[];
+                };
+                delete: {
+                    args: Prisma.PushSubscriptionDeleteArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PushSubscriptionPayload>;
+                };
+                update: {
+                    args: Prisma.PushSubscriptionUpdateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PushSubscriptionPayload>;
+                };
+                deleteMany: {
+                    args: Prisma.PushSubscriptionDeleteManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateMany: {
+                    args: Prisma.PushSubscriptionUpdateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateManyAndReturn: {
+                    args: Prisma.PushSubscriptionUpdateManyAndReturnArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PushSubscriptionPayload>[];
+                };
+                upsert: {
+                    args: Prisma.PushSubscriptionUpsertArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PushSubscriptionPayload>;
+                };
+                aggregate: {
+                    args: Prisma.PushSubscriptionAggregateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.AggregatePushSubscription>;
+                };
+                groupBy: {
+                    args: Prisma.PushSubscriptionGroupByArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.PushSubscriptionGroupByOutputType>[];
+                };
+                count: {
+                    args: Prisma.PushSubscriptionCountArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.PushSubscriptionCountAggregateOutputType> | number;
+                };
+            };
+        };
+        OrderReminder: {
+            payload: Prisma.$OrderReminderPayload<ExtArgs>;
+            fields: Prisma.OrderReminderFieldRefs;
+            operations: {
+                findUnique: {
+                    args: Prisma.OrderReminderFindUniqueArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderReminderPayload> | null;
+                };
+                findUniqueOrThrow: {
+                    args: Prisma.OrderReminderFindUniqueOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderReminderPayload>;
+                };
+                findFirst: {
+                    args: Prisma.OrderReminderFindFirstArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderReminderPayload> | null;
+                };
+                findFirstOrThrow: {
+                    args: Prisma.OrderReminderFindFirstOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderReminderPayload>;
+                };
+                findMany: {
+                    args: Prisma.OrderReminderFindManyArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderReminderPayload>[];
+                };
+                create: {
+                    args: Prisma.OrderReminderCreateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderReminderPayload>;
+                };
+                createMany: {
+                    args: Prisma.OrderReminderCreateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                createManyAndReturn: {
+                    args: Prisma.OrderReminderCreateManyAndReturnArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderReminderPayload>[];
+                };
+                delete: {
+                    args: Prisma.OrderReminderDeleteArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderReminderPayload>;
+                };
+                update: {
+                    args: Prisma.OrderReminderUpdateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderReminderPayload>;
+                };
+                deleteMany: {
+                    args: Prisma.OrderReminderDeleteManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateMany: {
+                    args: Prisma.OrderReminderUpdateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateManyAndReturn: {
+                    args: Prisma.OrderReminderUpdateManyAndReturnArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderReminderPayload>[];
+                };
+                upsert: {
+                    args: Prisma.OrderReminderUpsertArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderReminderPayload>;
+                };
+                aggregate: {
+                    args: Prisma.OrderReminderAggregateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.AggregateOrderReminder>;
+                };
+                groupBy: {
+                    args: Prisma.OrderReminderGroupByArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.OrderReminderGroupByOutputType>[];
+                };
+                count: {
+                    args: Prisma.OrderReminderCountArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.OrderReminderCountAggregateOutputType> | number;
+                };
+            };
+        };
+        EmailOrderReminder: {
+            payload: Prisma.$EmailOrderReminderPayload<ExtArgs>;
+            fields: Prisma.EmailOrderReminderFieldRefs;
+            operations: {
+                findUnique: {
+                    args: Prisma.EmailOrderReminderFindUniqueArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailOrderReminderPayload> | null;
+                };
+                findUniqueOrThrow: {
+                    args: Prisma.EmailOrderReminderFindUniqueOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailOrderReminderPayload>;
+                };
+                findFirst: {
+                    args: Prisma.EmailOrderReminderFindFirstArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailOrderReminderPayload> | null;
+                };
+                findFirstOrThrow: {
+                    args: Prisma.EmailOrderReminderFindFirstOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailOrderReminderPayload>;
+                };
+                findMany: {
+                    args: Prisma.EmailOrderReminderFindManyArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailOrderReminderPayload>[];
+                };
+                create: {
+                    args: Prisma.EmailOrderReminderCreateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailOrderReminderPayload>;
+                };
+                createMany: {
+                    args: Prisma.EmailOrderReminderCreateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                createManyAndReturn: {
+                    args: Prisma.EmailOrderReminderCreateManyAndReturnArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailOrderReminderPayload>[];
+                };
+                delete: {
+                    args: Prisma.EmailOrderReminderDeleteArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailOrderReminderPayload>;
+                };
+                update: {
+                    args: Prisma.EmailOrderReminderUpdateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailOrderReminderPayload>;
+                };
+                deleteMany: {
+                    args: Prisma.EmailOrderReminderDeleteManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateMany: {
+                    args: Prisma.EmailOrderReminderUpdateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateManyAndReturn: {
+                    args: Prisma.EmailOrderReminderUpdateManyAndReturnArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailOrderReminderPayload>[];
+                };
+                upsert: {
+                    args: Prisma.EmailOrderReminderUpsertArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailOrderReminderPayload>;
+                };
+                aggregate: {
+                    args: Prisma.EmailOrderReminderAggregateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.AggregateEmailOrderReminder>;
+                };
+                groupBy: {
+                    args: Prisma.EmailOrderReminderGroupByArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.EmailOrderReminderGroupByOutputType>[];
+                };
+                count: {
+                    args: Prisma.EmailOrderReminderCountArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.EmailOrderReminderCountAggregateOutputType> | number;
+                };
+            };
+        };
     };
 } & {
     other: {
@@ -674,6 +899,7 @@ export declare const UserScalarFieldEnum: {
     readonly name: "name";
     readonly email: "email";
     readonly password: "password";
+    readonly googleId: "googleId";
     readonly phone: "phone";
     readonly image: "image";
     readonly imagePublicId: "imagePublicId";
@@ -729,6 +955,34 @@ export declare const OrderScalarFieldEnum: {
     readonly updatedAt: "updatedAt";
 };
 export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum];
+export declare const PushSubscriptionScalarFieldEnum: {
+    readonly id: "id";
+    readonly userId: "userId";
+    readonly endpoint: "endpoint";
+    readonly p256dh: "p256dh";
+    readonly auth: "auth";
+    readonly createdAt: "createdAt";
+    readonly updatedAt: "updatedAt";
+};
+export type PushSubscriptionScalarFieldEnum = (typeof PushSubscriptionScalarFieldEnum)[keyof typeof PushSubscriptionScalarFieldEnum];
+export declare const OrderReminderScalarFieldEnum: {
+    readonly id: "id";
+    readonly orderId: "orderId";
+    readonly subscriptionId: "subscriptionId";
+    readonly dueDate: "dueDate";
+    readonly kind: "kind";
+    readonly sentAt: "sentAt";
+};
+export type OrderReminderScalarFieldEnum = (typeof OrderReminderScalarFieldEnum)[keyof typeof OrderReminderScalarFieldEnum];
+export declare const EmailOrderReminderScalarFieldEnum: {
+    readonly id: "id";
+    readonly orderId: "orderId";
+    readonly dueDate: "dueDate";
+    readonly kind: "kind";
+    readonly recipient: "recipient";
+    readonly sentAt: "sentAt";
+};
+export type EmailOrderReminderScalarFieldEnum = (typeof EmailOrderReminderScalarFieldEnum)[keyof typeof EmailOrderReminderScalarFieldEnum];
 export declare const SortOrder: {
     readonly asc: "asc";
     readonly desc: "desc";
@@ -977,6 +1231,9 @@ export type GlobalOmitConfig = {
     client?: Prisma.ClientOmit;
     measurement?: Prisma.MeasurementOmit;
     order?: Prisma.OrderOmit;
+    pushSubscription?: Prisma.PushSubscriptionOmit;
+    orderReminder?: Prisma.OrderReminderOmit;
+    emailOrderReminder?: Prisma.EmailOrderReminderOmit;
 };
 export type LogLevel = 'info' | 'query' | 'warn' | 'error';
 export type LogDefinition = {
