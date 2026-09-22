@@ -43,6 +43,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.disable('x-powered-by');
 
+
 // Routes protected by limiters
 app.use("/api/v1/users", authenticateToken, publicLimiter, userRouter);
 app.use("/api/v1/clients", authenticateToken, publicLimiter, clientRouter);
@@ -71,10 +72,10 @@ app.use((err: unknown, req: Request, res: Response, _next: NextFunction) => {
     err instanceof SyntaxError
   ) {
     req.log.warn({ err }, "Invalid JSON in request body");
-    return res.status(400).json({ error: "Invalid JSON in request body" });
+    return res.status(400).json({ error: "Invalid JSON in request body!" });
   }
 
-  req.log.error({ err }, "Unhandled request error");
+  req.log.error({ err }, "Unhandled request error!");
   return res.status(500).json({ error: "Internal server error" });
 });
 
