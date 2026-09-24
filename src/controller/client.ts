@@ -184,7 +184,7 @@ export const getClients = async (req: Request, res: Response) => {
             }
         });
         await setCache(cacheKey, clients);
-        return res.status(200).json(clients);
+        return res.status(200).json({status: "success", data: clients})
     } catch (error) {
         req.log.error({ err: error }, "Get clients failed");
         return res.status(500).json({ error: "Internal server error" });
@@ -240,7 +240,7 @@ export const updateClient = async (req: Request, res: Response) => {
                 ? [`measurements:${userId}:all`, `measurements:${userId}:client:${id}`]
                 : [])
         );
-        return res.status(200).json(client);
+        return res.status(200).json({status: "success", data: client})
     } catch (error: any) {
         if (error?.code === 'P2025') {
             return res.status(404).json({ error: "Client not found" });
