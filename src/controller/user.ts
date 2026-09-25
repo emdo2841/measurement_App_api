@@ -7,9 +7,21 @@ import { uploadImageBuffer, deleteImage } from "../Utils/cloudinary";
 import { sendEmail } from "../services/email";
 import { signupTemplate } from "../template/emailTemplate";
 import { getCache, setCache, delCache } from '../middleWare/cache';
+import { Prisma } from "../generated/prisma/client";
 
 const userCacheKey = (id: string) => `user:${id}`;
 const profileCacheKey = (id: string) => `user:profile:${id}`;
+
+const publicUserSelect = {
+    id: true,
+    name: true,
+    email: true,
+    phone: true,
+    image: true,
+    createdAt: true,
+    updatedAt: true,
+} as const;
+
 
 export const createUser = async (req: Request, res: Response) => {
     try {
@@ -19,11 +31,7 @@ export const createUser = async (req: Request, res: Response) => {
             return res.status(400).json({ error: validatedData.error.format() });
         }
         const { email, name, password, phone } = validatedData.data;
-        if (typeof password !== "string" || password.length < 8) {
-            return res.status(400).json({
-                error: "Password must be at least 8 characters",
-         });
-        }
+        
         let imageUrl: string | undefined;
         let imagePublicId: string | undefined;
         if (file) {
@@ -46,7 +54,8 @@ export const createUser = async (req: Request, res: Response) => {
                 imagePublicId,
                 password: hashedPassword,
                 phone
-            }
+            },
+            select: publicUserSelect,
         });
         const htmlContent = signupTemplate(user.name);
         try {
@@ -56,11 +65,11 @@ export const createUser = async (req: Request, res: Response) => {
                 html: htmlContent
             })
         } catch (emailError) {
-            console.error("Failed to send welcome email:", emailError);
+            req.log.error({ err: emailError }, "Failed to send welcome email");
         }
-        return res.status(201).json(user);
+        return res.status(201).json({status: "successful", data: user});
     } catch (error) {
-        console.log(error);
+        req.log.error({error:error}, "failed to create user")
         return res.status(500).json({ error: "Internal server error" });
     }
 };
@@ -69,6 +78,10 @@ export const createUser = async (req: Request, res: Response) => {
 export const getUser = async (req: Request, res: Response) => {
     try {
         const userId = req.params.id;
+        if (userId !== req.user?.userId) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
         const cacheKey = userCacheKey(userId);
  
         // 1. Try cache first
@@ -79,7 +92,8 @@ export const getUser = async (req: Request, res: Response) => {
  
         // 2. Cache miss -> query DB
         const user = await prisma.user.findUnique({
-            where: { id: userId }
+            where: { id: userId },
+            select: publicUserSelect,
         });
         if (!user) {
             return res.status(404).json({ error: "User not found" });
@@ -88,9 +102,9 @@ export const getUser = async (req: Request, res: Response) => {
         // 3. Populate cache (fire-and-forget, non-blocking on errors)
         await setCache(cacheKey, user);
  
-        return res.status(200).json(user);
+        return res.status(200).json({status: "successful",  data: user});
     } catch (error) {
-        console.log(error);
+        req.log.error({ err: error }, "Get user failed");
         return res.status(500).json({ error: "Internal server error" });
     }
 }
@@ -98,28 +112,54 @@ export const getUser = async (req: Request, res: Response) => {
 export const updateUser = async (req: Request, res: Response) => {
     try {
         const id = req.params.id;
-        const validatData = UpdateUserSchema.safeParse(req.body);
-        if (!validatData.success) {
-            return res.status(400).json({ error: validatData.error.format() });
+
+        if (id !== req.user?.userId) {
+            return res.status(404).json({ error: "User not found" });
         }
+
+        const validatedData = UpdateUserSchema.safeParse(req.body);
+        if (!validatedData.success) {
+            return res.status(400).json({ error: validatedData.error.format() });
+         }
+         
         const user = await prisma.user.update({
             where: { id },
-            data: validatData.data
+            data: validatedData.data,
+            select: publicUserSelect,
         })
  
         // Invalidate stale cache entries for this user
         await delCache(userCacheKey(id), profileCacheKey(id));
  
-        return res.status(200).json(user);
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({ error: "Internal server error" });
+        return res.status(200).json({status:"successful", data: user});
+    } catch (error: unknown) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2025"
+    ) {
+      return res.status(404).json({
+        error: "User not found",
+      });
     }
+
+    req.log.error(
+      { err: error },
+      "Update user failed",
+    );
+
+    return res.status(500).json({
+      error: "Internal server error",
+    });
+  }
 }
  
 export const deleteUser = async (req: Request, res: Response) => {
     try {
         const id = req.params.id;
+
+        if (id !== req.user?.userId) {
+            return res.status(404).json({ error: "User not found" });
+        }
  
         // 1. Query the user along with nested client and order imagePublicIds
         const user = await prisma.user.findUnique({
@@ -176,7 +216,7 @@ export const deleteUser = async (req: Request, res: Response) => {
             return res.status(404).json({ error: "User not found" });
         }
  
-        console.error(error);
+        req.log.error({ err: error }, "Delete user failed");
         return res.status(500).json({ error: "Internal server error" });
     }
 };
@@ -185,6 +225,8 @@ export const deleteUser = async (req: Request, res: Response) => {
 export const profile = async (req: Request, res: Response) => {
     try {
         const userId = req.user?.userId;
+        
+        const userCacheKey = (id: string) => `user:${id}`;
  
         if (!userId) {
             return res.status(401).json({ message: "unathorized access" })
@@ -195,20 +237,13 @@ export const profile = async (req: Request, res: Response) => {
         // 1. Try cache first
         const cached = await getCache(cacheKey);
         if (cached) {
-            return res.status(200).json(cached);
+            return res.status(200).json({ status: "successful", data: cached });
         }
  
         // 2. Cache miss -> query DB
         const user = await prisma.$primary().user.findUnique({
             where: { id: userId },
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                phone: true,
-                image: true,
-                createdAt: true
-            }
+            select: publicUserSelect,
         })
         if (!user) {
             return res.status(404).json({ error: "user not found" })
@@ -219,18 +254,18 @@ export const profile = async (req: Request, res: Response) => {
  
         return res.status(200).json({status: "successful", data: user})
     } catch (error) {
-        console.log(error);
+        req.log.error({ err: error }, "getting profile failed");
         return res.status(500).json({ error: "Internal server error" })
     }
 }
 
-export const getAllUsers = async (req: Request, res: Response) => {
-    try{
-        const user = await prisma.user.findMany();
-    return res.status(200).json({ status: "success", data: user  });
-    }catch(error){
-        console.log(error);
-        return res.status(500).json({ error: "Internal server error" });
-    }
+// export const getAllUsers = async (req: Request, res: Response) => {
+//     try{
+//         const user = await prisma.user.findMany();
+//     return res.status(200).json({ status: "success", data: user  });
+//     }catch(error){
+//         console.log(error);
+//         return res.status(500).json({ error: "Internal server error" });
+//     }
     
-}
+// }

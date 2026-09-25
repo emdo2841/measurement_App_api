@@ -3,8 +3,8 @@ import {prisma} from "../db";
 import { createOrderSchema, updateOrderSchema } from "../schemas/OrderSchema";
 import { getCache, setCache, delCache } from '../middleWare/cache';
 
-const orderCacheKey = (id: string) => `order:${id}`;
-const ORDERS_LIST_CACHE_KEY = 'orders:all';
+const orderCacheKey = (userId: string, id: string) => `order:${userId}:${id}`;
+const ordersListCacheKey = (userId: string) => `orders:${userId}:all`;
 
 
 export const createOrder = async (req: Request, res:Response) => {
@@ -35,10 +35,10 @@ export const createOrder = async (req: Request, res:Response) => {
                 }
             }
         })
-        await delCache(ORDERS_LIST_CACHE_KEY);
-        return res.status(201).json(order)
+        await delCache(ordersListCacheKey(req.user!.userId));;
+        return res.status(201).json({status: "successful", data: order})
     }catch(error){
-        console.log({"error":error})
+        req.log.error({ err: error }, 'Delete measurement failed');
         return res.status(500).json({error: "Internal server error"});
 
     }
@@ -61,7 +61,7 @@ export const getOrders = async (req: Request, res: Response) =>{
         })
         return res.status(200).json(order)
     }catch(error){
-        console.log(error)
+        req.log.error({ err: error }, 'get all orders failed');
         return res.status(500).json({error: "internal server error"})
     }
 }
@@ -69,7 +69,8 @@ export const getOrders = async (req: Request, res: Response) =>{
 export const getOrder = async (req: Request, res: Response) => {
     try{
         const id = req.params.id;
-        const cachedKey = orderCacheKey(id)
+        const userId = req.user!.userId;
+        const cachedKey = orderCacheKey(userId, id)
 
          // 1. Try cache first
         const cached = await getCache(cachedKey);
@@ -78,7 +79,7 @@ export const getOrder = async (req: Request, res: Response) => {
         }
 
         const order = await prisma.order.findFirst({
-            where: {id, client: { tailorId: req.user!.userId }},
+            where: {id, client: { tailorId: userId }},
              include: {
                  client: {
                      select: {
@@ -90,10 +91,12 @@ export const getOrder = async (req: Request, res: Response) => {
                 }
             }
         })
-        return res.status(200).json(order)
+        return res.status(200).json({status: "successful", data: order})
         if (!order) return res.status(404).json({ error: 'Order not found' });
-         return res.status(200).json(order)
+        await setCache(cachedKey, order);
+        return res.status(200).json(order)
     }catch(error) {
+        req.log.error({ err: error }, 'get order failed');
         return res.status(500).json({error: "Internal server error"})
     }
 }
@@ -119,14 +122,18 @@ export const updateOrder = async (req: Request, res: Response) => {
         
         })
         // Invalidate stale cache entries for this user
-        await delCache(ORDERS_LIST_CACHE_KEY, orderCacheKey(id))
+        await delCache(
+            ordersListCacheKey(req.user!.userId),
+            orderCacheKey(req.user!.userId, id)
+        )
+ 
 
-        return res.status(200).json(order)
+        return res.status(200).json({status: "successful", data: order})
     }catch (error){
         if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'P2025') {
             return res.status(404).json({error: 'Order not found'});
        }
-        console.log(error)
+        req.log.error({ err: error }, 'update order failed');
         return res.status(500).json({error: "internal server error"})
     }
 }
@@ -139,14 +146,16 @@ export const deleteOrder = async (req: Request, res: Response) =>{
     })
 
     // Invalidate stale cache entries for this user
-    await delCache(ORDERS_LIST_CACHE_KEY, orderCacheKey(id));
+    await delCache(
+        ordersListCacheKey(req.user!.userId),
+        orderCacheKey(req.user!.userId, id));
 
     return res.status(200).json({message : "order deleted successfully"})
     }catch(error) {
         if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'P2025') {
             return res.status(404).json({error: 'Order not found'});
        }
-        console.log(error)
+        req.log.error({ err: error }, 'Delete order failed');
         return res.status(500).json({error: "internal server error"})
     }
    

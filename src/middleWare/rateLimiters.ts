@@ -18,10 +18,14 @@ export const publicLimiter = rateLimit({
     error: 'Too Many Requests',
     message: 'You have exceeded the request limit. Please try again later.',
   },
-  store: new RedisStore({
-    sendCommand,
-    prefix: 'rl:public:',
-  }),
+  ...(process.env.NODE_ENV === 'test'
+   ? {}
+   : {
+       store: new RedisStore({
+         sendCommand,
+         prefix: 'rl:auth:',
+       }),
+     }),
 });
 
 // Auth Limiter
@@ -36,8 +40,12 @@ export const authLimiter = rateLimit({
     error: 'Too Many Requests',
     message: 'Too many authentication attempts. Account locked for 15 minutes.',
   },
-  store: new RedisStore({
-    sendCommand,
-    prefix: 'rl:auth:',
-  }),
+  ...(process.env.NODE_ENV === 'test'
+    ? {}
+    : {
+        store: new RedisStore({
+          sendCommand,
+          prefix: 'rl:public:',
+        }),
+      }),
 });
