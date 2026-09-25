@@ -1,6 +1,8 @@
-FROM node:20 AS build
+FROM node:22 AS build
 
-RUN apt-get update -y && apt-get install -y openssl
+RUN apt-get update -y \
+    && apt-get install -y openssl \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -12,13 +14,17 @@ RUN npm ci
 COPY . .
 
 
-RUN DATABASE_URL=postgresql://postgres:placeholder@db:5432/postgres npx prisma generate --config prisma.config.ts
+RUN DATABASE_URL=postgresql://postgres:placeholder@db:5432/postgres \
+    npm run prisma:generate
+
 RUN npm run build
 
 
-FROM node:20
+FROM node:22
 
-RUN apt-get update -y && apt-get install -y openssl
+RUN apt-get update -y \
+    && apt-get install -y openssl \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
