@@ -7,10 +7,12 @@ export const createUserSchema = z.object({
     phone: z.string().min(10, { message: "Phone is required" }).max(15, { message: "Phone must be less than 15 characters" }),
     email: z.email({ message: "Invalid email address" }).trim().toLowerCase(),
     password: z.string().min(8, "Password must be at least 8 characters"),
-    imagePublicId: z.string().optional().nullable()
     
 })
-export const UpdateUserSchema = createUserSchema.partial();
+export const UpdateUserSchema = z.object({
+    name: z.string().trim().min(1).max(100).optional(),
+    phone: z.string().min(10).max(15).nullable().optional(),
+}).strict();
 
 export const LoginSchema = z.object({
     email: z.email({message: "provide a valid Email"}).trim().toLowerCase(),

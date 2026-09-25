@@ -64,9 +64,9 @@ app.use((err, req, res, _next) => {
         err.type === "entity.parse.failed") ||
         err instanceof SyntaxError) {
         req.log.warn({ err }, "Invalid JSON in request body");
-        return res.status(400).json({ error: "Invalid JSON in request body" });
+        return res.status(400).json({ error: "Invalid JSON in request body!" });
     }
-    req.log.error({ err }, "Unhandled request error");
+    req.log.error({ err }, "Unhandled request error!");
     return res.status(500).json({ error: "Internal server error" });
 });
 exports.default = app;

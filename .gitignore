@@ -8,3 +8,11 @@ node_modules
 nginx.dev.conf
 
 docker-compose.dev.yaml
+b/.gitignore
+prisma.config.js*
+prisma.config.d.ts*
+prisma.config.js
+prisma.config.js.map
+prisma.config.js.bak
+prisma.config.d.ts
+prisma.config.d.ts.map

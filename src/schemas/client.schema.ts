@@ -20,6 +20,8 @@ export const createClientSchema = z.object({
     .optional()
     .nullable(),
 
+  image: z.string().optional().nullable().or(z.literal("")),
+
   address: z.string()
     .trim()
     .optional()
@@ -33,8 +35,7 @@ export const createClientSchema = z.object({
 
 export const UpdateClientSchema = createClientSchema.partial()
 
-export type CreateClientInput =
-  z.infer<typeof createClientSchema>
+export type CreateClientInput = z.infer<typeof createClientSchema>;
 
 export type UpdateClientInput =
   z.infer<typeof UpdateClientSchema>

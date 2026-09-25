@@ -8,9 +8,11 @@ exports.createUserSchema = zod_1.z.object({
     phone: zod_1.z.string().min(10, { message: "Phone is required" }).max(15, { message: "Phone must be less than 15 characters" }),
     email: zod_1.z.email({ message: "Invalid email address" }).trim().toLowerCase(),
     password: zod_1.z.string().min(8, "Password must be at least 8 characters"),
-    imagePublicId: zod_1.z.string().optional().nullable()
 });
-exports.UpdateUserSchema = exports.createUserSchema.partial();
+exports.UpdateUserSchema = zod_1.z.object({
+    name: zod_1.z.string().trim().min(1).max(100).optional(),
+    phone: zod_1.z.string().min(10).max(15).nullable().optional(),
+}).strict();
 exports.LoginSchema = zod_1.z.object({
     email: zod_1.z.email({ message: "provide a valid Email" }).trim().toLowerCase(),
     password: zod_1.z.string().min(6, { message: "Password must be at least 6 character" }).max(100, { message: "Password must be less than 100 characters" })

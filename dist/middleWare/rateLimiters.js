@@ -18,10 +18,14 @@ exports.publicLimiter = (0, express_rate_limit_1.rateLimit)({
         error: 'Too Many Requests',
         message: 'You have exceeded the request limit. Please try again later.',
     },
-    store: new rate_limit_redis_1.RedisStore({
-        sendCommand,
-        prefix: 'rl:public:',
-    }),
+    ...(process.env.NODE_ENV === 'test'
+        ? {}
+        : {
+            store: new rate_limit_redis_1.RedisStore({
+                sendCommand,
+                prefix: 'rl:auth:',
+            }),
+        }),
 });
 // Auth Limiter
 exports.authLimiter = (0, express_rate_limit_1.rateLimit)({
@@ -35,9 +39,13 @@ exports.authLimiter = (0, express_rate_limit_1.rateLimit)({
         error: 'Too Many Requests',
         message: 'Too many authentication attempts. Account locked for 15 minutes.',
     },
-    store: new rate_limit_redis_1.RedisStore({
-        sendCommand,
-        prefix: 'rl:auth:',
-    }),
+    ...(process.env.NODE_ENV === 'test'
+        ? {}
+        : {
+            store: new rate_limit_redis_1.RedisStore({
+                sendCommand,
+                prefix: 'rl:public:',
+            }),
+        }),
 });
 //# sourceMappingURL=rateLimiters.js.map

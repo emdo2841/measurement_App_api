@@ -7,7 +7,8 @@
     "description": "A Node.js application serving a static HTML file, used for load balancing with NGINX.",
     "main": "server.ts",
     "scripts": {
-        "build": "tsc",
+        "prisma:generate": "prisma generate --config prisma.config.ts",
+        "build": "npm run prisma:generate && tsc",
         "start": "node dist/src/server.ts",
         "dev": "npx prisma generate && nodemon src/server.ts",
         "test": "vitest run"

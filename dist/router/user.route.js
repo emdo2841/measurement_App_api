@@ -6,13 +6,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.userRouter = void 0;
 const express_1 = __importDefault(require("express"));
 const user_1 = require("../controller/user");
-const authMiddleware_1 = require("../middleWare/authMiddleware");
 const multer_1 = __importDefault(require("multer"));
 const upload = (0, multer_1.default)({ storage: multer_1.default.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } }); // 5MB limit
+const authMiddleware_1 = require("../middleWare/authMiddleware");
 const router = express_1.default.Router();
 exports.userRouter = router;
-router.get("/profile", authMiddleware_1.authenticateToken, user_1.profile);
-router.get("/", user_1.getAllUsers);
+// Registration must remain public. Every route declared after router.use is protected.
+router.post("/", upload.single("image"), user_1.createUser);
+router.use(authMiddleware_1.authenticateToken);
+router.get("/profile", user_1.profile);
 router.post("/", upload.single("image"), user_1.createUser);
 router.get("/:id", user_1.getUser);
 router.patch("/:id", user_1.updateUser);
