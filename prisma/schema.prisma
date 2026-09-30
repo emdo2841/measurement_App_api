@@ -4,30 +4,32 @@
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider   = "prisma-client"
+  output     = "../src/generated/prisma"
   engineType = "client"
 }
+
 datasource db {
   provider = "postgresql"
 }
 
 model User {
-  id           String        @id @default(uuid())
-  name         String
-  email        String        @unique
-  password     String?
-  googleId     String? @unique
-  phone        String?
-  image        String?
-  imagePublicId String? 
-  resetTokens   String?
-  resetTokenExpiry DateTime?
-  refreshToken RefreshToken[]
+  id                String             @id @default(uuid())
+  name              String
+  email             String             @unique
+  password          String?
+  googleId          String?            @unique
+  phone             String?
+  image             String?
+  imagePublicId     String?
+  resetTokens       String?
+  resetTokenExpiry  DateTime?
+  refreshToken      RefreshToken[]
   pushSubscriptions PushSubscription[]
-  createdAt    DateTime      @default(now())
-  clients      Client[]
-  updatedAt    DateTime      @updatedAt
+  createdAt         DateTime           @default(now())
+  clients           Client[]
+  updatedAt         DateTime           @updatedAt
+
   @@map("users")
 }
 
@@ -39,66 +41,86 @@ model RefreshToken {
   revoked     Boolean  @default(false)
   createdAt   DateTime @default(now())
   expiresAt   DateTime
+
   @@map("refreshTokens")
 }
 
-model Client{
-  id           String           @id @default(uuid())
-  name         String
-  phone        String
-  address      String?
-  email        String?
-  gender       Gender
-  tailor       User    @relation(fields: [tailorId], references: [id], onDelete: Cascade)
-  tailorId     String
-  measurements Measurement[]
-  image        String?
-  imagePublicId String? 
-  orders       Order[]
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+model Client {
+  id            String       @id @default(uuid())
+  name          String
+  phone         String
+  address       String?
+  email         String?
+  gender        Gender
+  tailor        User         @relation(fields: [tailorId], references: [id], onDelete: Cascade)
+  tailorId      String
+  measurement   Measurement?
+  image         String?
+  imagePublicId String?
+  orders        Order[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 
   @@index([tailorId])
   @@index([phone])
   @@map("clients")
-  
 }
+
 enum Gender {
   MALE
   FEMALE
 }
 
 model Measurement {
-  id           String           @id @default(uuid())
-  title        String
-  unit         Unit     @default(INCHES)
-  data         Json
-  client       Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  clientId     String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id    String @id @default(uuid())
+  title String
+  unit  Unit   @default(INCHES)
+  data  Json
+
+  clientId String @unique
+  client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  history MeasurementHistory[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("measurements")
 }
+
 enum Unit {
   CM
   INCHES
 }
 
+model MeasurementHistory {
+  id            String      @id @default(uuid())
+  measurementId String
+  measurement   Measurement @relation(fields: [measurementId], references: [id], onDelete: Cascade)
+
+  title      String
+  unit       Unit
+  data       Json
+  recordedAt DateTime @default(now())
+
+  @@index([measurementId])
+  @@map("measurement_history")
+}
+
 model Order {
-  id          String      @id @default(uuid())
-  clientId    String
-  image       String?
-  imagePublicId String? 
-  client      Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  status      OrderStatus @default(PENDING)
-  dueDate     DateTime?
-  totalAmount Float?
-  notes       String?
-  reminders   OrderReminder[]
+  id             String               @id @default(uuid())
+  clientId       String
+  image          String?
+  imagePublicId  String?
+  client         Client               @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  status         OrderStatus          @default(PENDING)
+  dueDate        DateTime?
+  totalAmount    Float?
+  notes          String?
+  reminders      OrderReminder[]
   emailReminders EmailOrderReminder[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
 
   @@index([clientId])
   @@index([status])
@@ -116,28 +138,28 @@ enum OrderStatus {
 }
 
 model PushSubscription {
-  id        String   @id @default(uuid())
+  id        String          @id @default(uuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  endpoint  String   @unique
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String          @unique
   p256dh    String
   auth      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
   reminders OrderReminder[]
 
   @@index([userId])
 }
 
 model OrderReminder {
-  id        String   @id @default(uuid())
-  orderId   String
-  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  id             String           @id @default(uuid())
+  orderId        String
+  order          Order            @relation(fields: [orderId], references: [id], onDelete: Cascade)
   subscriptionId String
-  subscription PushSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
-  dueDate   DateTime
-  kind      String
-  sentAt    DateTime @default(now())
+  subscription   PushSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  dueDate        DateTime
+  kind           String
+  sentAt         DateTime         @default(now())
 
   @@unique([orderId, dueDate, kind, subscriptionId])
 }

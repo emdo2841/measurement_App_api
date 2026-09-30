@@ -80,7 +80,7 @@ export const createClient = async (
             },
 
             include: {
-                measurements: true,
+                measurement: true,
 
                 tailor: {
                     select: {
@@ -129,7 +129,7 @@ export const getClient = async (req: Request, res: Response) => {
         const client = await prisma.client.findFirst({
             where: { id: clientId, tailorId: userId },
             include: {
-                measurements: true,
+                measurement: true,
                 tailor: {
                     select: {
                         id: true,
@@ -167,7 +167,7 @@ export const getClients = async (req: Request, res: Response) => {
         const clients = await prisma.client.findMany({
             where: { tailorId: userId },
             include: {
-                measurements: true,
+                measurement: true,
                 tailor: {
                     select: {
                         id: true,

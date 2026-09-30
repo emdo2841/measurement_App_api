@@ -1,4 +1,5 @@
 import type { Request, Response } from 'express';
+import { Prisma } from '../generated/prisma/client'
 import { prisma } from '../db';
 import { getCache, setCache, delCache } from '../middleWare/cache';
 import {
@@ -10,40 +11,110 @@ const measurementCacheKey = (userId: string, id: string) => `measurement:${userI
 const clientMeasurementsCacheKey = (userId: string, clientId: string) =>
   `measurements:${userId}:client:${clientId}`;
 const allMeasurementsCacheKey = (userId: string) => `measurements:${userId}:all`;
+const measurementDataToInput = (
+  value: Prisma.JsonValue,
+): Prisma.InputJsonObject => {
+  if (
+    value === null ||
+    Array.isArray(value) ||
+    typeof value !== 'object'
+  ) {
+    throw new Error('Measurement data must be a JSON object')
+  }
 
-export const createMeasurement = async (req: Request, res: Response) => {
+  const entries = Object.entries(value)
+
+  const containsInvalidValue = entries.some(
+    ([, measurementValue]) =>
+      typeof measurementValue !== 'number' ||
+      !Number.isFinite(measurementValue),
+  )
+
+  if (containsInvalidValue) {
+    throw new Error(
+      'Every measurement field must contain a valid number',
+    )
+  }
+
+  return Object.fromEntries(entries) as Prisma.InputJsonObject
+}
+
+export const createMeasurement = async (
+  req: Request,
+  res: Response,
+) => {
   try {
-    const validatedData = createMeasurementSchema.safeParse(req.body);
+    const validatedData = createMeasurementSchema.safeParse(req.body)
+
     if (!validatedData.success) {
-      return res.status(400).json({ error: validatedData.error.format() });
+      return res.status(400).json({
+        error: validatedData.error.format(),
+      })
     }
-    const userId = req.user!.userId;
+
+    const userId = req.user!.userId
+    const { clientId } = validatedData.data
+
     const client = await prisma.client.findFirst({
-      where: { id: validatedData.data.clientId, tailorId: userId },
-      select: { id: true },
-    });
+      where: {
+        id: clientId,
+        tailorId: userId,
+      },
+      select: {
+        id: true,
+        measurement: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    })
+
     if (!client) {
-      return res.status(404).json({ error: 'Client not found' });
+      return res.status(404).json({
+        error: 'Client not found',
+      })
+    }
+
+    if (client.measurement) {
+      return res.status(409).json({
+        error: 'This client already has a measurement profile.',
+        measurementId: client.measurement.id,
+      })
     }
 
     const measurement = await prisma.measurement.create({
       data: validatedData.data,
-    });
+    })
 
     await delCache(
-     clientMeasurementsCacheKey(userId, measurement.clientId),
-      allMeasurementsCacheKey(userId)
-    );
+      clientMeasurementsCacheKey(userId, clientId),
+      allMeasurementsCacheKey(userId),
+    )
 
-    return res.status(201).json({status: "successful", data: measurement});
-  } catch (error: any) {
-    if (error?.code === 'P2003') {
-      return res.status(400).json({ error: 'Invalid clientId — client does not exist' });
+    return res.status(201).json({
+      status: 'successful',
+      data: measurement,
+    })
+  } catch (error: unknown) {
+    if (
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      error.code === 'P2002'
+    ) {
+      return res.status(409).json({
+        error: 'This client already has a measurement profile.',
+      })
     }
-    req.log.error({ err: error }, 'Create measurement failed');
-    return res.status(500).json({ error: 'Internal server error' });
+
+    req.log.error({ err: error }, 'Create measurement failed')
+
+    return res.status(500).json({
+      error: 'Internal server error',
+    })
   }
-};
+}
 
 export const getAllMeasurements = async (req: Request, res: Response) => {
   try {
@@ -110,88 +181,249 @@ export const getMeasurement = async (req: Request, res: Response) => {
   }
 };
 
-export const getMeasurementsByClient = async (req: Request, res: Response) => {
+export const getMeasurementByClient = async (
+  req: Request,
+  res: Response,
+) => {
   try {
-    const clientId = req.params.clientId;
-    const userId = req.user!.userId;
-    const cacheKey = clientMeasurementsCacheKey(userId, clientId);
+    const clientId = req.params.clientId
+    const userId = req.user!.userId
 
     const client = await prisma.client.findFirst({
-      where: { id: clientId, tailorId: userId },
-      select: { id: true },
-    });
+      where: {
+        id: clientId,
+        tailorId: userId,
+      },
+      select: {
+        id: true,
+      },
+    })
+
     if (!client) {
-      return res.status(404).json({ error: 'Client not found' });
+      return res.status(404).json({
+        error: 'Client not found',
+      })
     }
-    // 2. Cache miss -> query DB
-    const measurements = await prisma.measurement.findMany({
-      where: { clientId, client: { tailorId: userId } },
-      orderBy: { createdAt: 'desc' },
-    });
 
-    // 3. Populate cache
-    await setCache(cacheKey, measurements);
+    const measurement = await prisma.measurement.findUnique({
+      where: {
+        clientId,
+      },
+    })
 
-    return res.status(200).json({status: "successful", data: measurements});
+    return res.status(200).json({
+      status: 'successful',
+      data: measurement,
+    })
   } catch (error) {
-    req.log.error({ err: error }, 'Get client measurement failed');
-    return res.status(500).json({ error: 'Internal server error' });
+    req.log.error({ err: error }, 'Get client measurement failed')
+
+    return res.status(500).json({
+      error: 'Internal server error',
+    })
   }
-};
-
-export const updateMeasurement = async (req: Request, res: Response) => {
+}
+export const getMeasurementHistory = async (
+  req: Request,
+  res: Response,
+) => {
   try {
-    const id = req.params.id;
-    const userId = req.user!.userId;
+    const id = req.params.id
+    const userId = req.user!.userId
 
-    const validatedData = UpdateMeasurementSchema.safeParse(req.body);
+    const measurement = await prisma.measurement.findFirst({
+      where: {
+        id,
+        client: {
+          tailorId: userId,
+        },
+      },
+      select: {
+        id: true,
+      },
+    })
+
+    if (!measurement) {
+      return res.status(404).json({
+        error: 'Measurement not found',
+      })
+    }
+
+    const history = await prisma.measurementHistory.findMany({
+      where: {
+        measurementId: measurement.id,
+      },
+      orderBy: {
+        recordedAt: 'desc',
+      },
+    })
+
+    return res.status(200).json({
+      status: 'successful',
+      data: history,
+    })
+  } catch (error) {
+    req.log.error({ err: error }, 'Get measurement history failed')
+
+    return res.status(500).json({
+      error: 'Internal server error',
+    })
+  }
+}
+export const restoreMeasurementHistory = async (
+  req: Request,
+  res: Response,
+) => {
+  try {
+    const { id, historyId } = req.params
+    const userId = req.user!.userId
+
+    const current = await prisma.measurement.findFirst({
+      where: {
+        id,
+        client: {
+          tailorId: userId,
+        },
+      },
+    })
+
+    if (!current) {
+      return res.status(404).json({
+        error: 'Measurement not found',
+      })
+    }
+
+    const historicalVersion =
+      await prisma.measurementHistory.findFirst({
+        where: {
+          id: historyId,
+          measurementId: current.id,
+        },
+      })
+
+    if (!historicalVersion) {
+      return res.status(404).json({
+        error: 'Measurement history entry not found',
+      })
+    }
+
+    const restored = await prisma.$transaction(async (database) => {
+      // Preserve the current version before restoring the older one.
+      await database.measurementHistory.create({
+        data: {
+          measurementId: current.id,
+          title: current.title,
+          unit: current.unit,
+          data: measurementDataToInput(current.data),
+        },
+      })
+
+      return database.measurement.update({
+        where: {
+          id: current.id,
+        },
+        data: {
+          title: historicalVersion.title,
+          unit: historicalVersion.unit,
+          data: measurementDataToInput(historicalVersion.data),
+        },
+      })
+    })
+
+    await delCache(
+      measurementCacheKey(userId, current.id),
+      clientMeasurementsCacheKey(userId, current.clientId),
+      allMeasurementsCacheKey(userId),
+    )
+
+    return res.status(200).json({
+      status: 'successful',
+      data: restored,
+    })
+  } catch (error) {
+    req.log.error({ err: error }, 'Restore measurement failed')
+
+    return res.status(500).json({
+      error: 'Internal server error',
+    })
+  }
+}
+
+export const updateMeasurement = async (
+  req: Request,
+  res: Response,
+) => {
+  try {
+    const id = req.params.id
+    const userId = req.user!.userId
+
+    const validatedData = UpdateMeasurementSchema.safeParse(req.body)
+
     if (!validatedData.success) {
-      return res.status(400).json({ error: validatedData.error.format() });
+      return res.status(400).json({
+        error: validatedData.error.format(),
+      })
     }
+
     const existingMeasurement = await prisma.measurement.findFirst({
-      where: { id, client: { tailorId: userId } },
-      select: { id: true, clientId: true },
-    });
+      where: {
+        id,
+        client: {
+          tailorId: userId,
+        },
+      },
+    })
+
     if (!existingMeasurement) {
-      return res.status(404).json({ error: 'Measurement not found' });
+      return res.status(404).json({
+        error: 'Measurement not found',
+      })
     }
 
-    if (validatedData.data.clientId) {
-      const targetClient = await prisma.client.findFirst({
-        where: { id: validatedData.data.clientId, tailorId: userId },
-        select: { id: true },
-      });
-      if (!targetClient) {
-        return res.status(404).json({ error: 'Client not found' });
-      }
-    }
+    // Do not allow moving a measurement to another client.
+    const { clientId: _ignoredClientId, ...updateData } =
+      validatedData.data
 
+    const measurement = await prisma.$transaction(async (database) => {
+      // Save the current values before changing them.
+      await database.measurementHistory.create({
+        data: {
+          measurementId: existingMeasurement.id,
+          title: existingMeasurement.title,
+          unit: existingMeasurement.unit,
+          data: measurementDataToInput(existingMeasurement.data),
+        },
+      })
 
-    const measurement = await prisma.measurement.update({
-      where: { id },
-      data: validatedData.data,
-    });
+      return database.measurement.update({
+        where: {
+          id: existingMeasurement.id,
+        },
+        data: updateData,
+      })
+    })
 
-    // Invalidate the single-measurement cache and the client's list
     await delCache(
       measurementCacheKey(userId, id),
-      clientMeasurementsCacheKey(userId, existingMeasurement.clientId),
-      clientMeasurementsCacheKey(userId, measurement.clientId),
-      allMeasurementsCacheKey(userId)
-    );
+      clientMeasurementsCacheKey(
+        userId,
+        existingMeasurement.clientId,
+      ),
+      allMeasurementsCacheKey(userId),
+    )
 
-    return res.status(200).json({status: "successful", data: measurement});
-  } catch (error: any) {
-    if (error?.code === 'P2025') {
-      return res.status(404).json({ error: 'Measurement not found' });
-    }
-    if (error?.code === 'P2003') {
-      return res.status(400).json({ error: 'Invalid clientId — client does not exist' });
-    }
-    req.log.error({ err: error }, 'Update measurement failed');
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(200).json({
+      status: 'successful',
+      data: measurement,
+    })
+  } catch (error: unknown) {
+    req.log.error({ err: error }, 'Update measurement failed')
+
+    return res.status(500).json({
+      error: 'Internal server error',
+    })
   }
-};
+}
 
 export const deleteMeasurement = async (req: Request, res: Response) => {
   try {
@@ -204,16 +436,29 @@ export const deleteMeasurement = async (req: Request, res: Response) => {
       select: { id: true, clientId: true },
     });
     if (!existingMeasurement) {
-      return res.status(404).json({ error: 'Measurement not found' });
-    }
-    // Invalidate the single-measurement cache and the client's list
-    await delCache(
-      measurementCacheKey(userId, id),
-      clientMeasurementsCacheKey(userId, existingMeasurement.clientId),
-      allMeasurementsCacheKey(userId)
-    );
+  return res.status(404).json({
+    error: 'Measurement not found',
+  })
+}
 
-    return res.status(200).json({ message: 'Measurement deleted successfully' });
+await prisma.measurement.delete({
+  where: {
+    id: existingMeasurement.id,
+  },
+})
+
+await delCache(
+  measurementCacheKey(userId, id),
+  clientMeasurementsCacheKey(
+    userId,
+    existingMeasurement.clientId,
+  ),
+  allMeasurementsCacheKey(userId),
+)
+
+return res.status(200).json({
+  message: 'Measurement deleted successfully',
+})
   } catch (error: any) {
     if (error?.code === 'P2025') {
       return res.status(404).json({ error: 'Measurement not found' });
