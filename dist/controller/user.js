@@ -12,7 +12,6 @@ const cloudinary_1 = require("../Utils/cloudinary");
 const email_1 = require("../services/email");
 const emailTemplate_1 = require("../template/emailTemplate");
 const cache_1 = require("../middleWare/cache");
-const client_1 = require("../generated/prisma/client");
 const userCacheKey = (id) => `user:${id}`;
 const profileCacheKey = (id) => `user:profile:${id}`;
 const publicUserSelect = {
@@ -105,32 +104,92 @@ const getUser = async (req, res) => {
 };
 exports.getUser = getUser;
 const updateUser = async (req, res) => {
+    const id = req.params.id;
     try {
-        const id = req.params.id;
-        if (id !== req.user?.userId) {
-            return res.status(404).json({ error: "User not found" });
+        if (!req.user?.userId) {
+            return res.status(401).json({
+                error: "Unauthorized access",
+            });
         }
+        if (id !== req.user.userId) {
+            return res.status(404).json({
+                error: "User not found",
+            });
+        }
+        const file = req.file;
         const validatedData = user_schema_1.UpdateUserSchema.safeParse(req.body);
         if (!validatedData.success) {
-            return res.status(400).json({ error: validatedData.error.format() });
+            return res.status(400).json({
+                error: validatedData.error.format(),
+            });
         }
+        const existingUser = await db_1.prisma.user.findUnique({
+            where: { id },
+            select: {
+                id: true,
+                image: true,
+                imagePublicId: true,
+            },
+        });
+        if (!existingUser) {
+            return res.status(404).json({
+                error: "User not found",
+            });
+        }
+        let uploadedImage;
+        if (file) {
+            uploadedImage = await (0, cloudinary_1.uploadImageBuffer)(file.buffer, "users");
+        }
+        const { name, phone } = validatedData.data;
         const user = await db_1.prisma.user.update({
             where: { id },
-            data: validatedData.data,
+            data: {
+                ...(name !== undefined ? { name } : {}),
+                ...(phone !== undefined ? { phone } : {}),
+                ...(uploadedImage
+                    ? {
+                        image: uploadedImage.url,
+                        imagePublicId: uploadedImage.publicId,
+                    }
+                    : {}),
+            },
             select: publicUserSelect,
         });
-        // Invalidate stale cache entries for this user
+        // Delete the previous Cloudinary image only after DB update succeeds.
+        if (uploadedImage &&
+            existingUser.imagePublicId &&
+            existingUser.imagePublicId !== uploadedImage.publicId) {
+            try {
+                await (0, cloudinary_1.deleteImage)(existingUser.imagePublicId);
+            }
+            catch (imageDeleteError) {
+                req.log.warn({
+                    err: imageDeleteError,
+                    userId: id,
+                    imagePublicId: existingUser.imagePublicId,
+                }, "Old profile image could not be deleted");
+            }
+        }
+        // Very important: remove cached profile containing the old image.
         await (0, cache_1.delCache)(userCacheKey(id), profileCacheKey(id));
-        return res.status(200).json({ status: "successful", data: user });
+        return res.status(200).json({
+            status: "successful",
+            data: user,
+        });
     }
     catch (error) {
-        if (error instanceof client_1.Prisma.PrismaClientKnownRequestError &&
+        if (typeof error === "object" &&
+            error !== null &&
+            "code" in error &&
             error.code === "P2025") {
             return res.status(404).json({
                 error: "User not found",
             });
         }
-        req.log.error({ err: error }, "Update user failed");
+        req.log.error({
+            err: error,
+            userId: id,
+        }, "Update user failed");
         return res.status(500).json({
             error: "Internal server error",
         });

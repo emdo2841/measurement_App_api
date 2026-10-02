@@ -17,6 +17,7 @@ const order_route_1 = require("./router/order.route");
 const auth_route_1 = require("./router/auth.route");
 const measurement_route_1 = require("./router/measurement.route");
 const push_route_1 = require("./router/push.route");
+const measurementShare_route_1 = require("./router/measurementShare.route");
 const logger_1 = require("./logger");
 const app = (0, express_1.default)();
 app.set('trust proxy', 1);
@@ -32,12 +33,50 @@ app.use((0, pino_http_1.default)({
 }));
 app.use((0, helmet_1.default)());
 app.use((0, compression_1.default)());
-app.use((0, cors_1.default)({
-    origin: ['http://localhost:5173', 'http://localhost:8081'],
+const allowedOrigins = [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://localhost:8081',
+    'http://127.0.0.1:8081',
+    'https://ejtech.duckdns.org',
+];
+const corsOptions = {
+    origin(origin, callback) {
+        // Requests from Postman, curl and server-to-server calls
+        // normally do not include an Origin header.
+        if (!origin) {
+            return callback(null, true);
+        }
+        if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+        reqLoggerWarning(origin);
+        return callback(new Error(`Origin ${origin} is not allowed by CORS`));
+    },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+    methods: [
+        'GET',
+        'POST',
+        'PUT',
+        'PATCH',
+        'DELETE',
+        'OPTIONS',
+    ],
+    allowedHeaders: [
+        'Content-Type',
+        'Authorization',
+    ],
+    exposedHeaders: [
+        'RateLimit',
+        'RateLimit-Policy',
+        'Retry-After',
+    ],
+    optionsSuccessStatus: 204,
+};
+function reqLoggerWarning(origin) {
+    logger_1.logger.warn({ origin }, 'Request blocked by CORS');
+}
+app.use((0, cors_1.default)(corsOptions));
 app.use(express_1.default.json());
 app.use((0, cookie_parser_1.default)());
 app.disable('x-powered-by');
@@ -48,6 +87,7 @@ app.use("/api/v1/orders", rateLimiters_1.publicLimiter, order_route_1.orderRoute
 app.use("/api/v1/measurement", rateLimiters_1.publicLimiter, measurement_route_1.measurementtRouter);
 app.use("/api/v1/auth", rateLimiters_1.authLimiter, auth_route_1.authRouter);
 app.use('/api/v1/push', rateLimiters_1.publicLimiter, push_route_1.pushRouter);
+app.use('/api/v1', rateLimiters_1.publicLimiter, measurementShare_route_1.measurementShareRouter);
 app.get("/", (req, res) => {
     res.status(200).json({
         message: `Welcome to ${process.env.APP_NAME || 'App'}`,

@@ -4,6 +4,7 @@ exports.deleteOrder = exports.updateOrder = exports.getOrder = exports.getOrders
 const db_1 = require("../db");
 const OrderSchema_1 = require("../schemas/OrderSchema");
 const cache_1 = require("../middleWare/cache");
+const pagination_1 = require("../Utils/pagination");
 const orderCacheKey = (userId, id) => `order:${userId}:${id}`;
 const ordersListCacheKey = (userId) => `orders:${userId}:all`;
 const createOrder = async (req, res) => {
@@ -44,23 +45,91 @@ const createOrder = async (req, res) => {
 exports.createOrder = createOrder;
 const getOrders = async (req, res) => {
     try {
-        const order = await db_1.prisma.order.findMany({
-            where: { client: { tailorId: req.user.userId } },
-            include: {
-                client: {
-                    select: {
-                        id: true,
-                        name: true,
-                        image: true
-                    }
+        const userId = req.user?.userId;
+        if (!userId) {
+            return res.status(401).json({
+                error: "Unauthorized access",
+            });
+        }
+        const { page, limit, skip } = (0, pagination_1.getPagination)(req.query);
+        const search = typeof req.query.search === "string"
+            ? req.query.search.trim()
+            : "";
+        const requestedStatus = typeof req.query.status === "string"
+            ? req.query.status.trim().toUpperCase()
+            : "";
+        const allowedStatuses = [
+            "PENDING",
+            "CUTTING",
+            "SEWING",
+            "FITTING",
+            "COMPLETED",
+            "DELIVERED",
+        ];
+        const status = allowedStatuses.find((item) => item === requestedStatus);
+        const where = {
+            client: {
+                tailorId: userId,
+            },
+            ...(status
+                ? {
+                    status,
                 }
-            }
+                : {}),
+            ...(search
+                ? {
+                    OR: [
+                        {
+                            client: {
+                                name: {
+                                    contains: search,
+                                    mode: "insensitive",
+                                },
+                            },
+                        },
+                        {
+                            notes: {
+                                contains: search,
+                                mode: "insensitive",
+                            },
+                        },
+                    ],
+                }
+                : {}),
+        };
+        const [orders, total] = await db_1.prisma.$transaction([
+            db_1.prisma.order.findMany({
+                where,
+                skip,
+                take: limit,
+                orderBy: {
+                    createdAt: "desc",
+                },
+                include: {
+                    client: {
+                        select: {
+                            id: true,
+                            name: true,
+                            image: true,
+                        },
+                    },
+                },
+            }),
+            db_1.prisma.order.count({
+                where,
+            }),
+        ]);
+        return res.status(200).json({
+            status: "successful",
+            data: orders,
+            pagination: (0, pagination_1.paginationMeta)(page, limit, total),
         });
-        return res.status(200).json(order);
     }
     catch (error) {
-        req.log.error({ err: error }, 'get all orders failed');
-        return res.status(500).json({ error: "internal server error" });
+        req.log.error({ err: error }, "Get all orders failed");
+        return res.status(500).json({
+            error: "Internal server error",
+        });
     }
 };
 exports.getOrders = getOrders;

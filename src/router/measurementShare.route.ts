@@ -9,10 +9,7 @@ import {
 const router = express.Router()
 
 // Public: the recipient does not need to log in.
-router.get(
-  '/shared/measurements/:token',
-  getSharedMeasurement,
-)
+router.get('/shared/measurements/:token',getSharedMeasurement,)
 
 // Protected: only the owning tailor can create a link.
 router.post(

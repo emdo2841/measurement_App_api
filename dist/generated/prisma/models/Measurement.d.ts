@@ -151,7 +151,9 @@ export type MeasurementWhereInput = {
     clientId?: Prisma.StringFilter<"Measurement"> | string;
     createdAt?: Prisma.DateTimeFilter<"Measurement"> | Date | string;
     updatedAt?: Prisma.DateTimeFilter<"Measurement"> | Date | string;
+    shares?: Prisma.MeasurementShareListRelationFilter;
     client?: Prisma.XOR<Prisma.ClientScalarRelationFilter, Prisma.ClientWhereInput>;
+    history?: Prisma.MeasurementHistoryListRelationFilter;
 };
 export type MeasurementOrderByWithRelationInput = {
     id?: Prisma.SortOrder;
@@ -161,7 +163,9 @@ export type MeasurementOrderByWithRelationInput = {
     clientId?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
     updatedAt?: Prisma.SortOrder;
+    shares?: Prisma.MeasurementShareOrderByRelationAggregateInput;
     client?: Prisma.ClientOrderByWithRelationInput;
+    history?: Prisma.MeasurementHistoryOrderByRelationAggregateInput;
 };
 export type MeasurementWhereUniqueInput = Prisma.AtLeast<{
     id?: string;
@@ -174,7 +178,9 @@ export type MeasurementWhereUniqueInput = Prisma.AtLeast<{
     clientId?: Prisma.StringFilter<"Measurement"> | string;
     createdAt?: Prisma.DateTimeFilter<"Measurement"> | Date | string;
     updatedAt?: Prisma.DateTimeFilter<"Measurement"> | Date | string;
+    shares?: Prisma.MeasurementShareListRelationFilter;
     client?: Prisma.XOR<Prisma.ClientScalarRelationFilter, Prisma.ClientWhereInput>;
+    history?: Prisma.MeasurementHistoryListRelationFilter;
 }, "id">;
 export type MeasurementOrderByWithAggregationInput = {
     id?: Prisma.SortOrder;
@@ -207,7 +213,9 @@ export type MeasurementCreateInput = {
     data: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    shares?: Prisma.MeasurementShareCreateNestedManyWithoutMeasurementInput;
     client: Prisma.ClientCreateNestedOneWithoutMeasurementsInput;
+    history?: Prisma.MeasurementHistoryCreateNestedManyWithoutMeasurementInput;
 };
 export type MeasurementUncheckedCreateInput = {
     id?: string;
@@ -217,6 +225,8 @@ export type MeasurementUncheckedCreateInput = {
     clientId: string;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    shares?: Prisma.MeasurementShareUncheckedCreateNestedManyWithoutMeasurementInput;
+    history?: Prisma.MeasurementHistoryUncheckedCreateNestedManyWithoutMeasurementInput;
 };
 export type MeasurementUpdateInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -225,7 +235,9 @@ export type MeasurementUpdateInput = {
     data?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    shares?: Prisma.MeasurementShareUpdateManyWithoutMeasurementNestedInput;
     client?: Prisma.ClientUpdateOneRequiredWithoutMeasurementsNestedInput;
+    history?: Prisma.MeasurementHistoryUpdateManyWithoutMeasurementNestedInput;
 };
 export type MeasurementUncheckedUpdateInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -235,6 +247,8 @@ export type MeasurementUncheckedUpdateInput = {
     clientId?: Prisma.StringFieldUpdateOperationsInput | string;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    shares?: Prisma.MeasurementShareUncheckedUpdateManyWithoutMeasurementNestedInput;
+    history?: Prisma.MeasurementHistoryUncheckedUpdateManyWithoutMeasurementNestedInput;
 };
 export type MeasurementCreateManyInput = {
     id?: string;
@@ -295,6 +309,10 @@ export type MeasurementMinOrderByAggregateInput = {
     createdAt?: Prisma.SortOrder;
     updatedAt?: Prisma.SortOrder;
 };
+export type MeasurementScalarRelationFilter = {
+    is?: Prisma.MeasurementWhereInput;
+    isNot?: Prisma.MeasurementWhereInput;
+};
 export type MeasurementCreateNestedManyWithoutClientInput = {
     create?: Prisma.XOR<Prisma.MeasurementCreateWithoutClientInput, Prisma.MeasurementUncheckedCreateWithoutClientInput> | Prisma.MeasurementCreateWithoutClientInput[] | Prisma.MeasurementUncheckedCreateWithoutClientInput[];
     connectOrCreate?: Prisma.MeasurementCreateOrConnectWithoutClientInput | Prisma.MeasurementCreateOrConnectWithoutClientInput[];
@@ -336,6 +354,30 @@ export type MeasurementUncheckedUpdateManyWithoutClientNestedInput = {
 export type EnumUnitFieldUpdateOperationsInput = {
     set?: $Enums.Unit;
 };
+export type MeasurementCreateNestedOneWithoutSharesInput = {
+    create?: Prisma.XOR<Prisma.MeasurementCreateWithoutSharesInput, Prisma.MeasurementUncheckedCreateWithoutSharesInput>;
+    connectOrCreate?: Prisma.MeasurementCreateOrConnectWithoutSharesInput;
+    connect?: Prisma.MeasurementWhereUniqueInput;
+};
+export type MeasurementUpdateOneRequiredWithoutSharesNestedInput = {
+    create?: Prisma.XOR<Prisma.MeasurementCreateWithoutSharesInput, Prisma.MeasurementUncheckedCreateWithoutSharesInput>;
+    connectOrCreate?: Prisma.MeasurementCreateOrConnectWithoutSharesInput;
+    upsert?: Prisma.MeasurementUpsertWithoutSharesInput;
+    connect?: Prisma.MeasurementWhereUniqueInput;
+    update?: Prisma.XOR<Prisma.XOR<Prisma.MeasurementUpdateToOneWithWhereWithoutSharesInput, Prisma.MeasurementUpdateWithoutSharesInput>, Prisma.MeasurementUncheckedUpdateWithoutSharesInput>;
+};
+export type MeasurementCreateNestedOneWithoutHistoryInput = {
+    create?: Prisma.XOR<Prisma.MeasurementCreateWithoutHistoryInput, Prisma.MeasurementUncheckedCreateWithoutHistoryInput>;
+    connectOrCreate?: Prisma.MeasurementCreateOrConnectWithoutHistoryInput;
+    connect?: Prisma.MeasurementWhereUniqueInput;
+};
+export type MeasurementUpdateOneRequiredWithoutHistoryNestedInput = {
+    create?: Prisma.XOR<Prisma.MeasurementCreateWithoutHistoryInput, Prisma.MeasurementUncheckedCreateWithoutHistoryInput>;
+    connectOrCreate?: Prisma.MeasurementCreateOrConnectWithoutHistoryInput;
+    upsert?: Prisma.MeasurementUpsertWithoutHistoryInput;
+    connect?: Prisma.MeasurementWhereUniqueInput;
+    update?: Prisma.XOR<Prisma.XOR<Prisma.MeasurementUpdateToOneWithWhereWithoutHistoryInput, Prisma.MeasurementUpdateWithoutHistoryInput>, Prisma.MeasurementUncheckedUpdateWithoutHistoryInput>;
+};
 export type MeasurementCreateWithoutClientInput = {
     id?: string;
     title: string;
@@ -343,6 +385,8 @@ export type MeasurementCreateWithoutClientInput = {
     data: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    shares?: Prisma.MeasurementShareCreateNestedManyWithoutMeasurementInput;
+    history?: Prisma.MeasurementHistoryCreateNestedManyWithoutMeasurementInput;
 };
 export type MeasurementUncheckedCreateWithoutClientInput = {
     id?: string;
@@ -351,6 +395,8 @@ export type MeasurementUncheckedCreateWithoutClientInput = {
     data: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    shares?: Prisma.MeasurementShareUncheckedCreateNestedManyWithoutMeasurementInput;
+    history?: Prisma.MeasurementHistoryUncheckedCreateNestedManyWithoutMeasurementInput;
 };
 export type MeasurementCreateOrConnectWithoutClientInput = {
     where: Prisma.MeasurementWhereUniqueInput;
@@ -385,6 +431,112 @@ export type MeasurementScalarWhereInput = {
     createdAt?: Prisma.DateTimeFilter<"Measurement"> | Date | string;
     updatedAt?: Prisma.DateTimeFilter<"Measurement"> | Date | string;
 };
+export type MeasurementCreateWithoutSharesInput = {
+    id?: string;
+    title: string;
+    unit?: $Enums.Unit;
+    data: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    client: Prisma.ClientCreateNestedOneWithoutMeasurementsInput;
+    history?: Prisma.MeasurementHistoryCreateNestedManyWithoutMeasurementInput;
+};
+export type MeasurementUncheckedCreateWithoutSharesInput = {
+    id?: string;
+    title: string;
+    unit?: $Enums.Unit;
+    data: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+    clientId: string;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    history?: Prisma.MeasurementHistoryUncheckedCreateNestedManyWithoutMeasurementInput;
+};
+export type MeasurementCreateOrConnectWithoutSharesInput = {
+    where: Prisma.MeasurementWhereUniqueInput;
+    create: Prisma.XOR<Prisma.MeasurementCreateWithoutSharesInput, Prisma.MeasurementUncheckedCreateWithoutSharesInput>;
+};
+export type MeasurementUpsertWithoutSharesInput = {
+    update: Prisma.XOR<Prisma.MeasurementUpdateWithoutSharesInput, Prisma.MeasurementUncheckedUpdateWithoutSharesInput>;
+    create: Prisma.XOR<Prisma.MeasurementCreateWithoutSharesInput, Prisma.MeasurementUncheckedCreateWithoutSharesInput>;
+    where?: Prisma.MeasurementWhereInput;
+};
+export type MeasurementUpdateToOneWithWhereWithoutSharesInput = {
+    where?: Prisma.MeasurementWhereInput;
+    data: Prisma.XOR<Prisma.MeasurementUpdateWithoutSharesInput, Prisma.MeasurementUncheckedUpdateWithoutSharesInput>;
+};
+export type MeasurementUpdateWithoutSharesInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    title?: Prisma.StringFieldUpdateOperationsInput | string;
+    unit?: Prisma.EnumUnitFieldUpdateOperationsInput | $Enums.Unit;
+    data?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    client?: Prisma.ClientUpdateOneRequiredWithoutMeasurementsNestedInput;
+    history?: Prisma.MeasurementHistoryUpdateManyWithoutMeasurementNestedInput;
+};
+export type MeasurementUncheckedUpdateWithoutSharesInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    title?: Prisma.StringFieldUpdateOperationsInput | string;
+    unit?: Prisma.EnumUnitFieldUpdateOperationsInput | $Enums.Unit;
+    data?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+    clientId?: Prisma.StringFieldUpdateOperationsInput | string;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    history?: Prisma.MeasurementHistoryUncheckedUpdateManyWithoutMeasurementNestedInput;
+};
+export type MeasurementCreateWithoutHistoryInput = {
+    id?: string;
+    title: string;
+    unit?: $Enums.Unit;
+    data: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    shares?: Prisma.MeasurementShareCreateNestedManyWithoutMeasurementInput;
+    client: Prisma.ClientCreateNestedOneWithoutMeasurementsInput;
+};
+export type MeasurementUncheckedCreateWithoutHistoryInput = {
+    id?: string;
+    title: string;
+    unit?: $Enums.Unit;
+    data: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+    clientId: string;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    shares?: Prisma.MeasurementShareUncheckedCreateNestedManyWithoutMeasurementInput;
+};
+export type MeasurementCreateOrConnectWithoutHistoryInput = {
+    where: Prisma.MeasurementWhereUniqueInput;
+    create: Prisma.XOR<Prisma.MeasurementCreateWithoutHistoryInput, Prisma.MeasurementUncheckedCreateWithoutHistoryInput>;
+};
+export type MeasurementUpsertWithoutHistoryInput = {
+    update: Prisma.XOR<Prisma.MeasurementUpdateWithoutHistoryInput, Prisma.MeasurementUncheckedUpdateWithoutHistoryInput>;
+    create: Prisma.XOR<Prisma.MeasurementCreateWithoutHistoryInput, Prisma.MeasurementUncheckedCreateWithoutHistoryInput>;
+    where?: Prisma.MeasurementWhereInput;
+};
+export type MeasurementUpdateToOneWithWhereWithoutHistoryInput = {
+    where?: Prisma.MeasurementWhereInput;
+    data: Prisma.XOR<Prisma.MeasurementUpdateWithoutHistoryInput, Prisma.MeasurementUncheckedUpdateWithoutHistoryInput>;
+};
+export type MeasurementUpdateWithoutHistoryInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    title?: Prisma.StringFieldUpdateOperationsInput | string;
+    unit?: Prisma.EnumUnitFieldUpdateOperationsInput | $Enums.Unit;
+    data?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    shares?: Prisma.MeasurementShareUpdateManyWithoutMeasurementNestedInput;
+    client?: Prisma.ClientUpdateOneRequiredWithoutMeasurementsNestedInput;
+};
+export type MeasurementUncheckedUpdateWithoutHistoryInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    title?: Prisma.StringFieldUpdateOperationsInput | string;
+    unit?: Prisma.EnumUnitFieldUpdateOperationsInput | $Enums.Unit;
+    data?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+    clientId?: Prisma.StringFieldUpdateOperationsInput | string;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    shares?: Prisma.MeasurementShareUncheckedUpdateManyWithoutMeasurementNestedInput;
+};
 export type MeasurementCreateManyClientInput = {
     id?: string;
     title: string;
@@ -400,6 +552,8 @@ export type MeasurementUpdateWithoutClientInput = {
     data?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    shares?: Prisma.MeasurementShareUpdateManyWithoutMeasurementNestedInput;
+    history?: Prisma.MeasurementHistoryUpdateManyWithoutMeasurementNestedInput;
 };
 export type MeasurementUncheckedUpdateWithoutClientInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -408,6 +562,8 @@ export type MeasurementUncheckedUpdateWithoutClientInput = {
     data?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    shares?: Prisma.MeasurementShareUncheckedUpdateManyWithoutMeasurementNestedInput;
+    history?: Prisma.MeasurementHistoryUncheckedUpdateManyWithoutMeasurementNestedInput;
 };
 export type MeasurementUncheckedUpdateManyWithoutClientInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -417,6 +573,38 @@ export type MeasurementUncheckedUpdateManyWithoutClientInput = {
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
+/**
+ * Count Type MeasurementCountOutputType
+ */
+export type MeasurementCountOutputType = {
+    shares: number;
+    history: number;
+};
+export type MeasurementCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    shares?: boolean | MeasurementCountOutputTypeCountSharesArgs;
+    history?: boolean | MeasurementCountOutputTypeCountHistoryArgs;
+};
+/**
+ * MeasurementCountOutputType without action
+ */
+export type MeasurementCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MeasurementCountOutputType
+     */
+    select?: Prisma.MeasurementCountOutputTypeSelect<ExtArgs> | null;
+};
+/**
+ * MeasurementCountOutputType without action
+ */
+export type MeasurementCountOutputTypeCountSharesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    where?: Prisma.MeasurementShareWhereInput;
+};
+/**
+ * MeasurementCountOutputType without action
+ */
+export type MeasurementCountOutputTypeCountHistoryArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    where?: Prisma.MeasurementHistoryWhereInput;
+};
 export type MeasurementSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
     id?: boolean;
     title?: boolean;
@@ -425,7 +613,10 @@ export type MeasurementSelect<ExtArgs extends runtime.Types.Extensions.InternalA
     clientId?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
+    shares?: boolean | Prisma.Measurement$sharesArgs<ExtArgs>;
     client?: boolean | Prisma.ClientDefaultArgs<ExtArgs>;
+    history?: boolean | Prisma.Measurement$historyArgs<ExtArgs>;
+    _count?: boolean | Prisma.MeasurementCountOutputTypeDefaultArgs<ExtArgs>;
 }, ExtArgs["result"]["measurement"]>;
 export type MeasurementSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
     id?: boolean;
@@ -458,7 +649,10 @@ export type MeasurementSelectScalar = {
 };
 export type MeasurementOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "unit" | "data" | "clientId" | "createdAt" | "updatedAt", ExtArgs["result"]["measurement"]>;
 export type MeasurementInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    shares?: boolean | Prisma.Measurement$sharesArgs<ExtArgs>;
     client?: boolean | Prisma.ClientDefaultArgs<ExtArgs>;
+    history?: boolean | Prisma.Measurement$historyArgs<ExtArgs>;
+    _count?: boolean | Prisma.MeasurementCountOutputTypeDefaultArgs<ExtArgs>;
 };
 export type MeasurementIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     client?: boolean | Prisma.ClientDefaultArgs<ExtArgs>;
@@ -469,7 +663,9 @@ export type MeasurementIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.
 export type $MeasurementPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     name: "Measurement";
     objects: {
+        shares: Prisma.$MeasurementSharePayload<ExtArgs>[];
         client: Prisma.$ClientPayload<ExtArgs>;
+        history: Prisma.$MeasurementHistoryPayload<ExtArgs>[];
     };
     scalars: runtime.Types.Extensions.GetPayloadResult<{
         id: string;
@@ -808,7 +1004,9 @@ export interface MeasurementDelegate<ExtArgs extends runtime.Types.Extensions.In
  */
 export interface Prisma__MeasurementClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise";
+    shares<T extends Prisma.Measurement$sharesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Measurement$sharesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MeasurementSharePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
     client<T extends Prisma.ClientDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ClientDefaultArgs<ExtArgs>>): Prisma.Prisma__ClientClient<runtime.Types.Result.GetResult<Prisma.$ClientPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>;
+    history<T extends Prisma.Measurement$historyArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Measurement$historyArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MeasurementHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1223,6 +1421,52 @@ export type MeasurementDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.I
      * Limit how many Measurements to delete.
      */
     limit?: number;
+};
+/**
+ * Measurement.shares
+ */
+export type Measurement$sharesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MeasurementShare
+     */
+    select?: Prisma.MeasurementShareSelect<ExtArgs> | null;
+    /**
+     * Omit specific fields from the MeasurementShare
+     */
+    omit?: Prisma.MeasurementShareOmit<ExtArgs> | null;
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: Prisma.MeasurementShareInclude<ExtArgs> | null;
+    where?: Prisma.MeasurementShareWhereInput;
+    orderBy?: Prisma.MeasurementShareOrderByWithRelationInput | Prisma.MeasurementShareOrderByWithRelationInput[];
+    cursor?: Prisma.MeasurementShareWhereUniqueInput;
+    take?: number;
+    skip?: number;
+    distinct?: Prisma.MeasurementShareScalarFieldEnum | Prisma.MeasurementShareScalarFieldEnum[];
+};
+/**
+ * Measurement.history
+ */
+export type Measurement$historyArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MeasurementHistory
+     */
+    select?: Prisma.MeasurementHistorySelect<ExtArgs> | null;
+    /**
+     * Omit specific fields from the MeasurementHistory
+     */
+    omit?: Prisma.MeasurementHistoryOmit<ExtArgs> | null;
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: Prisma.MeasurementHistoryInclude<ExtArgs> | null;
+    where?: Prisma.MeasurementHistoryWhereInput;
+    orderBy?: Prisma.MeasurementHistoryOrderByWithRelationInput | Prisma.MeasurementHistoryOrderByWithRelationInput[];
+    cursor?: Prisma.MeasurementHistoryWhereUniqueInput;
+    take?: number;
+    skip?: number;
+    distinct?: Prisma.MeasurementHistoryScalarFieldEnum | Prisma.MeasurementHistoryScalarFieldEnum[];
 };
 /**
  * Measurement without action

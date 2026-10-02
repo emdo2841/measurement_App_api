@@ -248,6 +248,8 @@ export declare const ModelName: {
     readonly RefreshToken: "RefreshToken";
     readonly Client: "Client";
     readonly Measurement: "Measurement";
+    readonly MeasurementShare: "MeasurementShare";
+    readonly MeasurementHistory: "MeasurementHistory";
     readonly Order: "Order";
     readonly PushSubscription: "PushSubscription";
     readonly OrderReminder: "OrderReminder";
@@ -264,7 +266,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         omit: GlobalOmitOptions;
     };
     meta: {
-        modelProps: "user" | "refreshToken" | "client" | "measurement" | "order" | "pushSubscription" | "orderReminder" | "emailOrderReminder";
+        modelProps: "user" | "refreshToken" | "client" | "measurement" | "measurementShare" | "measurementHistory" | "order" | "pushSubscription" | "orderReminder" | "emailOrderReminder";
         txIsolationLevel: TransactionIsolationLevel;
     };
     model: {
@@ -561,6 +563,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
                 count: {
                     args: Prisma.MeasurementCountArgs<ExtArgs>;
                     result: runtime.Types.Utils.Optional<Prisma.MeasurementCountAggregateOutputType> | number;
+                };
+            };
+        };
+        MeasurementShare: {
+            payload: Prisma.$MeasurementSharePayload<ExtArgs>;
+            fields: Prisma.MeasurementShareFieldRefs;
+            operations: {
+                findUnique: {
+                    args: Prisma.MeasurementShareFindUniqueArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$MeasurementSharePayload> | null;
+                };
+                findUniqueOrThrow: {
+                    args: Prisma.MeasurementShareFindUniqueOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$MeasurementSharePayload>;
+                };
+                findFirst: {
+                    args: Prisma.MeasurementShareFindFirstArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$MeasurementSharePayload> | null;
+                };
+                findFirstOrThrow: {
+                    args: Prisma.MeasurementShareFindFirstOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$MeasurementSharePayload>;
+                };
+                findMany: {
+                    args: Prisma.MeasurementShareFindManyArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$MeasurementSharePayload>[];
+                };
+                create: {
+                    args: Prisma.MeasurementShareCreateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$MeasurementSharePayload>;
+                };
+                createMany: {
+                    args: Prisma.MeasurementShareCreateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                createManyAndReturn: {
+                    args: Prisma.MeasurementShareCreateManyAndReturnArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$MeasurementSharePayload>[];
+                };
+                delete: {
+                    args: Prisma.MeasurementShareDeleteArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$MeasurementSharePayload>;
+                };
+                update: {
+                    args: Prisma.MeasurementShareUpdateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$MeasurementSharePayload>;
+                };
+                deleteMany: {
+                    args: Prisma.MeasurementShareDeleteManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateMany: {
+                    args: Prisma.MeasurementShareUpdateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateManyAndReturn: {
+                    args: Prisma.MeasurementShareUpdateManyAndReturnArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$MeasurementSharePayload>[];
+                };
+                upsert: {
+                    args: Prisma.MeasurementShareUpsertArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$MeasurementSharePayload>;
+                };
+                aggregate: {
+                    args: Prisma.MeasurementShareAggregateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.AggregateMeasurementShare>;
+                };
+                groupBy: {
+                    args: Prisma.MeasurementShareGroupByArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.MeasurementShareGroupByOutputType>[];
+                };
+                count: {
+                    args: Prisma.MeasurementShareCountArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.MeasurementShareCountAggregateOutputType> | number;
+                };
+            };
+        };
+        MeasurementHistory: {
+            payload: Prisma.$MeasurementHistoryPayload<ExtArgs>;
+            fields: Prisma.MeasurementHistoryFieldRefs;
+            operations: {
+                findUnique: {
+                    args: Prisma.MeasurementHistoryFindUniqueArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$MeasurementHistoryPayload> | null;
+                };
+                findUniqueOrThrow: {
+                    args: Prisma.MeasurementHistoryFindUniqueOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$MeasurementHistoryPayload>;
+                };
+                findFirst: {
+                    args: Prisma.MeasurementHistoryFindFirstArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$MeasurementHistoryPayload> | null;
+                };
+                findFirstOrThrow: {
+                    args: Prisma.MeasurementHistoryFindFirstOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$MeasurementHistoryPayload>;
+                };
+                findMany: {
+                    args: Prisma.MeasurementHistoryFindManyArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$MeasurementHistoryPayload>[];
+                };
+                create: {
+                    args: Prisma.MeasurementHistoryCreateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$MeasurementHistoryPayload>;
+                };
+                createMany: {
+                    args: Prisma.MeasurementHistoryCreateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                createManyAndReturn: {
+                    args: Prisma.MeasurementHistoryCreateManyAndReturnArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$MeasurementHistoryPayload>[];
+                };
+                delete: {
+                    args: Prisma.MeasurementHistoryDeleteArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$MeasurementHistoryPayload>;
+                };
+                update: {
+                    args: Prisma.MeasurementHistoryUpdateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$MeasurementHistoryPayload>;
+                };
+                deleteMany: {
+                    args: Prisma.MeasurementHistoryDeleteManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateMany: {
+                    args: Prisma.MeasurementHistoryUpdateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateManyAndReturn: {
+                    args: Prisma.MeasurementHistoryUpdateManyAndReturnArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$MeasurementHistoryPayload>[];
+                };
+                upsert: {
+                    args: Prisma.MeasurementHistoryUpsertArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$MeasurementHistoryPayload>;
+                };
+                aggregate: {
+                    args: Prisma.MeasurementHistoryAggregateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.AggregateMeasurementHistory>;
+                };
+                groupBy: {
+                    args: Prisma.MeasurementHistoryGroupByArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.MeasurementHistoryGroupByOutputType>[];
+                };
+                count: {
+                    args: Prisma.MeasurementHistoryCountArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.MeasurementHistoryCountAggregateOutputType> | number;
                 };
             };
         };
@@ -942,6 +1092,24 @@ export declare const MeasurementScalarFieldEnum: {
     readonly updatedAt: "updatedAt";
 };
 export type MeasurementScalarFieldEnum = (typeof MeasurementScalarFieldEnum)[keyof typeof MeasurementScalarFieldEnum];
+export declare const MeasurementShareScalarFieldEnum: {
+    readonly id: "id";
+    readonly tokenHash: "tokenHash";
+    readonly measurementId: "measurementId";
+    readonly expiresAt: "expiresAt";
+    readonly revokedAt: "revokedAt";
+    readonly createdAt: "createdAt";
+};
+export type MeasurementShareScalarFieldEnum = (typeof MeasurementShareScalarFieldEnum)[keyof typeof MeasurementShareScalarFieldEnum];
+export declare const MeasurementHistoryScalarFieldEnum: {
+    readonly id: "id";
+    readonly measurementId: "measurementId";
+    readonly title: "title";
+    readonly unit: "unit";
+    readonly data: "data";
+    readonly recordedAt: "recordedAt";
+};
+export type MeasurementHistoryScalarFieldEnum = (typeof MeasurementHistoryScalarFieldEnum)[keyof typeof MeasurementHistoryScalarFieldEnum];
 export declare const OrderScalarFieldEnum: {
     readonly id: "id";
     readonly clientId: "clientId";
@@ -1230,6 +1398,8 @@ export type GlobalOmitConfig = {
     refreshToken?: Prisma.RefreshTokenOmit;
     client?: Prisma.ClientOmit;
     measurement?: Prisma.MeasurementOmit;
+    measurementShare?: Prisma.MeasurementShareOmit;
+    measurementHistory?: Prisma.MeasurementHistoryOmit;
     order?: Prisma.OrderOmit;
     pushSubscription?: Prisma.PushSubscriptionOmit;
     orderReminder?: Prisma.OrderReminderOmit;

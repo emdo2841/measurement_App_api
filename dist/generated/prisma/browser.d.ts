@@ -23,6 +23,16 @@ export type Client = Prisma.ClientModel;
  */
 export type Measurement = Prisma.MeasurementModel;
 /**
+ * Model MeasurementShare
+ *
+ */
+export type MeasurementShare = Prisma.MeasurementShareModel;
+/**
+ * Model MeasurementHistory
+ *
+ */
+export type MeasurementHistory = Prisma.MeasurementHistoryModel;
+/**
  * Model Order
  *
  */

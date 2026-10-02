@@ -5,6 +5,7 @@ const db_1 = require("../db");
 const client_schema_1 = require("../schemas/client.schema");
 const cloudinary_1 = require("../Utils/cloudinary");
 const cache_1 = require("../middleWare/cache");
+const pagination_1 = require("../Utils/pagination");
 const clientsListCacheKey = (userId) => `clients:${userId}:all`;
 const clientCacheKey = (userId, clientId) => `client:${userId}:${clientId}`;
 const createClient = async (req, res) => {
@@ -53,7 +54,9 @@ const createClient = async (req, res) => {
                     : {}),
             },
             include: {
-                measurements: true,
+                measurements: {
+                    orderBy: { updatedAt: 'desc' },
+                },
                 tailor: {
                     select: {
                         id: true,
@@ -93,7 +96,9 @@ const getClient = async (req, res) => {
         const client = await db_1.prisma.client.findFirst({
             where: { id: clientId, tailorId: userId },
             include: {
-                measurements: true,
+                measurements: {
+                    orderBy: { updatedAt: 'desc' },
+                },
                 tailor: {
                     select: {
                         id: true,
@@ -120,38 +125,85 @@ const getClient = async (req, res) => {
 exports.getClient = getClient;
 const getClients = async (req, res) => {
     try {
-        // 1. Try cache first
-        const userId = req.user.userId;
-        const cacheKey = clientsListCacheKey(userId);
-        const cached = await (0, cache_1.getCache)(cacheKey);
-        if (cached) {
-            return res.status(200).json(cached);
+        const userId = req.user?.userId;
+        if (!userId) {
+            return res.status(401).json({
+                error: "Unauthorized access",
+            });
         }
-        const clients = await db_1.prisma.client.findMany({
-            where: { tailorId: userId },
-            include: {
-                measurements: true,
-                tailor: {
-                    select: {
-                        id: true,
-                        name: true,
-                    }
-                }, // Include the tailor relation in the response
-                orders: {
-                    select: {
-                        dueDate: true,
-                        status: true,
-                        totalAmount: true,
-                    }
-                } // Include the orders relation in the response
-            }
+        const { page, limit, skip } = (0, pagination_1.getPagination)(req.query);
+        const search = typeof req.query.search === "string"
+            ? req.query.search.trim()
+            : "";
+        const where = {
+            tailorId: userId,
+            ...(search
+                ? {
+                    OR: [
+                        {
+                            name: {
+                                contains: search,
+                                mode: "insensitive",
+                            },
+                        },
+                        {
+                            phone: {
+                                contains: search,
+                            },
+                        },
+                        {
+                            email: {
+                                contains: search,
+                                mode: "insensitive",
+                            },
+                        },
+                        {
+                            address: {
+                                contains: search,
+                                mode: "insensitive",
+                            },
+                        },
+                    ],
+                }
+                : {}),
+        };
+        const [clients, total] = await db_1.prisma.$transaction([
+            db_1.prisma.client.findMany({
+                where,
+                skip,
+                take: limit,
+                orderBy: {
+                    createdAt: "desc",
+                },
+                include: {
+                    measurements: {
+                        orderBy: { updatedAt: 'desc' },
+                    },
+                    orders: {
+                        select: {
+                            id: true,
+                            dueDate: true,
+                            status: true,
+                            totalAmount: true,
+                        },
+                    },
+                },
+            }),
+            db_1.prisma.client.count({
+                where,
+            }),
+        ]);
+        return res.status(200).json({
+            status: "successful",
+            data: clients,
+            pagination: (0, pagination_1.paginationMeta)(page, limit, total),
         });
-        await (0, cache_1.setCache)(cacheKey, clients);
-        return res.status(200).json({ status: "success", data: clients });
     }
     catch (error) {
         req.log.error({ err: error }, "Get clients failed");
-        return res.status(500).json({ error: "Internal server error" });
+        return res.status(500).json({
+            error: "Internal server error",
+        });
     }
 };
 exports.getClients = getClients;

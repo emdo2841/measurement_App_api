@@ -34,12 +34,67 @@ app.use(helmet());
 app.use(compression());
 
 
-app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:8081'],
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://localhost:8081',
+  'http://127.0.0.1:8081',
+  'https://ejtech.duckdns.org',
+];
+
+const corsOptions: cors.CorsOptions = {
+  origin(origin, callback) {
+    // Requests from Postman, curl and server-to-server calls
+    // normally do not include an Origin header.
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    reqLoggerWarning(origin);
+
+    return callback(
+      new Error(`Origin ${origin} is not allowed by CORS`),
+    );
+  },
+
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+
+  methods: [
+    'GET',
+    'POST',
+    'PUT',
+    'PATCH',
+    'DELETE',
+    'OPTIONS',
+  ],
+
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+  ],
+
+  exposedHeaders: [
+    'RateLimit',
+    'RateLimit-Policy',
+    'Retry-After',
+  ],
+
+  optionsSuccessStatus: 204,
+};
+
+function reqLoggerWarning(origin: string) {
+  logger.warn(
+    { origin },
+    'Request blocked by CORS',
+  );
+}
+
+app.use(cors(corsOptions));
+
 app.use(express.json());
 app.use(cookieParser());
 app.disable('x-powered-by');

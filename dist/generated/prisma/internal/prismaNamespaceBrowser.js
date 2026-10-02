@@ -48,7 +48,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.JsonNullValueFilter = exports.NullsOrder = exports.QueryMode = exports.JsonNullValueInput = exports.SortOrder = exports.EmailOrderReminderScalarFieldEnum = exports.OrderReminderScalarFieldEnum = exports.PushSubscriptionScalarFieldEnum = exports.OrderScalarFieldEnum = exports.MeasurementScalarFieldEnum = exports.ClientScalarFieldEnum = exports.RefreshTokenScalarFieldEnum = exports.UserScalarFieldEnum = exports.TransactionIsolationLevel = exports.ModelName = exports.AnyNull = exports.JsonNull = exports.DbNull = exports.NullTypes = exports.Decimal = void 0;
+exports.JsonNullValueFilter = exports.NullsOrder = exports.QueryMode = exports.JsonNullValueInput = exports.SortOrder = exports.EmailOrderReminderScalarFieldEnum = exports.OrderReminderScalarFieldEnum = exports.PushSubscriptionScalarFieldEnum = exports.OrderScalarFieldEnum = exports.MeasurementHistoryScalarFieldEnum = exports.MeasurementShareScalarFieldEnum = exports.MeasurementScalarFieldEnum = exports.ClientScalarFieldEnum = exports.RefreshTokenScalarFieldEnum = exports.UserScalarFieldEnum = exports.TransactionIsolationLevel = exports.ModelName = exports.AnyNull = exports.JsonNull = exports.DbNull = exports.NullTypes = exports.Decimal = void 0;
 const runtime = __importStar(require("@prisma/client/runtime/index-browser"));
 exports.Decimal = runtime.Decimal;
 exports.NullTypes = {
@@ -79,6 +79,8 @@ exports.ModelName = {
     RefreshToken: 'RefreshToken',
     Client: 'Client',
     Measurement: 'Measurement',
+    MeasurementShare: 'MeasurementShare',
+    MeasurementHistory: 'MeasurementHistory',
     Order: 'Order',
     PushSubscription: 'PushSubscription',
     OrderReminder: 'OrderReminder',
@@ -136,6 +138,22 @@ exports.MeasurementScalarFieldEnum = {
     clientId: 'clientId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
+};
+exports.MeasurementShareScalarFieldEnum = {
+    id: 'id',
+    tokenHash: 'tokenHash',
+    measurementId: 'measurementId',
+    expiresAt: 'expiresAt',
+    revokedAt: 'revokedAt',
+    createdAt: 'createdAt'
+};
+exports.MeasurementHistoryScalarFieldEnum = {
+    id: 'id',
+    measurementId: 'measurementId',
+    title: 'title',
+    unit: 'unit',
+    data: 'data',
+    recordedAt: 'recordedAt'
 };
 exports.OrderScalarFieldEnum = {
     id: 'id',

@@ -12,8 +12,10 @@ exports.measurementtRouter = router;
 router.use(authMiddleware_1.authenticateToken);
 router.post("/", measurement_1.createMeasurement);
 router.get("/", measurement_1.getAllMeasurements);
-router.get("/client/:clientId", measurement_1.getMeasurementsByClient);
-+router.get("/:id", measurement_1.getMeasurement);
+router.get("/client/:clientId", measurement_1.getMeasurementByClient);
+router.get('/:id/history', measurement_1.getMeasurementHistory);
+router.post('/:id/history/:historyId/restore', measurement_1.restoreMeasurementHistory);
+router.get("/:id", measurement_1.getMeasurement);
 router.patch("/:id", measurement_1.updateMeasurement);
 router.delete("/:id", measurement_1.deleteMeasurement);
 //# sourceMappingURL=measurement.route.js.map

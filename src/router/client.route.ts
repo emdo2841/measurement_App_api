@@ -10,7 +10,7 @@ router.use(authenticateToken)
 router.post("/", upload.single('image'), createClient);
 router.get("/:id", getClient);
 router.get("/", getClients);
-+router.patch("/:id", upload.single('image'), updateClient);
+router.patch("/:id", upload.single('image'), updateClient);
 router.delete("/:id", deleteClient);
 
 export { router as clientRouter };

@@ -45,7 +45,8 @@ export const createMeasurement = async (
   res: Response,
 ) => {
   try {
-    const validatedData = createMeasurementSchema.safeParse(req.body)
+    const validatedData =
+      createMeasurementSchema.safeParse(req.body)
 
     if (!validatedData.success) {
       return res.status(400).json({
@@ -53,34 +54,30 @@ export const createMeasurement = async (
       })
     }
 
-    const userId = req.user!.userId
+    const userId = req.user?.userId
+
+    if (!userId) {
+      return res.status(401).json({
+        error: 'Unauthorized access',
+      })
+    }
+
     const { clientId } = validatedData.data
 
+    // Confirm that the client belongs to the logged-in tailor.
     const client = await prisma.client.findFirst({
-      where: {
-        id: clientId,
-        tailorId: userId,
-      },
-      select: {
-        id: true,
-        measurement: {
-          select: {
-            id: true,
-          },
-        },
-      },
-    })
+  where: {
+    id: clientId,
+    tailorId: userId,
+  },
+  select: {
+    id: true,
+  },
+})
 
     if (!client) {
       return res.status(404).json({
         error: 'Client not found',
-      })
-    }
-
-    if (client.measurement) {
-      return res.status(409).json({
-        error: 'This client already has a measurement profile.',
-        measurementId: client.measurement.id,
       })
     }
 
@@ -91,6 +88,8 @@ export const createMeasurement = async (
     await delCache(
       clientMeasurementsCacheKey(userId, clientId),
       allMeasurementsCacheKey(userId),
+      `clients:${userId}:all`,
+      `client:${userId}:${clientId}`,
     )
 
     return res.status(201).json({
@@ -98,18 +97,10 @@ export const createMeasurement = async (
       data: measurement,
     })
   } catch (error: unknown) {
-    if (
-      typeof error === 'object' &&
-      error !== null &&
-      'code' in error &&
-      error.code === 'P2002'
-    ) {
-      return res.status(409).json({
-        error: 'This client already has a measurement profile.',
-      })
-    }
-
-    req.log.error({ err: error }, 'Create measurement failed')
+    req.log.error(
+      { err: error },
+      'Create measurement failed',
+    )
 
     return res.status(500).json({
       error: 'Internal server error',
@@ -224,6 +215,15 @@ export const getMeasurement = async (req: Request, res: Response) => {
     // 2. Cache miss -> query DB
     const measurement = await prisma.measurement.findFirst({
       where: { id, client: { tailorId: userId } },
+      include: {
+        client: {
+          select: {
+            id: true,
+            name: true,
+            image: true,
+          },
+        },
+      }
      });
     if (!measurement) {
       return res.status(404).json({ error: 'Measurement not found' });
@@ -263,15 +263,18 @@ export const getMeasurementByClient = async (
       })
     }
 
-    const measurement = await prisma.measurement.findUnique({
-      where: {
-        clientId,
+    const measurements = await prisma.measurement.findMany({
+       where: {
+         clientId,
+       },
+      orderBy: {
+        updatedAt: 'desc',
       },
-    })
+     })
 
     return res.status(200).json({
       status: 'successful',
-      data: measurement,
+      data: measurements,
     })
   } catch (error) {
     req.log.error({ err: error }, 'Get client measurement failed')

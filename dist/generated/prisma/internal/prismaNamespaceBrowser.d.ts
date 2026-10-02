@@ -30,6 +30,8 @@ export declare const ModelName: {
     readonly RefreshToken: "RefreshToken";
     readonly Client: "Client";
     readonly Measurement: "Measurement";
+    readonly MeasurementShare: "MeasurementShare";
+    readonly MeasurementHistory: "MeasurementHistory";
     readonly Order: "Order";
     readonly PushSubscription: "PushSubscription";
     readonly OrderReminder: "OrderReminder";
@@ -91,6 +93,24 @@ export declare const MeasurementScalarFieldEnum: {
     readonly updatedAt: "updatedAt";
 };
 export type MeasurementScalarFieldEnum = (typeof MeasurementScalarFieldEnum)[keyof typeof MeasurementScalarFieldEnum];
+export declare const MeasurementShareScalarFieldEnum: {
+    readonly id: "id";
+    readonly tokenHash: "tokenHash";
+    readonly measurementId: "measurementId";
+    readonly expiresAt: "expiresAt";
+    readonly revokedAt: "revokedAt";
+    readonly createdAt: "createdAt";
+};
+export type MeasurementShareScalarFieldEnum = (typeof MeasurementShareScalarFieldEnum)[keyof typeof MeasurementShareScalarFieldEnum];
+export declare const MeasurementHistoryScalarFieldEnum: {
+    readonly id: "id";
+    readonly measurementId: "measurementId";
+    readonly title: "title";
+    readonly unit: "unit";
+    readonly data: "data";
+    readonly recordedAt: "recordedAt";
+};
+export type MeasurementHistoryScalarFieldEnum = (typeof MeasurementHistoryScalarFieldEnum)[keyof typeof MeasurementHistoryScalarFieldEnum];
 export declare const OrderScalarFieldEnum: {
     readonly id: "id";
     readonly clientId: "clientId";

@@ -54,7 +54,7 @@ model Client {
   gender        Gender
   tailor        User         @relation(fields: [tailorId], references: [id], onDelete: Cascade)
   tailorId      String
-  measurement   Measurement?
+  measurements   Measurement[]
   image         String?
   imagePublicId String?
   orders        Order[]
@@ -78,7 +78,7 @@ model Measurement {
   data  Json
   shares MeasurementShare[]
 
-  clientId String @unique
+  clientId String
   client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
 
   history MeasurementHistory[]
@@ -86,6 +86,7 @@ model Measurement {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([clientId])
   @@map("measurements")
 }
 

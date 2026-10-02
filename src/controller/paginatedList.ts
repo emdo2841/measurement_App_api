@@ -32,9 +32,11 @@ export async function getClientsPaginated(req: Request, res: Response) {
     }
 
     const [data, total] = await prisma.$transaction([
-      prisma.client.findMany({ where, skip, take: limit, orderBy: { createdAt: 'desc' }, include: { measurement: true, orders: { select: { id: true, dueDate: true, status: true, totalAmount: true } } } }),
-      prisma.client.count({ where }),
-    ])
+      prisma.client.findMany({ where, skip, take: limit, orderBy: { createdAt: 'desc' }, include: { measurements: { orderBy: { updatedAt: 'desc' } }, orders: { select: { id: true, dueDate: true, status: true, totalAmount: true } } } }),
+       prisma.client.count({ where }),
+     ])
+     
+    
     const payload = { status: 'successful', data, pagination: paginationMeta(page, limit, total) }
     await setCache(cacheKey, payload, CACHE_TTL_SECONDS)
     return res.status(200).json(payload)

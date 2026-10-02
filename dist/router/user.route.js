@@ -15,8 +15,7 @@ exports.userRouter = router;
 router.post("/", upload.single("image"), user_1.createUser);
 router.use(authMiddleware_1.authenticateToken);
 router.get("/profile", user_1.profile);
-router.post("/", upload.single("image"), user_1.createUser);
 router.get("/:id", user_1.getUser);
-router.patch("/:id", user_1.updateUser);
+router.patch("/:id", upload.single('image'), user_1.updateUser);
 router.delete("/:id", user_1.deleteUser);
 //# sourceMappingURL=user.route.js.map

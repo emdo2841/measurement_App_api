@@ -162,6 +162,28 @@ export interface PrismaClient<in LogOpts extends Prisma.LogLevel = never, in out
         omit: OmitOpts;
     }>;
     /**
+     * `prisma.measurementShare`: Exposes CRUD operations for the **MeasurementShare** model.
+      * Example usage:
+      * ```ts
+      * // Fetch zero or more MeasurementShares
+      * const measurementShares = await prisma.measurementShare.findMany()
+      * ```
+      */
+    get measurementShare(): Prisma.MeasurementShareDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
+    /**
+     * `prisma.measurementHistory`: Exposes CRUD operations for the **MeasurementHistory** model.
+      * Example usage:
+      * ```ts
+      * // Fetch zero or more MeasurementHistories
+      * const measurementHistories = await prisma.measurementHistory.findMany()
+      * ```
+      */
+    get measurementHistory(): Prisma.MeasurementHistoryDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
+    /**
      * `prisma.order`: Exposes CRUD operations for the **Order** model.
       * Example usage:
       * ```ts

@@ -15,6 +15,6 @@ router.use(authMiddleware_1.authenticateToken);
 router.post("/", upload.single('image'), client_1.createClient);
 router.get("/:id", client_1.getClient);
 router.get("/", client_1.getClients);
-+router.patch("/:id", upload.single('image'), client_1.updateClient);
+router.patch("/:id", upload.single('image'), client_1.updateClient);
 router.delete("/:id", client_1.deleteClient);
 //# sourceMappingURL=client.route.js.map

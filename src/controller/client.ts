@@ -81,7 +81,9 @@ export const createClient = async (
             },
 
             include: {
-                measurement: true,
+                measurements: {
+                    orderBy: { updatedAt: 'desc' },
+                },
 
                 tailor: {
                     select: {
@@ -130,7 +132,9 @@ export const getClient = async (req: Request, res: Response) => {
         const client = await prisma.client.findFirst({
             where: { id: clientId, tailorId: userId },
             include: {
-                measurement: true,
+                measurements: {
+                    orderBy: { updatedAt: 'desc' },
+                },
                 tailor: {
                     select: {
                         id: true,
@@ -218,7 +222,9 @@ export const getClients = async (
           createdAt: "desc",
         },
         include: {
-          measurement: true,
+          measurements: {
+                    orderBy: { updatedAt: 'desc' },
+                },
           orders: {
             select: {
               id: true,
