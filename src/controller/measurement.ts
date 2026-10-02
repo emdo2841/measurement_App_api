@@ -6,6 +6,7 @@ import {
   createMeasurementSchema,
   UpdateMeasurementSchema,
 } from '../schemas/measurement.schema'; // adjust path to wherever your zod file lives
+import {paginationMeta,getPagination,} from "../Utils/pagination";
 
 const measurementCacheKey = (userId: string, id: string) => `measurement:${userId}:${id}`;
 const clientMeasurementsCacheKey = (userId: string, clientId: string) =>
@@ -116,39 +117,96 @@ export const createMeasurement = async (
   }
 }
 
-export const getAllMeasurements = async (req: Request, res: Response) => {
+export const getAllMeasurements = async (
+  req: Request,
+  res: Response,
+) => {
   try {
-    // 1. Try cache first
-    const userId = req.user!.userId;
+    const userId = req.user?.userId;
 
-    const cacheKey = allMeasurementsCacheKey(userId);
-    const cached = await getCache(cacheKey);
-    if (cached) {
-      return res.status(200).json(cached);
+    if (!userId) {
+      return res.status(401).json({
+        error: "Unauthorized access",
+      });
     }
- 
-    // 2. Cache miss -> query DB
-    const measurements = await prisma.measurement.findMany({
-      where: { client: { tailorId: userId } },
-      include: {
-        client: {
-          select: {
-            id: true,
-            name: true,
-            image: true,
-          },
-        },
+
+    const { page, limit, skip } = getPagination(req.query);
+
+    const search =
+      typeof req.query.search === "string"
+        ? req.query.search.trim()
+        : "";
+
+    const where = {
+      client: {
+        tailorId: userId,
       },
-      orderBy: { createdAt: 'desc' },
+
+      ...(search
+        ? {
+            OR: [
+              {
+                title: {
+                  contains: search,
+                  mode: "insensitive" as const,
+                },
+              },
+              {
+                client: {
+                  name: {
+                    contains: search,
+                    mode: "insensitive" as const,
+                  },
+                },
+              },
+            ],
+          }
+        : {}),
+    };
+
+    const [measurements, total] =
+      await prisma.$transaction([
+        prisma.measurement.findMany({
+          where,
+          skip,
+          take: limit,
+          orderBy: {
+            updatedAt: "desc",
+          },
+          include: {
+            client: {
+              select: {
+                id: true,
+                name: true,
+                image: true,
+              },
+            },
+          },
+        }),
+
+        prisma.measurement.count({
+          where,
+        }),
+      ]);
+
+    return res.status(200).json({
+      status: "successful",
+      data: measurements,
+      pagination: paginationMeta(
+        page,
+        limit,
+        total,
+      ),
     });
- 
-    // 3. Populate cache (short TTL — this list changes as measurements are created/edited)
-    await setCache(cacheKey, measurements, 60);
- 
-    return res.status(200).json({status: "successful", data: measurements});
   } catch (error) {
-    req.log.error({ err: error }, 'Get measurements failed');
-    return res.status(500).json({ error: 'Internal server error' });
+    req.log.error(
+      { err: error },
+      "Get measurements failed",
+    );
+
+    return res.status(500).json({
+      error: "Internal server error",
+    });
   }
 };
 

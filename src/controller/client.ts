@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import { createClientSchema, UpdateClientSchema } from "../schemas/client.schema";
 import { uploadImageBuffer, deleteImage } from "../Utils/cloudinary";
 import { getCache, setCache, delCache } from '../middleWare/cache';
+import {getPagination, paginationMeta} from "../Utils/pagination";
 
 const clientsListCacheKey = (userId: string) =>
     `clients:${userId}:all`
@@ -153,44 +154,108 @@ export const getClient = async (req: Request, res: Response) => {
 
     }
 }
-export const getClients = async (req: Request, res: Response) => {
-    try {
 
-        // 1. Try cache first
-        const userId = req.user!.userId;
-        const cacheKey = clientsListCacheKey(userId);
 
-        const cached = await getCache(cacheKey);
-        if (cached) {
-            return res.status(200).json(cached);
-        }
-        const clients = await prisma.client.findMany({
-            where: { tailorId: userId },
-            include: {
-                measurement: true,
-                tailor: {
-                    select: {
-                        id: true,
-                        name: true,
-                    }
-                }, // Include the tailor relation in the response
-                orders: {
-                    select: {
-                        dueDate: true,
-                        status: true,
-                        totalAmount: true,
-                    }
-                } // Include the orders relation in the response
-            }
-        });
-        await setCache(cacheKey, clients);
-        return res.status(200).json({status: "success", data: clients})
-    } catch (error) {
-        req.log.error({ err: error }, "Get clients failed");
-        return res.status(500).json({ error: "Internal server error" });
+export const getClients = async (
+  req: Request,
+  res: Response,
+) => {
+  try {
+    const userId = req.user?.userId;
 
+    if (!userId) {
+      return res.status(401).json({
+        error: "Unauthorized access",
+      });
     }
-}
+
+    const { page, limit, skip } = getPagination(req.query);
+    const search =
+      typeof req.query.search === "string"
+        ? req.query.search.trim()
+        : "";
+
+    const where = {
+      tailorId: userId,
+
+      ...(search
+        ? {
+            OR: [
+              {
+                name: {
+                  contains: search,
+                  mode: "insensitive" as const,
+                },
+              },
+              {
+                phone: {
+                  contains: search,
+                },
+              },
+              {
+                email: {
+                  contains: search,
+                  mode: "insensitive" as const,
+                },
+              },
+              {
+                address: {
+                  contains: search,
+                  mode: "insensitive" as const,
+                },
+              },
+            ],
+          }
+        : {}),
+    };
+
+    const [clients, total] = await prisma.$transaction([
+      prisma.client.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: {
+          createdAt: "desc",
+        },
+        include: {
+          measurement: true,
+          orders: {
+            select: {
+              id: true,
+              dueDate: true,
+              status: true,
+              totalAmount: true,
+            },
+          },
+        },
+      }),
+
+      prisma.client.count({
+        where,
+      }),
+    ]);
+
+    return res.status(200).json({
+      status: "successful",
+      data: clients,
+      pagination: paginationMeta(
+        page,
+        limit,
+        total,
+      ),
+    });
+  } catch (error) {
+    req.log.error(
+      { err: error },
+      "Get clients failed",
+    );
+
+    return res.status(500).json({
+      error: "Internal server error",
+    });
+  }
+};
+
 export const updateClient = async (req: Request, res: Response) => {
     const id = req.params.id;
     try {

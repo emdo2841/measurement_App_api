@@ -14,8 +14,9 @@ import { orderRouter } from './router/order.route';
 import { authRouter } from './router/auth.route';
 import { measurementtRouter } from './router/measurement.route';
 import { pushRouter } from './router/push.route';
+import { measurementShareRouter } from './router/measurementShare.route'
 import { logger } from "./logger";
-import { authenticateToken } from './middleWare/authMiddleware';
+
 
 const app = express();
 app.set('trust proxy', 1);
@@ -51,6 +52,7 @@ app.use("/api/v1/orders", publicLimiter, orderRouter);
 app.use("/api/v1/measurement", publicLimiter, measurementtRouter);
 app.use("/api/v1/auth", authLimiter, authRouter);
 app.use('/api/v1/push',  publicLimiter, pushRouter);
+app.use('/api/v1', publicLimiter, measurementShareRouter)
 
 app.get("/", (req: Request, res: Response) => {
   res.status(200).json({

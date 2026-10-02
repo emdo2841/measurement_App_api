@@ -76,6 +76,7 @@ model Measurement {
   title String
   unit  Unit   @default(INCHES)
   data  Json
+  shares MeasurementShare[]
 
   clientId String @unique
   client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
@@ -91,6 +92,20 @@ model Measurement {
 enum Unit {
   CM
   INCHES
+}
+
+model MeasurementShare {
+  id            String      @id @default(uuid())
+  tokenHash     String      @unique
+  measurementId String
+  measurement   Measurement @relation(fields: [measurementId], references: [id], onDelete: Cascade)
+
+  expiresAt     DateTime?
+  revokedAt     DateTime?
+  createdAt     DateTime    @default(now())
+
+  @@index([measurementId])
+  @@map("measurement_shares")
 }
 
 model MeasurementHistory {

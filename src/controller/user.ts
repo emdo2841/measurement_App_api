@@ -110,31 +110,109 @@ export const getUser = async (req: Request, res: Response) => {
 }
  
 export const updateUser = async (req: Request, res: Response) => {
-    try {
-        const id = req.params.id;
+  const id = req.params.id;
 
-        if (id !== req.user?.userId) {
-            return res.status(404).json({ error: "User not found" });
+  try {
+    if (!req.user?.userId) {
+      return res.status(401).json({
+        error: "Unauthorized access",
+      });
+    }
+
+    if (id !== req.user.userId) {
+      return res.status(404).json({
+        error: "User not found",
+      });
+    }
+
+    const file = req.file as Express.Multer.File | undefined;
+
+    const validatedData = UpdateUserSchema.safeParse(req.body);
+
+    if (!validatedData.success) {
+      return res.status(400).json({
+        error: validatedData.error.format(),
+      });
+    }
+
+    const existingUser = await prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        image: true,
+        imagePublicId: true,
+      },
+    });
+
+    if (!existingUser) {
+      return res.status(404).json({
+        error: "User not found",
+      });
+    }
+
+    let uploadedImage:
+      | {
+          url: string;
+          publicId: string;
         }
+      | undefined;
 
-        const validatedData = UpdateUserSchema.safeParse(req.body);
-        if (!validatedData.success) {
-            return res.status(400).json({ error: validatedData.error.format() });
-         }
-         
-        const user = await prisma.user.update({
-            where: { id },
-            data: validatedData.data,
-            select: publicUserSelect,
-        })
- 
-        // Invalidate stale cache entries for this user
-        await delCache(userCacheKey(id), profileCacheKey(id));
- 
-        return res.status(200).json({status:"successful", data: user});
-    } catch (error: unknown) {
+    if (file) {
+      uploadedImage = await uploadImageBuffer(file.buffer, "users");
+    }
+
+    const { name, phone } = validatedData.data;
+
+    const user = await prisma.user.update({
+      where: { id },
+      data: {
+        ...(name !== undefined ? { name } : {}),
+        ...(phone !== undefined ? { phone } : {}),
+        ...(uploadedImage
+          ? {
+              image: uploadedImage.url,
+              imagePublicId: uploadedImage.publicId,
+            }
+          : {}),
+      },
+      select: publicUserSelect,
+    });
+
+    // Delete the previous Cloudinary image only after DB update succeeds.
     if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
+      uploadedImage &&
+      existingUser.imagePublicId &&
+      existingUser.imagePublicId !== uploadedImage.publicId
+    ) {
+      try {
+        await deleteImage(existingUser.imagePublicId);
+      } catch (imageDeleteError) {
+        req.log.warn(
+          {
+            err: imageDeleteError,
+            userId: id,
+            imagePublicId: existingUser.imagePublicId,
+          },
+          "Old profile image could not be deleted",
+        );
+      }
+    }
+
+    // Very important: remove cached profile containing the old image.
+    await delCache(
+      userCacheKey(id),
+      profileCacheKey(id),
+    );
+
+    return res.status(200).json({
+      status: "successful",
+      data: user,
+    });
+  } catch (error: unknown) {
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
       error.code === "P2025"
     ) {
       return res.status(404).json({
@@ -143,7 +221,10 @@ export const updateUser = async (req: Request, res: Response) => {
     }
 
     req.log.error(
-      { err: error },
+      {
+        err: error,
+        userId: id,
+      },
       "Update user failed",
     );
 
@@ -151,7 +232,7 @@ export const updateUser = async (req: Request, res: Response) => {
       error: "Internal server error",
     });
   }
-}
+};
  
 export const deleteUser = async (req: Request, res: Response) => {
     try {

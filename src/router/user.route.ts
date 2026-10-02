@@ -11,9 +11,8 @@ router.post("/", upload.single("image"), createUser);
 
 router.use(authenticateToken);
 router.get("/profile", profile)
-router.post("/", upload.single("image"), createUser);
-router.get("/:id",   getUser);
-router.patch("/:id",  updateUser);
+router.get("/:id",  getUser);
+router.patch("/:id", upload.single('image'),  updateUser);
 router.delete("/:id",  deleteUser);
 
 export {router as userRouter};

@@ -1,51 +1,79 @@
 import { rateLimit } from 'express-rate-limit';
-import { RedisStore } from 'rate-limit-redis';
+import {
+  RedisStore,
+  type RedisReply,
+} from 'rate-limit-redis';
+
 import { redisClient } from './redisClient';
 
-// Helper function to send commands safely
-const sendCommand = (...args: string[]): Promise<any> =>
-  redisClient.sendCommand(args);
+const sendCommand = (
+  ...args: string[]
+): Promise<RedisReply> => {
+  return redisClient.sendCommand(args) as Promise<RedisReply>;
+};
 
-// Public Limiter
+/**
+ * General authenticated/public API limiter.
+ *
+ * 500 requests per 15 minutes per IP should be sufficient
+ * for normal dashboard usage.
+ */
 export const publicLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 100,
-  standardHeaders: true,
-  legacyHeaders: false,
-  statusCode: 429,
-  message: {
-    status: 429,
-    error: 'Too Many Requests',
-    message: 'You have exceeded the request limit. Please try again later.',
-  },
-  ...(process.env.NODE_ENV === 'test'
-   ? {}
-   : {
-       store: new RedisStore({
-         sendCommand,
-         prefix: 'rl:auth:',
-       }),
-     }),
-});
+  limit: 500,
 
-// Auth Limiter
-export const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 5,
-  standardHeaders: true,
+  standardHeaders: 'draft-8',
   legacyHeaders: false,
+
   statusCode: 429,
+
   message: {
     status: 429,
     error: 'Too Many Requests',
-    message: 'Too many authentication attempts. Account locked for 15 minutes.',
+    message:
+      'You have made too many requests. Please wait a few minutes and try again.',
   },
+
   ...(process.env.NODE_ENV === 'test'
     ? {}
     : {
         store: new RedisStore({
           sendCommand,
           prefix: 'rl:public:',
+        }),
+      }),
+});
+
+/**
+ * Authentication limiter.
+ *
+ * Successful authentication requests are not counted.
+ * Failed login attempts are limited to 10 per 15 minutes.
+ */
+export const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+
+  skipSuccessfulRequests: true,
+
+  statusCode: 429,
+
+  message: {
+    status: 429,
+    error: 'Too Many Requests',
+    message:
+      'Too many failed authentication attempts. Please try again in 15 minutes.',
+  },
+
+  ...(process.env.NODE_ENV === 'test'
+    ? {}
+    : {
+        store: new RedisStore({
+          sendCommand,
+          prefix: 'rl:auth:',
         }),
       }),
 });
