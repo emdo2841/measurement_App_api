@@ -60,10 +60,11 @@ export const createMeasurementShare = async (
     })
 
     const frontendUrl = (
-      process.env.FRONTEND_URL ?? 'http://localhost:5173'
-    ).replace(/\/$/, '')
+  process.env.FRONTEND_URL ?? 'http://localhost:5173'
+).replace(/\/+$/, '')
 
-    const shareUrl = `${frontendUrl}/shared/measurements/${token}`
+const shareUrl =
+  `${frontendUrl}/shared/measurements/${token}`
 
     return res.status(201).json({
       status: 'successful',
