@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.resetPassword = exports.forgotPassword = exports.logout = exports.refreshToken = exports.googleLogin = exports.login = void 0;
+exports.changePassword = exports.verifyRegistrationOtp = exports.requestRegistrationOtp = exports.resetPassword = exports.forgotPassword = exports.logout = exports.refreshToken = exports.googleLogin = exports.login = void 0;
 const db_1 = require("../db");
 const user_schema_1 = require("../schemas/user.schema");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
@@ -15,6 +15,7 @@ const google_auth_library_1 = require("google-auth-library");
 const cryptos_1 = require("../Utils/cryptos");
 const email_1 = require("../services/email");
 const emailTemplate_1 = require("../template/emailTemplate");
+const node_crypto_1 = require("node:crypto");
 const GoogleLoginSchema = zod_1.z.object({
     credential: zod_1.z.string().min(1),
 });
@@ -119,6 +120,7 @@ const googleLogin = async (req, res) => {
                     googleId,
                     email,
                     name,
+                    emailVerifiedAt: new Date(),
                 },
             });
             isNewUser = true;
@@ -171,7 +173,7 @@ const refreshToken = async (req, res) => {
                 where: { userId: decoded.userId },
                 data: { revoked: true },
             });
-            res.clearCookie('refreshToken', { path: '/api/auth' });
+            res.clearCookie('refreshToken', { path: '/api/v1/auth' });
             return res.status(403).json({ error: 'Security breach detected. Please log in again.' });
         }
         if (!storedToken || storedToken.expiresAt < new Date()) {
@@ -219,7 +221,7 @@ const logout = async (req, res) => {
         });
     }
     // Clear client cookie
-    res.clearCookie('refreshToken', { path: '/api/auth' });
+    res.clearCookie('refreshToken', { path: '/api/v1/auth' });
     return res.status(200).json({ message: 'Logged out successfully' });
 };
 exports.logout = logout;
@@ -294,15 +296,162 @@ const resetPassword = async (req, res) => {
     // 3. Hash new password and clear token fields
     const saltRounds = 12;
     const hashedPassword = await bcryptjs_1.default.hash(newPassword, saltRounds);
-    await db_1.prisma.user.update({
-        where: { id: user.id },
-        data: {
-            password: hashedPassword,
-            resetTokens: null,
-            resetTokenExpiry: null,
-        },
-    });
+    await db_1.prisma.$transaction([
+        db_1.prisma.user.update({
+            where: { id: user.id },
+            data: {
+                password: hashedPassword,
+                resetTokens: null,
+                resetTokenExpiry: null,
+            },
+        }),
+        db_1.prisma.refreshToken.updateMany({
+            where: { userId: user.id },
+            data: { revoked: true },
+        }),
+    ]);
     return res.status(200).json({ message: 'Password reset successful. You can now log in.' });
 };
 exports.resetPassword = resetPassword;
+const requestRegistrationOtp = async (req, res) => {
+    const email = typeof req.body?.email === "string"
+        ? req.body.email.trim().toLowerCase()
+        : "";
+    if (!email) {
+        return res.status(400).json({
+            error: "Email is required.",
+        });
+    }
+    if (!zod_1.z.email().safeParse(email).success) {
+        return res.status(400).json({
+            error: "Enter a valid email address.",
+        });
+    }
+    const existingUser = await db_1.prisma.user.findUnique({
+        where: { email },
+    });
+    if (existingUser) {
+        return res.status(409).json({
+            error: "An account with this email already exists. Please sign in.",
+        });
+    }
+    const code = String((0, node_crypto_1.randomInt)(100000, 1000000));
+    const codeExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
+    await db_1.prisma.registrationVerification.upsert({
+        where: { email },
+        create: {
+            email,
+            codeHash: (0, auth_1.hashToken)(code),
+            codeExpiresAt,
+        },
+        update: {
+            codeHash: (0, auth_1.hashToken)(code),
+            codeExpiresAt,
+            attempts: 0,
+            verifiedAt: null,
+            registrationTokenHash: null,
+            registrationTokenExpiry: null,
+        },
+    });
+    try {
+        await (0, email_1.sendEmail)({
+            to: email,
+            subject: "Your TailorPro verification code",
+            html: (0, emailTemplate_1.registrationOtpTemplate)(code),
+        });
+    }
+    catch (error) {
+        req.log.error({ err: error }, "Registration OTP email failed");
+        return res.status(500).json({
+            error: "Unable to send the verification code. Please try again.",
+        });
+    }
+    return res.status(200).json({
+        message: "A six-digit verification code was sent to your email.",
+    });
+};
+exports.requestRegistrationOtp = requestRegistrationOtp;
+const verifyRegistrationOtp = async (req, res) => {
+    const email = typeof req.body?.email === "string"
+        ? req.body.email.trim().toLowerCase()
+        : "";
+    const code = typeof req.body?.code === "string"
+        ? req.body.code.trim()
+        : "";
+    if (!email || !/^\d{6}$/.test(code)) {
+        return res.status(400).json({
+            error: "Email and a valid six-digit code are required.",
+        });
+    }
+    const record = await db_1.prisma.registrationVerification.findUnique({
+        where: { email },
+    });
+    if (!record ||
+        record.codeExpiresAt <= new Date() ||
+        record.attempts >= 5) {
+        return res.status(400).json({
+            error: "This code is invalid or expired. Request a new code.",
+        });
+    }
+    if (record.codeHash !== (0, auth_1.hashToken)(code)) {
+        await db_1.prisma.registrationVerification.update({
+            where: { id: record.id },
+            data: {
+                attempts: {
+                    increment: 1,
+                },
+            },
+        });
+        return res.status(400).json({
+            error: "The verification code is incorrect.",
+        });
+    }
+    const { rawToken, hashedToken, expiresAt, } = (0, cryptos_1.generateResetToken)(30);
+    await db_1.prisma.registrationVerification.update({
+        where: { id: record.id },
+        data: {
+            verifiedAt: new Date(),
+            registrationTokenHash: hashedToken,
+            registrationTokenExpiry: expiresAt,
+        },
+    });
+    return res.status(200).json({
+        message: "Email verified. Complete your registration.",
+        registrationToken: rawToken,
+    });
+};
+exports.verifyRegistrationOtp = verifyRegistrationOtp;
+const changePassword = async (req, res) => {
+    const userId = req.user?.userId;
+    const currentPassword = typeof req.body?.currentPassword === 'string' ? req.body.currentPassword : '';
+    const newPassword = typeof req.body?.newPassword === 'string' ? req.body.newPassword : '';
+    if (!userId)
+        return res.status(401).json({ error: 'Unauthorized access.' });
+    if (!currentPassword || newPassword.length < 8) {
+        return res.status(400).json({ error: 'Current password and a new password of at least 8 characters are required.' });
+    }
+    if (currentPassword === newPassword) {
+        return res.status(400).json({ error: 'Your new password must be different from your current password.' });
+    }
+    const user = await db_1.prisma.user.findUnique({ where: { id: userId } });
+    if (!user?.password) {
+        return res.status(400).json({ error: 'This Google account does not have a password to change.' });
+    }
+    if (!(await bcryptjs_1.default.compare(currentPassword, user.password))) {
+        return res.status(400).json({ error: 'Current password is incorrect.' });
+    }
+    await db_1.prisma.$transaction([
+        db_1.prisma.user.update({
+            where: { id: user.id },
+            data: { password: await bcryptjs_1.default.hash(newPassword, 12) },
+        }),
+        db_1.prisma.refreshToken.updateMany({
+            where: { userId: user.id },
+            data: { revoked: true },
+        }),
+    ]);
+    res.clearCookie('refreshToken', { path: '/api/v1/auth' });
+    return res.status(200).json({ message: 'Password changed successfully. Please sign in again.' });
+};
+exports.changePassword = changePassword;
 //# sourceMappingURL=auth.js.map

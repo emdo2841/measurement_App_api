@@ -11,21 +11,27 @@ vi.mock('./Utils/mail', () => ({
 describe('GET /', () => {
   it('should return 200 with list of users from Prisma', async () => {
     const mockUsers = [
-      {
-        id: '1',
-        name: 'Joy Zabura',
-        email: 'john@example.com',
-        password: 'hashedpassword',
-        googleId: null,
-        phone: null,
-        image: null,
-        imagePublicId: null,
-        resetTokens: null,
-        resetTokenExpiry: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    ];
+  {
+    id: '1',
+    name: 'Joy Zabura',
+    email: 'john@example.com',
+    password: 'hashedpassword',
+    googleId: null,
+    phone: null,
+    image: null,
+    imagePublicId: null,
+    resetTokens: null,
+    resetTokenExpiry: null,
+
+    // New email-verification fields
+    emailVerifiedAt: new Date(),
+    verificationTokenHash: null,
+    verificationTokenExpiry: null,
+
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+]
 
     // Mock Prisma return value
     prismaMock.user.findMany.mockResolvedValue(mockUsers);

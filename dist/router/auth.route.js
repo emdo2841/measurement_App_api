@@ -14,4 +14,6 @@ router.post("/logout", auth_1.logout);
 router.post("/refresh-token", auth_1.refreshToken);
 router.post("/forgot-password", auth_1.forgotPassword);
 router.post("/reset-password", auth_1.resetPassword);
+router.post("/registration/request-code", auth_1.requestRegistrationOtp);
+router.post("/registration/verify-code", auth_1.verifyRegistrationOtp);
 //# sourceMappingURL=auth.route.js.map

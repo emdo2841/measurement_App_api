@@ -59,6 +59,18 @@ export const signupTemplate = (clientName: string, dashboardUrl?: string) => {
   return emailLayout('Welcome to EJ Services!', content);
 };
 
+export const emailVerificationTemplate = (name: string, verificationUrl: string) =>
+  emailLayout('Verify your email address', `
+    <p>Hi ${name},</p>
+    <p>Confirm that this email address belongs to you before signing in to TailorPro.</p>
+    <p style="text-align: center;">
+      <a href="${verificationUrl}" class="btn" target="_blank">Verify email</a>
+    </p>
+    <p>This link expires in <strong>24 hours</strong>.</p>
+    <p>If you did not create this account, you can ignore this email.</p>
+    <p style="word-break: break-all; color: #0066cc;">${verificationUrl}</p>
+  `);
+
 export const passwordResetTemplate = (clientName: string, resetUrl: string) => {
   const content = `
     <p>Hi ${clientName},</p>
@@ -121,4 +133,45 @@ export const orderDueReminderTemplate = (tailorName: string, clientName: string,
     <p>An unfinished order for <strong>${escapeReminderHtml(clientName)}</strong> is due on <strong>${date}</strong>.</p>
     <p>Check the order in your dashboard and plan the remaining work.</p>
   `);
+};
+
+
+export const registrationOtpTemplate = (
+  code: string,
+): string => {
+  const content = `
+    <p>Hello,</p>
+
+    <p>
+      Use the verification code below to continue creating
+      your TailorPro account.
+    </p>
+
+    <div
+      style="
+        margin: 24px 0;
+        text-align: center;
+        font-size: 32px;
+        font-weight: 800;
+        letter-spacing: 8px;
+        color: #0066cc;
+      "
+    >
+      ${code}
+    </div>
+
+    <p>
+      This code expires in <strong>10 minutes</strong>.
+    </p>
+
+    <p>
+      If you did not request this code, you can ignore
+      this email.
+    </p>
+  `;
+
+  return emailLayout(
+    "Verify Your Email Address",
+    content,
+  );
 };

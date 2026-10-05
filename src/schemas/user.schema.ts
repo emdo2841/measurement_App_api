@@ -7,6 +7,7 @@ export const createUserSchema = z.object({
     phone: z.string().min(10, { message: "Phone is required" }).max(15, { message: "Phone must be less than 15 characters" }),
     email: z.email({ message: "Invalid email address" }).trim().toLowerCase(),
     password: z.string().min(8, "Password must be at least 8 characters"),
+    registrationToken: z.string().min(1, "Email verification is required"),
     
 })
 export const UpdateUserSchema = z.object({

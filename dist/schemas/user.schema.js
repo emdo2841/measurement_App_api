@@ -8,6 +8,7 @@ exports.createUserSchema = zod_1.z.object({
     phone: zod_1.z.string().min(10, { message: "Phone is required" }).max(15, { message: "Phone must be less than 15 characters" }),
     email: zod_1.z.email({ message: "Invalid email address" }).trim().toLowerCase(),
     password: zod_1.z.string().min(8, "Password must be at least 8 characters"),
+    registrationToken: zod_1.z.string().min(1, "Email verification is required"),
 });
 exports.UpdateUserSchema = zod_1.z.object({
     name: zod_1.z.string().trim().min(1).max(100).optional(),

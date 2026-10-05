@@ -4,6 +4,7 @@ export declare const createUserSchema: z.ZodObject<{
     phone: z.ZodString;
     email: z.ZodEmail;
     password: z.ZodString;
+    registrationToken: z.ZodString;
 }, z.core.$strip>;
 export declare const UpdateUserSchema: z.ZodObject<{
     name: z.ZodOptional<z.ZodString>;

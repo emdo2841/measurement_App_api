@@ -25,6 +25,10 @@ vitest_1.vi.mock('./Utils/mail', () => ({
                 imagePublicId: null,
                 resetTokens: null,
                 resetTokenExpiry: null,
+                // New email-verification fields
+                emailVerifiedAt: new Date(),
+                verificationTokenHash: null,
+                verificationTokenExpiry: null,
                 createdAt: new Date(),
                 updatedAt: new Date(),
             },

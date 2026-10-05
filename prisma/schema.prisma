@@ -24,6 +24,7 @@ model User {
   imagePublicId     String?
   resetTokens       String?
   resetTokenExpiry  DateTime?
+  emailVerifiedAt   DateTime?
   refreshToken      RefreshToken[]
   pushSubscriptions PushSubscription[]
   createdAt         DateTime           @default(now())
@@ -31,6 +32,21 @@ model User {
   updatedAt         DateTime           @updatedAt
 
   @@map("users")
+}
+
+model RegistrationVerification {
+  id                      String    @id @default(uuid())
+  email                   String    @unique
+  codeHash                String
+  codeExpiresAt           DateTime
+  attempts                Int       @default(0)
+  verifiedAt              DateTime?
+  registrationTokenHash   String?   @unique
+  registrationTokenExpiry DateTime?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+
+  @@map("registration_verifications")
 }
 
 model RefreshToken {
@@ -54,7 +70,7 @@ model Client {
   gender        Gender
   tailor        User         @relation(fields: [tailorId], references: [id], onDelete: Cascade)
   tailorId      String
-  measurements   Measurement[]
+  measurements  Measurement[]
   image         String?
   imagePublicId String?
   orders        Order[]

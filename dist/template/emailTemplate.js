@@ -1,7 +1,7 @@
 "use strict";
 // templates/emailTemplates.ts
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.orderDueReminderTemplate = exports.orderReceiptTemplate = exports.passwordResetSuccessTemplate = exports.passwordResetTemplate = exports.signupTemplate = void 0;
+exports.registrationOtpTemplate = exports.orderDueReminderTemplate = exports.orderReceiptTemplate = exports.passwordResetSuccessTemplate = exports.passwordResetTemplate = exports.emailVerificationTemplate = exports.signupTemplate = void 0;
 // Base wrapper to maintain consistent branding and styling
 const emailLayout = (title, content) => `
 <!DOCTYPE html>
@@ -59,6 +59,17 @@ const signupTemplate = (clientName, dashboardUrl) => {
     return emailLayout('Welcome to EJ Services!', content);
 };
 exports.signupTemplate = signupTemplate;
+const emailVerificationTemplate = (name, verificationUrl) => emailLayout('Verify your email address', `
+    <p>Hi ${name},</p>
+    <p>Confirm that this email address belongs to you before signing in to TailorPro.</p>
+    <p style="text-align: center;">
+      <a href="${verificationUrl}" class="btn" target="_blank">Verify email</a>
+    </p>
+    <p>This link expires in <strong>24 hours</strong>.</p>
+    <p>If you did not create this account, you can ignore this email.</p>
+    <p style="word-break: break-all; color: #0066cc;">${verificationUrl}</p>
+  `);
+exports.emailVerificationTemplate = emailVerificationTemplate;
 const passwordResetTemplate = (clientName, resetUrl) => {
     const content = `
     <p>Hi ${clientName},</p>
@@ -118,4 +129,38 @@ const orderDueReminderTemplate = (tailorName, clientName, dueDate) => {
   `);
 };
 exports.orderDueReminderTemplate = orderDueReminderTemplate;
+const registrationOtpTemplate = (code) => {
+    const content = `
+    <p>Hello,</p>
+
+    <p>
+      Use the verification code below to continue creating
+      your TailorPro account.
+    </p>
+
+    <div
+      style="
+        margin: 24px 0;
+        text-align: center;
+        font-size: 32px;
+        font-weight: 800;
+        letter-spacing: 8px;
+        color: #0066cc;
+      "
+    >
+      ${code}
+    </div>
+
+    <p>
+      This code expires in <strong>10 minutes</strong>.
+    </p>
+
+    <p>
+      If you did not request this code, you can ignore
+      this email.
+    </p>
+  `;
+    return emailLayout("Verify Your Email Address", content);
+};
+exports.registrationOtpTemplate = registrationOtpTemplate;
 //# sourceMappingURL=emailTemplate.js.map

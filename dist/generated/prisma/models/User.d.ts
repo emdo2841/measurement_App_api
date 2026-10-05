@@ -21,6 +21,7 @@ export type UserMinAggregateOutputType = {
     imagePublicId: string | null;
     resetTokens: string | null;
     resetTokenExpiry: Date | null;
+    emailVerifiedAt: Date | null;
     createdAt: Date | null;
     updatedAt: Date | null;
 };
@@ -35,6 +36,7 @@ export type UserMaxAggregateOutputType = {
     imagePublicId: string | null;
     resetTokens: string | null;
     resetTokenExpiry: Date | null;
+    emailVerifiedAt: Date | null;
     createdAt: Date | null;
     updatedAt: Date | null;
 };
@@ -49,6 +51,7 @@ export type UserCountAggregateOutputType = {
     imagePublicId: number;
     resetTokens: number;
     resetTokenExpiry: number;
+    emailVerifiedAt: number;
     createdAt: number;
     updatedAt: number;
     _all: number;
@@ -64,6 +67,7 @@ export type UserMinAggregateInputType = {
     imagePublicId?: true;
     resetTokens?: true;
     resetTokenExpiry?: true;
+    emailVerifiedAt?: true;
     createdAt?: true;
     updatedAt?: true;
 };
@@ -78,6 +82,7 @@ export type UserMaxAggregateInputType = {
     imagePublicId?: true;
     resetTokens?: true;
     resetTokenExpiry?: true;
+    emailVerifiedAt?: true;
     createdAt?: true;
     updatedAt?: true;
 };
@@ -92,6 +97,7 @@ export type UserCountAggregateInputType = {
     imagePublicId?: true;
     resetTokens?: true;
     resetTokenExpiry?: true;
+    emailVerifiedAt?: true;
     createdAt?: true;
     updatedAt?: true;
     _all?: true;
@@ -169,6 +175,7 @@ export type UserGroupByOutputType = {
     imagePublicId: string | null;
     resetTokens: string | null;
     resetTokenExpiry: Date | null;
+    emailVerifiedAt: Date | null;
     createdAt: Date;
     updatedAt: Date;
     _count: UserCountAggregateOutputType | null;
@@ -192,6 +199,7 @@ export type UserWhereInput = {
     imagePublicId?: Prisma.StringNullableFilter<"User"> | string | null;
     resetTokens?: Prisma.StringNullableFilter<"User"> | string | null;
     resetTokenExpiry?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null;
+    emailVerifiedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null;
     createdAt?: Prisma.DateTimeFilter<"User"> | Date | string;
     updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string;
     refreshToken?: Prisma.RefreshTokenListRelationFilter;
@@ -209,6 +217,7 @@ export type UserOrderByWithRelationInput = {
     imagePublicId?: Prisma.SortOrderInput | Prisma.SortOrder;
     resetTokens?: Prisma.SortOrderInput | Prisma.SortOrder;
     resetTokenExpiry?: Prisma.SortOrderInput | Prisma.SortOrder;
+    emailVerifiedAt?: Prisma.SortOrderInput | Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
     updatedAt?: Prisma.SortOrder;
     refreshToken?: Prisma.RefreshTokenOrderByRelationAggregateInput;
@@ -229,6 +238,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
     imagePublicId?: Prisma.StringNullableFilter<"User"> | string | null;
     resetTokens?: Prisma.StringNullableFilter<"User"> | string | null;
     resetTokenExpiry?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null;
+    emailVerifiedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null;
     createdAt?: Prisma.DateTimeFilter<"User"> | Date | string;
     updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string;
     refreshToken?: Prisma.RefreshTokenListRelationFilter;
@@ -246,6 +256,7 @@ export type UserOrderByWithAggregationInput = {
     imagePublicId?: Prisma.SortOrderInput | Prisma.SortOrder;
     resetTokens?: Prisma.SortOrderInput | Prisma.SortOrder;
     resetTokenExpiry?: Prisma.SortOrderInput | Prisma.SortOrder;
+    emailVerifiedAt?: Prisma.SortOrderInput | Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
     updatedAt?: Prisma.SortOrder;
     _count?: Prisma.UserCountOrderByAggregateInput;
@@ -266,6 +277,7 @@ export type UserScalarWhereWithAggregatesInput = {
     imagePublicId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null;
     resetTokens?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null;
     resetTokenExpiry?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null;
+    emailVerifiedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null;
     createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string;
     updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string;
 };
@@ -280,6 +292,7 @@ export type UserCreateInput = {
     imagePublicId?: string | null;
     resetTokens?: string | null;
     resetTokenExpiry?: Date | string | null;
+    emailVerifiedAt?: Date | string | null;
     createdAt?: Date | string;
     updatedAt?: Date | string;
     refreshToken?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput;
@@ -297,6 +310,7 @@ export type UserUncheckedCreateInput = {
     imagePublicId?: string | null;
     resetTokens?: string | null;
     resetTokenExpiry?: Date | string | null;
+    emailVerifiedAt?: Date | string | null;
     createdAt?: Date | string;
     updatedAt?: Date | string;
     refreshToken?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput;
@@ -314,6 +328,7 @@ export type UserUpdateInput = {
     imagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     resetTokens?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     resetTokenExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     refreshToken?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput;
@@ -331,6 +346,7 @@ export type UserUncheckedUpdateInput = {
     imagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     resetTokens?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     resetTokenExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     refreshToken?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput;
@@ -348,6 +364,7 @@ export type UserCreateManyInput = {
     imagePublicId?: string | null;
     resetTokens?: string | null;
     resetTokenExpiry?: Date | string | null;
+    emailVerifiedAt?: Date | string | null;
     createdAt?: Date | string;
     updatedAt?: Date | string;
 };
@@ -362,6 +379,7 @@ export type UserUpdateManyMutationInput = {
     imagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     resetTokens?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     resetTokenExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
@@ -376,6 +394,7 @@ export type UserUncheckedUpdateManyInput = {
     imagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     resetTokens?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     resetTokenExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
@@ -390,6 +409,7 @@ export type UserCountOrderByAggregateInput = {
     imagePublicId?: Prisma.SortOrder;
     resetTokens?: Prisma.SortOrder;
     resetTokenExpiry?: Prisma.SortOrder;
+    emailVerifiedAt?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
     updatedAt?: Prisma.SortOrder;
 };
@@ -404,6 +424,7 @@ export type UserMaxOrderByAggregateInput = {
     imagePublicId?: Prisma.SortOrder;
     resetTokens?: Prisma.SortOrder;
     resetTokenExpiry?: Prisma.SortOrder;
+    emailVerifiedAt?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
     updatedAt?: Prisma.SortOrder;
 };
@@ -418,6 +439,7 @@ export type UserMinOrderByAggregateInput = {
     imagePublicId?: Prisma.SortOrder;
     resetTokens?: Prisma.SortOrder;
     resetTokenExpiry?: Prisma.SortOrder;
+    emailVerifiedAt?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
     updatedAt?: Prisma.SortOrder;
 };
@@ -484,6 +506,7 @@ export type UserCreateWithoutRefreshTokenInput = {
     imagePublicId?: string | null;
     resetTokens?: string | null;
     resetTokenExpiry?: Date | string | null;
+    emailVerifiedAt?: Date | string | null;
     createdAt?: Date | string;
     updatedAt?: Date | string;
     pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput;
@@ -500,6 +523,7 @@ export type UserUncheckedCreateWithoutRefreshTokenInput = {
     imagePublicId?: string | null;
     resetTokens?: string | null;
     resetTokenExpiry?: Date | string | null;
+    emailVerifiedAt?: Date | string | null;
     createdAt?: Date | string;
     updatedAt?: Date | string;
     pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput;
@@ -529,6 +553,7 @@ export type UserUpdateWithoutRefreshTokenInput = {
     imagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     resetTokens?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     resetTokenExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput;
@@ -545,6 +570,7 @@ export type UserUncheckedUpdateWithoutRefreshTokenInput = {
     imagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     resetTokens?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     resetTokenExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput;
@@ -561,6 +587,7 @@ export type UserCreateWithoutClientsInput = {
     imagePublicId?: string | null;
     resetTokens?: string | null;
     resetTokenExpiry?: Date | string | null;
+    emailVerifiedAt?: Date | string | null;
     createdAt?: Date | string;
     updatedAt?: Date | string;
     refreshToken?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput;
@@ -577,6 +604,7 @@ export type UserUncheckedCreateWithoutClientsInput = {
     imagePublicId?: string | null;
     resetTokens?: string | null;
     resetTokenExpiry?: Date | string | null;
+    emailVerifiedAt?: Date | string | null;
     createdAt?: Date | string;
     updatedAt?: Date | string;
     refreshToken?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput;
@@ -606,6 +634,7 @@ export type UserUpdateWithoutClientsInput = {
     imagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     resetTokens?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     resetTokenExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     refreshToken?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput;
@@ -622,6 +651,7 @@ export type UserUncheckedUpdateWithoutClientsInput = {
     imagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     resetTokens?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     resetTokenExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     refreshToken?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput;
@@ -638,6 +668,7 @@ export type UserCreateWithoutPushSubscriptionsInput = {
     imagePublicId?: string | null;
     resetTokens?: string | null;
     resetTokenExpiry?: Date | string | null;
+    emailVerifiedAt?: Date | string | null;
     createdAt?: Date | string;
     updatedAt?: Date | string;
     refreshToken?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput;
@@ -654,6 +685,7 @@ export type UserUncheckedCreateWithoutPushSubscriptionsInput = {
     imagePublicId?: string | null;
     resetTokens?: string | null;
     resetTokenExpiry?: Date | string | null;
+    emailVerifiedAt?: Date | string | null;
     createdAt?: Date | string;
     updatedAt?: Date | string;
     refreshToken?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput;
@@ -683,6 +715,7 @@ export type UserUpdateWithoutPushSubscriptionsInput = {
     imagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     resetTokens?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     resetTokenExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     refreshToken?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput;
@@ -699,6 +732,7 @@ export type UserUncheckedUpdateWithoutPushSubscriptionsInput = {
     imagePublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     resetTokens?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     resetTokenExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     refreshToken?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput;
@@ -755,6 +789,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
     imagePublicId?: boolean;
     resetTokens?: boolean;
     resetTokenExpiry?: boolean;
+    emailVerifiedAt?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
     refreshToken?: boolean | Prisma.User$refreshTokenArgs<ExtArgs>;
@@ -773,6 +808,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
     imagePublicId?: boolean;
     resetTokens?: boolean;
     resetTokenExpiry?: boolean;
+    emailVerifiedAt?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
 }, ExtArgs["result"]["user"]>;
@@ -787,6 +823,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
     imagePublicId?: boolean;
     resetTokens?: boolean;
     resetTokenExpiry?: boolean;
+    emailVerifiedAt?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
 }, ExtArgs["result"]["user"]>;
@@ -801,10 +838,11 @@ export type UserSelectScalar = {
     imagePublicId?: boolean;
     resetTokens?: boolean;
     resetTokenExpiry?: boolean;
+    emailVerifiedAt?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
 };
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "password" | "googleId" | "phone" | "image" | "imagePublicId" | "resetTokens" | "resetTokenExpiry" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>;
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "password" | "googleId" | "phone" | "image" | "imagePublicId" | "resetTokens" | "resetTokenExpiry" | "emailVerifiedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>;
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     refreshToken?: boolean | Prisma.User$refreshTokenArgs<ExtArgs>;
     pushSubscriptions?: boolean | Prisma.User$pushSubscriptionsArgs<ExtArgs>;
@@ -831,6 +869,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
         imagePublicId: string | null;
         resetTokens: string | null;
         resetTokenExpiry: Date | null;
+        emailVerifiedAt: Date | null;
         createdAt: Date;
         updatedAt: Date;
     }, ExtArgs["result"]["user"]>;
@@ -1200,6 +1239,7 @@ export interface UserFieldRefs {
     readonly imagePublicId: Prisma.FieldRef<"User", 'String'>;
     readonly resetTokens: Prisma.FieldRef<"User", 'String'>;
     readonly resetTokenExpiry: Prisma.FieldRef<"User", 'DateTime'>;
+    readonly emailVerifiedAt: Prisma.FieldRef<"User", 'DateTime'>;
     readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>;
     readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>;
 }

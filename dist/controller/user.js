@@ -11,6 +11,7 @@ require("dotenv/config");
 const cloudinary_1 = require("../Utils/cloudinary");
 const email_1 = require("../services/email");
 const emailTemplate_1 = require("../template/emailTemplate");
+const cryptos_1 = require("../Utils/cryptos");
 const cache_1 = require("../middleWare/cache");
 const userCacheKey = (id) => `user:${id}`;
 const profileCacheKey = (id) => `user:profile:${id}`;
@@ -22,6 +23,7 @@ const publicUserSelect = {
     image: true,
     createdAt: true,
     updatedAt: true,
+    emailVerifiedAt: true,
 };
 const createUser = async (req, res) => {
     try {
@@ -30,7 +32,24 @@ const createUser = async (req, res) => {
         if (!validatedData.success) {
             return res.status(400).json({ error: validatedData.error.format() });
         }
-        const { email, name, password, phone } = validatedData.data;
+        const { email, name, password, phone, registrationToken } = validatedData.data;
+        const verifiedRegistration = await db_1.prisma.registrationVerification.findFirst({
+            where: {
+                email,
+                verifiedAt: {
+                    not: null,
+                },
+                registrationTokenHash: (0, cryptos_1.hashToken)(registrationToken),
+                registrationTokenExpiry: {
+                    gt: new Date(),
+                },
+            },
+        });
+        if (!verifiedRegistration) {
+            return res.status(400).json({
+                error: "Verify your email before completing registration.",
+            });
+        }
         let imageUrl;
         let imagePublicId;
         if (file) {
@@ -43,29 +62,46 @@ const createUser = async (req, res) => {
             return res.status(409).json({ message: "User already exists" });
         }
         const hashedPassword = await bcryptjs_1.default.hash(password, 10);
-        const user = await db_1.prisma.user.create({
-            data: {
-                email,
-                name,
-                image: imageUrl,
-                imagePublicId,
-                password: hashedPassword,
-                phone
-            },
-            select: publicUserSelect,
+        const user = await db_1.prisma.$transaction(async (tx) => {
+            const createdUser = await tx.user.create({
+                data: {
+                    email,
+                    name,
+                    phone,
+                    password: hashedPassword,
+                    image: imageUrl,
+                    imagePublicId,
+                    emailVerifiedAt: new Date(),
+                },
+                select: publicUserSelect,
+            });
+            await tx.registrationVerification.delete({
+                where: {
+                    id: verifiedRegistration.id,
+                },
+            });
+            return createdUser;
         });
-        const htmlContent = (0, emailTemplate_1.signupTemplate)(user.name);
+        // The account now exists, so send the welcome email.
         try {
             await (0, email_1.sendEmail)({
-                to: email,
-                subject: "Welcome to EJ Services. ",
-                html: htmlContent
+                to: user.email,
+                subject: "Welcome to TailorPro!",
+                html: (0, emailTemplate_1.signupTemplate)(user.name),
             });
         }
         catch (emailError) {
-            req.log.error({ err: emailError }, "Failed to send welcome email");
+            req.log.warn({
+                err: emailError,
+                userId: user.id,
+                email: user.email,
+            }, "Account created, but welcome email failed");
         }
-        return res.status(201).json({ status: "successful", data: user });
+        return res.status(201).json({
+            status: "successful",
+            message: "Account created successfully. Welcome to TailorPro!",
+            data: user,
+        });
     }
     catch (error) {
         req.log.error({ error: error }, "failed to create user");

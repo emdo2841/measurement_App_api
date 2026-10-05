@@ -245,6 +245,7 @@ export type FieldRef<Model, FieldType> = runtime.FieldRef<Model, FieldType>;
 type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRef<Model, FieldType>;
 export declare const ModelName: {
     readonly User: "User";
+    readonly RegistrationVerification: "RegistrationVerification";
     readonly RefreshToken: "RefreshToken";
     readonly Client: "Client";
     readonly Measurement: "Measurement";
@@ -266,7 +267,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         omit: GlobalOmitOptions;
     };
     meta: {
-        modelProps: "user" | "refreshToken" | "client" | "measurement" | "measurementShare" | "measurementHistory" | "order" | "pushSubscription" | "orderReminder" | "emailOrderReminder";
+        modelProps: "user" | "registrationVerification" | "refreshToken" | "client" | "measurement" | "measurementShare" | "measurementHistory" | "order" | "pushSubscription" | "orderReminder" | "emailOrderReminder";
         txIsolationLevel: TransactionIsolationLevel;
     };
     model: {
@@ -341,6 +342,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
                 count: {
                     args: Prisma.UserCountArgs<ExtArgs>;
                     result: runtime.Types.Utils.Optional<Prisma.UserCountAggregateOutputType> | number;
+                };
+            };
+        };
+        RegistrationVerification: {
+            payload: Prisma.$RegistrationVerificationPayload<ExtArgs>;
+            fields: Prisma.RegistrationVerificationFieldRefs;
+            operations: {
+                findUnique: {
+                    args: Prisma.RegistrationVerificationFindUniqueArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$RegistrationVerificationPayload> | null;
+                };
+                findUniqueOrThrow: {
+                    args: Prisma.RegistrationVerificationFindUniqueOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$RegistrationVerificationPayload>;
+                };
+                findFirst: {
+                    args: Prisma.RegistrationVerificationFindFirstArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$RegistrationVerificationPayload> | null;
+                };
+                findFirstOrThrow: {
+                    args: Prisma.RegistrationVerificationFindFirstOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$RegistrationVerificationPayload>;
+                };
+                findMany: {
+                    args: Prisma.RegistrationVerificationFindManyArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$RegistrationVerificationPayload>[];
+                };
+                create: {
+                    args: Prisma.RegistrationVerificationCreateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$RegistrationVerificationPayload>;
+                };
+                createMany: {
+                    args: Prisma.RegistrationVerificationCreateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                createManyAndReturn: {
+                    args: Prisma.RegistrationVerificationCreateManyAndReturnArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$RegistrationVerificationPayload>[];
+                };
+                delete: {
+                    args: Prisma.RegistrationVerificationDeleteArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$RegistrationVerificationPayload>;
+                };
+                update: {
+                    args: Prisma.RegistrationVerificationUpdateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$RegistrationVerificationPayload>;
+                };
+                deleteMany: {
+                    args: Prisma.RegistrationVerificationDeleteManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateMany: {
+                    args: Prisma.RegistrationVerificationUpdateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateManyAndReturn: {
+                    args: Prisma.RegistrationVerificationUpdateManyAndReturnArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$RegistrationVerificationPayload>[];
+                };
+                upsert: {
+                    args: Prisma.RegistrationVerificationUpsertArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$RegistrationVerificationPayload>;
+                };
+                aggregate: {
+                    args: Prisma.RegistrationVerificationAggregateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.AggregateRegistrationVerification>;
+                };
+                groupBy: {
+                    args: Prisma.RegistrationVerificationGroupByArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.RegistrationVerificationGroupByOutputType>[];
+                };
+                count: {
+                    args: Prisma.RegistrationVerificationCountArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.RegistrationVerificationCountAggregateOutputType> | number;
                 };
             };
         };
@@ -1055,10 +1130,24 @@ export declare const UserScalarFieldEnum: {
     readonly imagePublicId: "imagePublicId";
     readonly resetTokens: "resetTokens";
     readonly resetTokenExpiry: "resetTokenExpiry";
+    readonly emailVerifiedAt: "emailVerifiedAt";
     readonly createdAt: "createdAt";
     readonly updatedAt: "updatedAt";
 };
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum];
+export declare const RegistrationVerificationScalarFieldEnum: {
+    readonly id: "id";
+    readonly email: "email";
+    readonly codeHash: "codeHash";
+    readonly codeExpiresAt: "codeExpiresAt";
+    readonly attempts: "attempts";
+    readonly verifiedAt: "verifiedAt";
+    readonly registrationTokenHash: "registrationTokenHash";
+    readonly registrationTokenExpiry: "registrationTokenExpiry";
+    readonly createdAt: "createdAt";
+    readonly updatedAt: "updatedAt";
+};
+export type RegistrationVerificationScalarFieldEnum = (typeof RegistrationVerificationScalarFieldEnum)[keyof typeof RegistrationVerificationScalarFieldEnum];
 export declare const RefreshTokenScalarFieldEnum: {
     readonly id: "id";
     readonly hashedToken: "hashedToken";
@@ -1196,6 +1285,14 @@ export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel
  */
 export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>;
 /**
+ * Reference to a field of type 'Int'
+ */
+export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>;
+/**
+ * Reference to a field of type 'Int[]'
+ */
+export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>;
+/**
  * Reference to a field of type 'Boolean'
  */
 export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>;
@@ -1239,14 +1336,6 @@ export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, '
  * Reference to a field of type 'Float[]'
  */
 export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>;
-/**
- * Reference to a field of type 'Int'
- */
-export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>;
-/**
- * Reference to a field of type 'Int[]'
- */
-export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>;
 /**
  * Batch Payload for updateMany & deleteMany & createMany
  */
@@ -1395,6 +1484,7 @@ export interface PrismaClientOptionsWithAdapter extends PrismaClientBaseOptions 
 export type PrismaClientOptions = PrismaClientOptionsWithAccelerateUrl | PrismaClientOptionsWithAdapter;
 export type GlobalOmitConfig = {
     user?: Prisma.UserOmit;
+    registrationVerification?: Prisma.RegistrationVerificationOmit;
     refreshToken?: Prisma.RefreshTokenOmit;
     client?: Prisma.ClientOmit;
     measurement?: Prisma.MeasurementOmit;

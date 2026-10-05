@@ -27,6 +27,7 @@ export declare const JsonNull: import("@prisma/client-runtime-utils").JsonNullCl
 export declare const AnyNull: import("@prisma/client-runtime-utils").AnyNullClass;
 export declare const ModelName: {
     readonly User: "User";
+    readonly RegistrationVerification: "RegistrationVerification";
     readonly RefreshToken: "RefreshToken";
     readonly Client: "Client";
     readonly Measurement: "Measurement";
@@ -56,10 +57,24 @@ export declare const UserScalarFieldEnum: {
     readonly imagePublicId: "imagePublicId";
     readonly resetTokens: "resetTokens";
     readonly resetTokenExpiry: "resetTokenExpiry";
+    readonly emailVerifiedAt: "emailVerifiedAt";
     readonly createdAt: "createdAt";
     readonly updatedAt: "updatedAt";
 };
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum];
+export declare const RegistrationVerificationScalarFieldEnum: {
+    readonly id: "id";
+    readonly email: "email";
+    readonly codeHash: "codeHash";
+    readonly codeExpiresAt: "codeExpiresAt";
+    readonly attempts: "attempts";
+    readonly verifiedAt: "verifiedAt";
+    readonly registrationTokenHash: "registrationTokenHash";
+    readonly registrationTokenExpiry: "registrationTokenExpiry";
+    readonly createdAt: "createdAt";
+    readonly updatedAt: "updatedAt";
+};
+export type RegistrationVerificationScalarFieldEnum = (typeof RegistrationVerificationScalarFieldEnum)[keyof typeof RegistrationVerificationScalarFieldEnum];
 export declare const RefreshTokenScalarFieldEnum: {
     readonly id: "id";
     readonly hashedToken: "hashedToken";

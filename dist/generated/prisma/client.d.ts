@@ -27,6 +27,11 @@ export { Prisma };
  */
 export type User = Prisma.UserModel;
 /**
+ * Model RegistrationVerification
+ *
+ */
+export type RegistrationVerification = Prisma.RegistrationVerificationModel;
+/**
  * Model RefreshToken
  *
  */

@@ -48,7 +48,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.JsonNullValueFilter = exports.NullsOrder = exports.QueryMode = exports.JsonNullValueInput = exports.SortOrder = exports.EmailOrderReminderScalarFieldEnum = exports.OrderReminderScalarFieldEnum = exports.PushSubscriptionScalarFieldEnum = exports.OrderScalarFieldEnum = exports.MeasurementHistoryScalarFieldEnum = exports.MeasurementShareScalarFieldEnum = exports.MeasurementScalarFieldEnum = exports.ClientScalarFieldEnum = exports.RefreshTokenScalarFieldEnum = exports.UserScalarFieldEnum = exports.TransactionIsolationLevel = exports.ModelName = exports.AnyNull = exports.JsonNull = exports.DbNull = exports.NullTypes = exports.Decimal = void 0;
+exports.JsonNullValueFilter = exports.NullsOrder = exports.QueryMode = exports.JsonNullValueInput = exports.SortOrder = exports.EmailOrderReminderScalarFieldEnum = exports.OrderReminderScalarFieldEnum = exports.PushSubscriptionScalarFieldEnum = exports.OrderScalarFieldEnum = exports.MeasurementHistoryScalarFieldEnum = exports.MeasurementShareScalarFieldEnum = exports.MeasurementScalarFieldEnum = exports.ClientScalarFieldEnum = exports.RefreshTokenScalarFieldEnum = exports.RegistrationVerificationScalarFieldEnum = exports.UserScalarFieldEnum = exports.TransactionIsolationLevel = exports.ModelName = exports.AnyNull = exports.JsonNull = exports.DbNull = exports.NullTypes = exports.Decimal = void 0;
 const runtime = __importStar(require("@prisma/client/runtime/index-browser"));
 exports.Decimal = runtime.Decimal;
 exports.NullTypes = {
@@ -76,6 +76,7 @@ exports.JsonNull = runtime.JsonNull;
 exports.AnyNull = runtime.AnyNull;
 exports.ModelName = {
     User: 'User',
+    RegistrationVerification: 'RegistrationVerification',
     RefreshToken: 'RefreshToken',
     Client: 'Client',
     Measurement: 'Measurement',
@@ -106,6 +107,19 @@ exports.UserScalarFieldEnum = {
     imagePublicId: 'imagePublicId',
     resetTokens: 'resetTokens',
     resetTokenExpiry: 'resetTokenExpiry',
+    emailVerifiedAt: 'emailVerifiedAt',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+};
+exports.RegistrationVerificationScalarFieldEnum = {
+    id: 'id',
+    email: 'email',
+    codeHash: 'codeHash',
+    codeExpiresAt: 'codeExpiresAt',
+    attempts: 'attempts',
+    verifiedAt: 'verifiedAt',
+    registrationTokenHash: 'registrationTokenHash',
+    registrationTokenExpiry: 'registrationTokenExpiry',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
 };

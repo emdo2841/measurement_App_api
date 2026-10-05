@@ -6,6 +6,9 @@ import 'dotenv/config';
 import { uploadImageBuffer, deleteImage } from "../Utils/cloudinary";
 import { sendEmail } from "../services/email";
 import { signupTemplate } from "../template/emailTemplate";
+import {
+  hashToken,
+} from "../Utils/cryptos";
 import { getCache, setCache, delCache } from '../middleWare/cache';
 import { Prisma } from "../generated/prisma/client";
 
@@ -20,6 +23,7 @@ const publicUserSelect = {
     image: true,
     createdAt: true,
     updatedAt: true,
+    emailVerifiedAt: true,
 } as const;
 
 
@@ -30,7 +34,32 @@ export const createUser = async (req: Request, res: Response) => {
         if (!validatedData.success) {
             return res.status(400).json({ error: validatedData.error.format() });
         }
-        const { email, name, password, phone } = validatedData.data;
+        const { email, name, password, phone, registrationToken } = validatedData.data;
+
+        const verifiedRegistration =
+  await prisma.registrationVerification.findFirst({
+    where: {
+      email,
+
+      verifiedAt: {
+        not: null,
+      },
+
+      registrationTokenHash:
+        hashToken(registrationToken),
+
+      registrationTokenExpiry: {
+        gt: new Date(),
+      },
+    },
+  });
+
+if (!verifiedRegistration) {
+  return res.status(400).json({
+    error:
+      "Verify your email before completing registration.",
+  });
+}
         
         let imageUrl: string | undefined;
         let imagePublicId: string | undefined;
@@ -46,28 +75,58 @@ export const createUser = async (req: Request, res: Response) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const user = await prisma.user.create({
-            data: {
-                email,
-                name,
-                image: imageUrl,
-                imagePublicId,
-                password: hashedPassword,
-                phone
-            },
-            select: publicUserSelect,
-        });
-        const htmlContent = signupTemplate(user.name);
-        try {
-            await sendEmail({
-                to: email,
-                subject: "Welcome to EJ Services. ",
-                html: htmlContent
-            })
-        } catch (emailError) {
-            req.log.error({ err: emailError }, "Failed to send welcome email");
-        }
-        return res.status(201).json({status: "successful", data: user});
+        
+        const user = await prisma.$transaction(
+  async (tx) => {
+    const createdUser =
+      await tx.user.create({
+        data: {
+          email,
+          name,
+          phone,
+          password: hashedPassword,
+          image: imageUrl,
+          imagePublicId,
+          emailVerifiedAt: new Date(),
+        },
+
+        select: publicUserSelect,
+      });
+
+    await tx.registrationVerification.delete({
+      where: {
+        id: verifiedRegistration.id,
+      },
+    });
+
+    return createdUser;
+  },
+);
+
+// The account now exists, so send the welcome email.
+try {
+  await sendEmail({
+    to: user.email,
+    subject: "Welcome to TailorPro!",
+    html: signupTemplate(user.name),
+  });
+} catch (emailError) {
+  req.log.warn(
+    {
+      err: emailError,
+      userId: user.id,
+      email: user.email,
+    },
+    "Account created, but welcome email failed",
+  );
+}
+
+return res.status(201).json({
+  status: "successful",
+  message:
+    "Account created successfully. Welcome to TailorPro!",
+  data: user,
+});
     } catch (error) {
         req.log.error({error:error}, "failed to create user")
         return res.status(500).json({ error: "Internal server error" });

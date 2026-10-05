@@ -4,17 +4,17 @@ import { LoginSchema } from "../schemas/user.schema";
 import jwt from 'jsonwebtoken';
 import bcrypt from "bcryptjs";
 import 'dotenv/config';
-import {
-  generateAccessToken,
-  generateRefreshToken,
-  hashToken,
-  setRefreshTokenCookie,
-} from '../Utils/auth';
+import { generateAccessToken, generateRefreshToken, hashToken, setRefreshTokenCookie } from '../Utils/auth';
 import { z } from "zod";
 import { OAuth2Client } from "google-auth-library";
 import { generateResetToken } from '../Utils/cryptos';
 import { sendEmail } from "../services/email";
-import { passwordResetTemplate, signupTemplate  } from "../template/emailTemplate";
+import {
+  passwordResetTemplate,
+  registrationOtpTemplate,
+  signupTemplate,
+} from "../template/emailTemplate";
+import { randomInt } from "node:crypto";
 
 
 const GoogleLoginSchema = z.object({
@@ -69,6 +69,8 @@ export const login = async (req: Request, res: Response) => {
     if (!isValidPassword) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
+
+    
 
     const accessToken = await issueSession(res, user);
 
@@ -146,6 +148,7 @@ export const googleLogin = async (req: Request, res: Response) => {
           googleId,
           email,
           name,
+          emailVerifiedAt: new Date(),
         },
       });
        isNewUser = true;
@@ -203,7 +206,7 @@ export const refreshToken = async (req: Request, res: Response) => {
         where: { userId: decoded.userId },
         data: { revoked: true },
       });
-      res.clearCookie('refreshToken', { path: '/api/auth' });
+      res.clearCookie('refreshToken', { path: '/api/v1/auth' });
       return res.status(403).json({ error: 'Security breach detected. Please log in again.' });
     }
 
@@ -259,7 +262,7 @@ export const logout = async (req: Request, res: Response) => {
   }
 
   // Clear client cookie
-  res.clearCookie('refreshToken', { path: '/api/auth' });
+  res.clearCookie('refreshToken', { path: '/api/v1/auth' });
   return res.status(200).json({ message: 'Logged out successfully' });
 };
 
@@ -348,14 +351,211 @@ export const resetPassword = async (req: Request, res: Response) => {
   const saltRounds = 12;
   const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
 
-  await prisma.user.update({
-    where: { id: user.id },
-    data: {
-      password: hashedPassword,
-      resetTokens: null,
-      resetTokenExpiry: null,
+  await prisma.$transaction([
+    prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+        resetTokens: null,
+        resetTokenExpiry: null,
+      },
+    }),
+    prisma.refreshToken.updateMany({
+      where: { userId: user.id },
+      data: { revoked: true },
+    }),
+  ]);
+
+  return res.status(200).json({ message: 'Password reset successful. You can now log in.' });
+};
+export const requestRegistrationOtp = async (
+  req: Request,
+  res: Response,
+) => {
+  const email =
+    typeof req.body?.email === "string"
+      ? req.body.email.trim().toLowerCase()
+      : "";
+
+  if (!email) {
+    return res.status(400).json({
+      error: "Email is required.",
+    });
+  }
+
+  if (!z.email().safeParse(email).success) {
+    return res.status(400).json({
+      error: "Enter a valid email address.",
+    });
+  }
+
+  const existingUser = await prisma.user.findUnique({
+    where: { email },
+  });
+
+  if (existingUser) {
+    return res.status(409).json({
+      error:
+        "An account with this email already exists. Please sign in.",
+    });
+  }
+
+  const code = String(randomInt(100000, 1000000));
+  const codeExpiresAt = new Date(
+    Date.now() + 10 * 60 * 1000,
+  );
+
+  await prisma.registrationVerification.upsert({
+    where: { email },
+
+    create: {
+      email,
+      codeHash: hashToken(code),
+      codeExpiresAt,
+    },
+
+    update: {
+      codeHash: hashToken(code),
+      codeExpiresAt,
+      attempts: 0,
+      verifiedAt: null,
+      registrationTokenHash: null,
+      registrationTokenExpiry: null,
     },
   });
 
-  return res.status(200).json({ message: 'Password reset successful. You can now log in.' });
+  try {
+    await sendEmail({
+      to: email,
+      subject: "Your TailorPro verification code",
+      html: registrationOtpTemplate(code),
+    });
+  } catch (error) {
+    req.log.error(
+      { err: error },
+      "Registration OTP email failed",
+    );
+
+    return res.status(500).json({
+      error:
+        "Unable to send the verification code. Please try again.",
+    });
+  }
+
+  return res.status(200).json({
+    message:
+      "A six-digit verification code was sent to your email.",
+  });
+};
+
+
+export const verifyRegistrationOtp = async (
+  req: Request,
+  res: Response,
+) => {
+  const email =
+    typeof req.body?.email === "string"
+      ? req.body.email.trim().toLowerCase()
+      : "";
+
+  const code =
+    typeof req.body?.code === "string"
+      ? req.body.code.trim()
+      : "";
+
+  if (!email || !/^\d{6}$/.test(code)) {
+    return res.status(400).json({
+      error:
+        "Email and a valid six-digit code are required.",
+    });
+  }
+
+  const record =
+    await prisma.registrationVerification.findUnique({
+      where: { email },
+    });
+
+  if (
+    !record ||
+    record.codeExpiresAt <= new Date() ||
+    record.attempts >= 5
+  ) {
+    return res.status(400).json({
+      error:
+        "This code is invalid or expired. Request a new code.",
+    });
+  }
+
+  if (record.codeHash !== hashToken(code)) {
+    await prisma.registrationVerification.update({
+      where: { id: record.id },
+      data: {
+        attempts: {
+          increment: 1,
+        },
+      },
+    });
+
+    return res.status(400).json({
+      error: "The verification code is incorrect.",
+    });
+  }
+
+  const {
+    rawToken,
+    hashedToken,
+    expiresAt,
+  } = generateResetToken(30);
+
+  await prisma.registrationVerification.update({
+    where: { id: record.id },
+
+    data: {
+      verifiedAt: new Date(),
+      registrationTokenHash: hashedToken,
+      registrationTokenExpiry: expiresAt,
+    },
+  });
+
+  return res.status(200).json({
+    message:
+      "Email verified. Complete your registration.",
+    registrationToken: rawToken,
+  });
+};
+
+export const changePassword = async (req: Request, res: Response) => {
+  const userId = req.user?.userId;
+  const currentPassword = typeof req.body?.currentPassword === 'string' ? req.body.currentPassword : '';
+  const newPassword = typeof req.body?.newPassword === 'string' ? req.body.newPassword : '';
+
+  if (!userId) return res.status(401).json({ error: 'Unauthorized access.' });
+  if (!currentPassword || newPassword.length < 8) {
+    return res.status(400).json({ error: 'Current password and a new password of at least 8 characters are required.' });
+  }
+  if (currentPassword === newPassword) {
+    return res.status(400).json({ error: 'Your new password must be different from your current password.' });
+  }
+
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user?.password) {
+    return res.status(400).json({ error: 'This Google account does not have a password to change.' });
+  }
+  if (!(await bcrypt.compare(currentPassword, user.password))) {
+    return res.status(400).json({ error: 'Current password is incorrect.' });
+  }
+
+  await prisma.$transaction([
+    prisma.user.update({
+      where: { id: user.id },
+      data: { password: await bcrypt.hash(newPassword, 12) },
+    }),
+    prisma.refreshToken.updateMany({
+      where: { userId: user.id },
+      data: { revoked: true },
+    }),
+  ]);
+
+  res.clearCookie('refreshToken', { path: '/api/v1/auth' });
+  return res.status(200).json({ message: 'Password changed successfully. Please sign in again.' });
 };

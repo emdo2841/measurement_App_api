@@ -129,6 +129,17 @@ export interface PrismaClient<in LogOpts extends Prisma.LogLevel = never, in out
         omit: OmitOpts;
     }>;
     /**
+     * `prisma.registrationVerification`: Exposes CRUD operations for the **RegistrationVerification** model.
+      * Example usage:
+      * ```ts
+      * // Fetch zero or more RegistrationVerifications
+      * const registrationVerifications = await prisma.registrationVerification.findMany()
+      * ```
+      */
+    get registrationVerification(): Prisma.RegistrationVerificationDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
+    /**
      * `prisma.refreshToken`: Exposes CRUD operations for the **RefreshToken** model.
       * Example usage:
       * ```ts
