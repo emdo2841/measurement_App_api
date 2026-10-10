@@ -58,6 +58,12 @@ export declare const UserScalarFieldEnum: {
     readonly resetTokens: "resetTokens";
     readonly resetTokenExpiry: "resetTokenExpiry";
     readonly emailVerifiedAt: "emailVerifiedAt";
+    readonly platformRole: "platformRole";
+    readonly accountStatus: "accountStatus";
+    readonly lastLoginAt: "lastLoginAt";
+    readonly deletedAt: "deletedAt";
+    readonly monthlyReportEnabled: "monthlyReportEnabled";
+    readonly reportFrequency: "reportFrequency";
     readonly createdAt: "createdAt";
     readonly updatedAt: "updatedAt";
 };

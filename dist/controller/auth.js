@@ -45,24 +45,43 @@ const login = async (req, res) => {
             });
         }
         const { email, password } = validatedData.data;
-        const user = await db_1.prisma.user.findUnique({ where: { email } });
-        // A Google-only user has password = null.
+        const user = await db_1.prisma.user.findUnique({
+            where: {
+                email: email.trim().toLowerCase(),
+            },
+        });
+        // This also handles Google-only accounts.
         if (!user?.password) {
-            return res.status(401).json({ error: "Invalid credentials" });
+            return res.status(401).json({
+                error: 'Invalid credentials',
+            });
+        }
+        if (user.accountStatus !== 'ACTIVE') {
+            return res.status(403).json({
+                error: 'This account is not currently active.',
+            });
         }
         const isValidPassword = await bcryptjs_1.default.compare(password, user.password);
         if (!isValidPassword) {
-            return res.status(401).json({ error: "Invalid credentials" });
+            return res.status(401).json({
+                error: 'Invalid credentials',
+            });
         }
         const accessToken = await issueSession(res, user);
+        await db_1.prisma.user.update({
+            where: { id: user.id },
+            data: { lastLoginAt: new Date() },
+        });
         return res.status(200).json({
-            message: "Successfully logged in",
+            message: 'Successfully logged in',
             accessToken,
         });
     }
     catch (error) {
-        req.log.error({ err: error }, "GOOGLE TOKEN VERIFICATION ERROR");
-        return res.status(500).json({ error: "Internal server error" });
+        req.log.error({ err: error }, 'Login failed');
+        return res.status(500).json({
+            error: 'Internal server error',
+        });
     }
 };
 exports.login = login;

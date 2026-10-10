@@ -18,6 +18,7 @@ const auth_route_1 = require("./router/auth.route");
 const measurement_route_1 = require("./router/measurement.route");
 const push_route_1 = require("./router/push.route");
 const measurementShare_route_1 = require("./router/measurementShare.route");
+const admin_route_1 = require("./router/admin.route");
 const logger_1 = require("./logger");
 const app = (0, express_1.default)();
 app.set('trust proxy', 1);
@@ -39,6 +40,7 @@ const allowedOrigins = [
     'http://localhost:8081',
     'http://127.0.0.1:8081',
     'https://ejtech.duckdns.org',
+    'https://ejtailorpro.ejtech.workers.dev'
 ];
 const corsOptions = {
     origin(origin, callback) {
@@ -88,6 +90,7 @@ app.use("/api/v1/measurement", rateLimiters_1.publicLimiter, measurement_route_1
 app.use("/api/v1/auth", rateLimiters_1.authLimiter, auth_route_1.authRouter);
 app.use('/api/v1/push', rateLimiters_1.publicLimiter, push_route_1.pushRouter);
 app.use('/api/v1', rateLimiters_1.publicLimiter, measurementShare_route_1.measurementShareRouter);
+app.use('/api/v1/admin', admin_route_1.adminRouter);
 app.get("/", (req, res) => {
     res.status(200).json({
         message: `Welcome to ${process.env.APP_NAME || 'App'}`,

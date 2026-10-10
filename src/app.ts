@@ -15,6 +15,7 @@ import { authRouter } from './router/auth.route';
 import { measurementtRouter } from './router/measurement.route';
 import { pushRouter } from './router/push.route';
 import { measurementShareRouter } from './router/measurementShare.route'
+import { adminRouter } from './router/admin.route'
 import { logger } from "./logger";
 
 
@@ -109,6 +110,7 @@ app.use("/api/v1/measurement", publicLimiter, measurementtRouter);
 app.use("/api/v1/auth", authLimiter, authRouter);
 app.use('/api/v1/push',  publicLimiter, pushRouter);
 app.use('/api/v1', publicLimiter, measurementShareRouter)
+app.use('/api/v1/admin', adminRouter)
 
 app.get("/", (req: Request, res: Response) => {
   res.status(200).json({

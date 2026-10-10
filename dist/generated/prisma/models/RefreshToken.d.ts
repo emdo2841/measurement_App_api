@@ -316,9 +316,6 @@ export type RefreshTokenUncheckedUpdateManyWithoutUserNestedInput = {
     updateMany?: Prisma.RefreshTokenUpdateManyWithWhereWithoutUserInput | Prisma.RefreshTokenUpdateManyWithWhereWithoutUserInput[];
     deleteMany?: Prisma.RefreshTokenScalarWhereInput | Prisma.RefreshTokenScalarWhereInput[];
 };
-export type BoolFieldUpdateOperationsInput = {
-    set?: boolean;
-};
 export type RefreshTokenCreateWithoutUserInput = {
     id?: string;
     hashedToken: string;

@@ -1,3 +1,14 @@
+export declare const PlatformRole: {
+    readonly USER: "USER";
+    readonly ADMIN: "ADMIN";
+};
+export type PlatformRole = (typeof PlatformRole)[keyof typeof PlatformRole];
+export declare const AccountStatus: {
+    readonly ACTIVE: "ACTIVE";
+    readonly SUSPENDED: "SUSPENDED";
+    readonly DELETED: "DELETED";
+};
+export type AccountStatus = (typeof AccountStatus)[keyof typeof AccountStatus];
 export declare const Gender: {
     readonly MALE: "MALE";
     readonly FEMALE: "FEMALE";

@@ -3,6 +3,7 @@ import request from 'supertest';
 import app from './app';
 import { prismaMock } from './__mocks__/db';
 
+
 // Mock SMTP verification
 vi.mock('./Utils/mail', () => ({
   verifySmtpConnection: vi.fn(),
@@ -27,7 +28,12 @@ describe('GET /', () => {
     emailVerifiedAt: new Date(),
     verificationTokenHash: null,
     verificationTokenExpiry: null,
-
+    lastLoginAt           : new Date(),
+    deletedAt             : null,
+    reportFrequency:  null,
+    platformRole: 'USER',
+    monthlyReportEnabled: true,
+    AccountStatus: 'ACTIVE',
     createdAt: new Date(),
     updatedAt: new Date(),
   },

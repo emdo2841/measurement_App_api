@@ -49,40 +49,65 @@ const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret'
 // Your existing email-and-password login, updated.
 export const login = async (req: Request, res: Response) => {
   try {
-    const validatedData = LoginSchema.safeParse(req.body);
+    const validatedData = LoginSchema.safeParse(req.body)
 
     if (!validatedData.success) {
       return res.status(400).json({
         error: validatedData.error.format(),
-      });
+      })
     }
 
-    const { email, password } = validatedData.data;
-    const user = await prisma.user.findUnique({ where: { email } });
+    const { email, password } = validatedData.data
 
-    // A Google-only user has password = null.
+    const user = await prisma.user.findUnique({
+      where: {
+        email: email.trim().toLowerCase(),
+      },
+    })
+
+    // This also handles Google-only accounts.
     if (!user?.password) {
-      return res.status(401).json({ error: "Invalid credentials" });
+      return res.status(401).json({
+        error: 'Invalid credentials',
+      })
     }
 
-    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (user.accountStatus !== 'ACTIVE') {
+      return res.status(403).json({
+        error: 'This account is not currently active.',
+      })
+    }
+
+    const isValidPassword = await bcrypt.compare(
+      password,
+      user.password,
+    )
+
     if (!isValidPassword) {
-      return res.status(401).json({ error: "Invalid credentials" });
+      return res.status(401).json({
+        error: 'Invalid credentials',
+      })
     }
 
-    
+    const accessToken = await issueSession(res, user)
 
-    const accessToken = await issueSession(res, user);
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { lastLoginAt: new Date() },
+    })
 
     return res.status(200).json({
-      message: "Successfully logged in",
+      message: 'Successfully logged in',
       accessToken,
-    });
+    })
   } catch (error) {
-    req.log.error({ err: error }, "GOOGLE TOKEN VERIFICATION ERROR");
-    return res.status(500).json({ error: "Internal server error" });
+    req.log.error({ err: error }, 'Login failed')
+
+    return res.status(500).json({
+      error: 'Internal server error',
+    })
   }
-};
+}
 
 // New endpoint: the SAME Google button handles Google signup and login.
 export const googleLogin = async (req: Request, res: Response) => {

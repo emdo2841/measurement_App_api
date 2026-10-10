@@ -1131,6 +1131,12 @@ export declare const UserScalarFieldEnum: {
     readonly resetTokens: "resetTokens";
     readonly resetTokenExpiry: "resetTokenExpiry";
     readonly emailVerifiedAt: "emailVerifiedAt";
+    readonly platformRole: "platformRole";
+    readonly accountStatus: "accountStatus";
+    readonly lastLoginAt: "lastLoginAt";
+    readonly deletedAt: "deletedAt";
+    readonly monthlyReportEnabled: "monthlyReportEnabled";
+    readonly reportFrequency: "reportFrequency";
     readonly createdAt: "createdAt";
     readonly updatedAt: "updatedAt";
 };
@@ -1285,6 +1291,26 @@ export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel
  */
 export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>;
 /**
+ * Reference to a field of type 'PlatformRole'
+ */
+export type EnumPlatformRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PlatformRole'>;
+/**
+ * Reference to a field of type 'PlatformRole[]'
+ */
+export type ListEnumPlatformRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PlatformRole[]'>;
+/**
+ * Reference to a field of type 'AccountStatus'
+ */
+export type EnumAccountStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AccountStatus'>;
+/**
+ * Reference to a field of type 'AccountStatus[]'
+ */
+export type ListEnumAccountStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AccountStatus[]'>;
+/**
+ * Reference to a field of type 'Boolean'
+ */
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>;
+/**
  * Reference to a field of type 'Int'
  */
 export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>;
@@ -1292,10 +1318,6 @@ export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'In
  * Reference to a field of type 'Int[]'
  */
 export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>;
-/**
- * Reference to a field of type 'Boolean'
- */
-export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>;
 /**
  * Reference to a field of type 'Gender'
  */

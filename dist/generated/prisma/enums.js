@@ -9,7 +9,16 @@
 * 🟢 You can import this file directly.
 */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.OrderStatus = exports.Unit = exports.Gender = void 0;
+exports.OrderStatus = exports.Unit = exports.Gender = exports.AccountStatus = exports.PlatformRole = void 0;
+exports.PlatformRole = {
+    USER: 'USER',
+    ADMIN: 'ADMIN'
+};
+exports.AccountStatus = {
+    ACTIVE: 'ACTIVE',
+    SUSPENDED: 'SUSPENDED',
+    DELETED: 'DELETED'
+};
 exports.Gender = {
     MALE: 'MALE',
     FEMALE: 'FEMALE'

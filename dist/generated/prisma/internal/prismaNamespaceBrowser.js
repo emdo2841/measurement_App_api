@@ -108,6 +108,12 @@ exports.UserScalarFieldEnum = {
     resetTokens: 'resetTokens',
     resetTokenExpiry: 'resetTokenExpiry',
     emailVerifiedAt: 'emailVerifiedAt',
+    platformRole: 'platformRole',
+    accountStatus: 'accountStatus',
+    lastLoginAt: 'lastLoginAt',
+    deletedAt: 'deletedAt',
+    monthlyReportEnabled: 'monthlyReportEnabled',
+    reportFrequency: 'reportFrequency',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
 };
